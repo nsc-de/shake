@@ -413,7 +413,8 @@ public class Interpreter implements ShakeGenerator {
      */
     public InterpreterValue visitVariableDeclarationNode(VariableDeclarationNode n, Scope scope) {
         InterpreterValue value = n.getAssignment() != null ? visit(n.getAssignment().getValue(), scope) : null;
-        if(!scope.getScopeVariables().declare(Variable.create(n.getName(), n.getType(), n.isFinal(), value))) throw new Error("Variable is already defined");
+        if(!scope.getScopeVariables().declare(Variable.create(n.getName(), n.getType(), n.isFinal(), value)))
+            throw new Error(String.format("Variable \"%s\" is already defined", n.getName()));
         else return NullValue.NULL;
 }
 
