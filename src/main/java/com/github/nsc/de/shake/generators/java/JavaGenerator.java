@@ -315,6 +315,8 @@ public class JavaGenerator implements ShakeGenerator {
 
     public JavaNode visitFunctionDeclarationNode(FunctionDeclarationNode n, JavaGenerationContext context) {
 
+        boolean is_static = n.isInClass() ? n.isStatic() : true;
+
         context.getActualClass().getFunctions().add(new JavaFunction(
                 n.getName(),
                 JavaVariableType.VOID,
@@ -323,7 +325,7 @@ public class JavaGenerator implements ShakeGenerator {
                 ),
                 visitTree(n.getBody(), context),
                 JavaAccessDescriptor.from(n.getAccess()),
-                n.isStatic(),
+                is_static,
                 n.isFinal()));
         return null;
     }
