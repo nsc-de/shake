@@ -6,10 +6,18 @@ public class JavaGenerationContext {
 
     private final JavaClass actualClass;
     private final boolean isInRoot;
+    private final JavaGenerationContextVariableMap map;
+
+    public JavaGenerationContext(JavaClass actualClass, boolean isInRoot, JavaGenerationContextVariableMap map) {
+        this.actualClass = actualClass;
+        this.isInRoot = isInRoot;
+        this.map = map;
+    }
 
     public JavaGenerationContext(JavaClass actualClass, boolean isInRoot) {
         this.actualClass = actualClass;
         this.isInRoot = isInRoot;
+        this.map = new JavaGenerationContextVariableMap();
     }
 
     public JavaClass getActualClass() {
@@ -20,4 +28,7 @@ public class JavaGenerationContext {
         return isInRoot;
     }
 
+    public JavaGenerationContextVariableMap getMap() {
+        return map;
+    }
 }

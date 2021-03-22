@@ -1,5 +1,6 @@
 package com.github.nsc.de.shake;
 
+import com.github.nsc.de.shake.cli.ShakeCli;
 import com.github.nsc.de.shake.generators.java.JavaGenerator;
 import com.github.nsc.de.shake.generators.java.nodes.JavaClass;
 import com.github.nsc.de.shake.generators.json.JsonGenerator;
@@ -22,10 +23,8 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Stream;
@@ -46,37 +45,40 @@ public class ShakeTests {
 
     @ParameterizedTest
     @MethodSource("testStream")
-    public void interpreterTests(ShakeTest test) {
-        assertEquals(test.getResult(), run(test.getSourceFile(), test.getCode()).toString());
+    public void interpreterTests(ShakeTest test) throws NoSuchMethodException,
+            IllegalAccessException, InvocationTargetException {
+
+        Processes.executeClassInternal(ShakeCli.class, new String[] {
+                test.getSourceFile().getAbsolutePath()
+        });
+
+        assertEquals(test.getResult(), run(test.getSourceFile().getAbsolutePath(), test.getCode()).toString());
     }
 
     @ParameterizedTest
     @MethodSource("testStream")
     public void jsonTests(ShakeTest test) {
-        assertTrue(test.getJson().similar(generateJson(test.getSourceFile(), test.getCode())));
+        assertTrue(test.getJson().similar(generateJson(test.getSourceFile().getAbsolutePath(), test.getCode())));
     }
 
 
     @ParameterizedTest
     @MethodSource("testStream")
-    public void javaTests(ShakeTest test) throws IOException, InterruptedException {
+    public void javaTests(ShakeTest test) throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        try {
+            JavaClass cls = generateJava(test.getSourceFile().getAbsolutePath(), test.getCode());
 
-        JavaClass cls = generateJava(test.getSourceFile(), test.getCode());
+            System.out.println(getClass().getName());
+            File javaFile = writeFile(new File(tempDir, cls.getName() + ".java"), cls.toString());
+            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
-        System.out.println(getClass().getName());
-        File javaFile = writeFile(new File(tempDir, cls.getName() + ".java"), cls.toString());
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+            int result = compiler.run(null, System.out, System.err, javaFile.toString());
+            assertSame(0, result);
 
-        int result = compiler.run(null, System.out, System.err, javaFile.toString());
-        assertSame(0, result);
-
-        Process process = exec(tempDir.toString(), cls.getName(), new String[] {}, new String[] {});
-        process.waitFor();
-        while(process.getInputStream().available() > 0) {
-            System.out.print(process.getInputStream().read());
+            Processes.executeClassInternal(tempDir.toString(), cls.getName(), new String[]{});
+        } catch (Throwable t) {
+            throw new ShakeTestJavaError(test, t);
         }
-
-        assertSame(0, process.exitValue());
 
     }
 
@@ -120,7 +122,7 @@ public class ShakeTests {
                         .replace("src/test/resources/shake-tests/tests/", "")
                         .split("[\\\\/](?=[^\\\\/]+$)")[1] : null;
 
-        return generateJava(parse(source, code), baseName);
+        return generateJava(parse(source, code).getTree(), baseName);
 
     }
 
@@ -130,7 +132,7 @@ public class ShakeTests {
 
     }
 
-    public Tree parse(String source, String code) {
+    public ParseResult parse(String source, String code) {
 
         CharacterInputStream in = new SourceCharacterInputStream(source, code);
         Lexer lexer = new Lexer(in);
@@ -161,8 +163,16 @@ public class ShakeTests {
             return name;
         }
 
-        public String getSourceFile() {
-            return String.format("test/resources/shake-tests/tests/%s.shake", this.getName());
+        public File getSourceFile() {
+            return new File(String.format("src/test/resources/shake-tests/tests/%s.shake", this.getName()));
+        }
+
+        public File getResultFile() {
+            return new File(String.format("src/test/resources/shake-tests/results/%s.txt", this.getName()));
+        }
+
+        public File getJsonFile() {
+            return new File(String.format("src/test/resources/shake-tests/results/%s.json", this.getName()));
         }
 
         public String getCode() {
@@ -224,22 +234,36 @@ public class ShakeTests {
         return f;
     }
 
-    private static Process exec(String classPath, String className, String[] jvmArgs, String[] args) throws IOException {
+    private static class ShakeTestError extends Error {
 
-        String javaHome = System.getProperty("java.home");
-        String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
+        public ShakeTestError(String message, Throwable cause) {
+            super(message, cause);
+        }
 
-        List<String> command = new ArrayList<>();
-        command.add(javaBin);
-        command.addAll(Arrays.asList(jvmArgs));
-        command.add("-cp");
-        command.add(classPath);
-        command.add(className);
-        command.addAll(Arrays.asList(args));
+        public ShakeTestError(String message) {
+            super(message);
+        }
 
-        ProcessBuilder builder = new ProcessBuilder(command);
+    }
 
-        return builder.inheritIO().start();
+    private static class ShakeTestJavaError extends ShakeTestError {
+
+        public ShakeTestJavaError(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ShakeTestJavaError(String message) {
+            super(message);
+        }
+
+        public ShakeTestJavaError(ShakeTest test, Throwable cause) {
+            this(String.format("Error occurred while compiling test \"%s\" into java", test.getSourceFile().getPath()),
+                    cause);
+        }
+
+        public ShakeTestJavaError(ShakeTest test) {
+            this(String.format("Error occurred while compiling test \"%s\" into java", test.getSourceFile().getPath()));
+        }
 
     }
 
