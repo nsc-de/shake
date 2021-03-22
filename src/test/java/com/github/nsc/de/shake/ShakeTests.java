@@ -24,6 +24,7 @@ import javax.tools.ToolProvider;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -33,26 +34,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ShakeTests {
 
-    private static File tempDir;
+    private static File tempDir = new File("./target/shake/tests");
+    private static File javaTemp;
 
     @BeforeAll
     public static void setupTests(@TempDir Path tmp) {
 
-        tempDir = new File(String.valueOf(tmp));
-        tempDir.mkdirs();
+        // tempDir = new File(String.valueOf(tmp));
+        javaTemp = new File(tempDir, "java");
+        if(javaTemp.exists()) deleteRecursive(javaTemp);
+        javaTemp.mkdirs();
 
     }
 
     @ParameterizedTest
     @MethodSource("testStream")
-    public void interpreterTests(ShakeTest test) throws NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException {
-        /*
-        Processes.executeClassInternal(ShakeCli.class, new String[] {
-                test.getSourceFile().getAbsolutePath()
-        });
-        */
-
+    public void interpreterTests(ShakeTest test) {
         assertEquals(test.getResult(), run(test.getSourceFile().getAbsolutePath(), test.getCode()).toString());
     }
 
@@ -65,18 +62,18 @@ public class ShakeTests {
 
     @ParameterizedTest
     @MethodSource("testStream")
-    public void javaTests(ShakeTest test) throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public void javaTests(ShakeTest test) {
         try {
             JavaClass cls = generateJava(test.getSourceFile().getAbsolutePath(), test.getCode());
 
-            System.out.println(getClass().getName());
-            File javaFile = writeFile(new File(tempDir, cls.getName() + ".java"), cls.toString());
+            File directory = new File(javaTemp, Paths.get(test.getName()).getParent().toString());
+            File javaFile = writeFile(new File(directory, cls.getName() + ".java"), cls.toString());
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
             int result = compiler.run(null, System.out, System.err, javaFile.toString());
             assertSame(0, result);
 
-            Processes.executeClassInternal(tempDir.toString(), cls.getName(), new String[]{});
+            Processes.executeClassInternal(directory.toString(), cls.getName(), new String[]{});
         } catch (Throwable t) {
             throw new ShakeTestJavaError(test, t);
         }
@@ -266,6 +263,13 @@ public class ShakeTests {
             this(String.format("Error occurred while compiling test \"%s\" into java", test.getSourceFile().getPath()));
         }
 
+    }
+
+    private static void deleteRecursive(File file) {
+        if(file.isDirectory())
+            for(File f : file.listFiles())
+                deleteRecursive(f);
+        file.delete();
     }
 
 }
