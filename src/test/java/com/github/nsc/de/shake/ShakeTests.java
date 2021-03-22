@@ -47,10 +47,11 @@ public class ShakeTests {
     @MethodSource("testStream")
     public void interpreterTests(ShakeTest test) throws NoSuchMethodException,
             IllegalAccessException, InvocationTargetException {
-
+        /*
         Processes.executeClassInternal(ShakeCli.class, new String[] {
                 test.getSourceFile().getAbsolutePath()
         });
+        */
 
         assertEquals(test.getResult(), run(test.getSourceFile().getAbsolutePath(), test.getCode()).toString());
     }
