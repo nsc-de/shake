@@ -261,6 +261,10 @@ public class VariableList implements InterpreterValue {
         return String.format("{variables=%s,parentList=%s}", this.variables, this.parentList);
     }
 
+    public void reset() {
+        this.variables.clear();
+    }
+
     /**
      * This is a VariableList that forces all of its children to use a scope, it is required for the implementation
      * of {@link VariableList#withScope(Scope)}
@@ -350,6 +354,16 @@ public class VariableList implements InterpreterValue {
         public void setScope(Scope scope) {
             // just set the scope field
             this.scope = scope;
+        }
+
+        @Override
+        public String[] getChildren() {
+            return getVariables().keySet().toArray(new String[0]);
+        }
+
+        @Override
+        public Variable getChild(String c) {
+            return this.get(c);
         }
     }
 }

@@ -8,15 +8,7 @@ import com.github.nsc.de.shake.parser.node.factor.IntegerNode;
 import com.github.nsc.de.shake.parser.node.functions.FunctionArgumentNode;
 import com.github.nsc.de.shake.parser.node.functions.FunctionCallNode;
 import com.github.nsc.de.shake.parser.node.functions.FunctionDeclarationNode;
-import com.github.nsc.de.shake.parser.node.logical.LogicalAndNode;
-import com.github.nsc.de.shake.parser.node.logical.LogicalBiggerEqualsNode;
-import com.github.nsc.de.shake.parser.node.logical.LogicalBiggerNode;
-import com.github.nsc.de.shake.parser.node.logical.LogicalEqEqualsNode;
-import com.github.nsc.de.shake.parser.node.logical.LogicalFalseNode;
-import com.github.nsc.de.shake.parser.node.logical.LogicalOrNode;
-import com.github.nsc.de.shake.parser.node.logical.LogicalSmallerEqualsNode;
-import com.github.nsc.de.shake.parser.node.logical.LogicalSmallerNode;
-import com.github.nsc.de.shake.parser.node.logical.LogicalTrueNode;
+import com.github.nsc.de.shake.parser.node.logical.*;
 import com.github.nsc.de.shake.parser.node.loops.DoWhileNode;
 import com.github.nsc.de.shake.parser.node.loops.ForNode;
 import com.github.nsc.de.shake.parser.node.loops.WhileNode;
@@ -28,6 +20,7 @@ import org.json.JSONArray;
 
 public class JsonGenerator extends Generator<JSONObject> {
 
+    @Override
     public JSONObject visitTree(Tree t) {
         JSONArray array = new JSONArray();
         for (int i = 0; i < t.getChildren().length; i++) array.put(visit(t.getChildren()[i]));
@@ -49,30 +42,37 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("value", n.getNumber());
     }
 
+    @Override
     public JSONObject visitAddNode(AddNode n) {
         return new JSONObject().put("type", "add").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitSubNode(SubNode n) {
         return new JSONObject().put("type", "sub").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitMulNode(MulNode n) {
         return new JSONObject().put("type", "mul").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitDivNode(DivNode n) {
         return new JSONObject().put("type", "div").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitModNode(ModNode n) {
         return new JSONObject().put("type", "mod").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitPowNode(PowNode n) {
         return new JSONObject().put("type", "pow").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitVariableDeclarationNode(VariableDeclarationNode n) {
         JSONObject obj = new JSONObject()
                 .put("type", "variable_declaration")
@@ -86,6 +86,7 @@ public class JsonGenerator extends Generator<JSONObject> {
         return obj;
     }
 
+    @Override
     public JSONObject visitVariableAssignmentNode(VariableAssignmentNode n) {
         return new JSONObject()
                 .put("type", "variable_assignment")
@@ -93,6 +94,7 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("value", visit(n.getValue()));
     }
 
+    @Override
     public JSONObject visitVariableAddAssignmentNode(VariableAddAssignmentNode n) {
         return new JSONObject()
                 .put("type", "variable_add_assignment")
@@ -100,6 +102,7 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("value", visit(n.getValue()));
     }
 
+    @Override
     public JSONObject visitVariableSubAssignmentNode(VariableSubAssignmentNode n) {
         return new JSONObject()
                 .put("type", "variable_sub_assignment")
@@ -107,6 +110,7 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("value", visit(n.getValue()));
     }
 
+    @Override
     public JSONObject visitVariableMulAssignmentNode(VariableMulAssignmentNode n) {
         return new JSONObject()
                 .put("type", "variable_mul_assignment")
@@ -114,6 +118,7 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("value", visit(n.getValue()));
     }
 
+    @Override
     public JSONObject visitVariableDivAssignmentNode(VariableDivAssignmentNode n) {
         return new JSONObject()
                 .put("type", "variable_div_assignment")
@@ -121,6 +126,7 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("value", visit(n.getValue()));
     }
 
+    @Override
     public JSONObject visitVariableModAssignmentNode(VariableModAssignmentNode n) {
         return new JSONObject()
                 .put("type", "variable_mod_assignment")
@@ -128,6 +134,7 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("value", visit(n.getValue()));
     }
 
+    @Override
     public JSONObject visitVariablePowAssignmentNode(VariablePowAssignmentNode n) {
         return new JSONObject()
                 .put("type", "variable_pow_assignment")
@@ -135,54 +142,72 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("value", visit(n.getValue()));
     }
 
+    @Override
     public JSONObject visitVariableIncreaseNode(VariableIncreaseNode n) {
         return new JSONObject().put("type", "variable_incr").put("variable", visit(n.getVariable()));
     }
 
+    @Override
     public JSONObject visitVariableDecreaseNode(VariableDecreaseNode n) {
         return new JSONObject().put("type", "variable_decr").put("variable", visit(n.getVariable()));
     }
 
+    @Override
     public JSONObject visitVariableUsageNode(VariableUsageNode n) {
         return new JSONObject().put("type", "variable_usage").put("variable", visit(n.getVariable()));
     }
 
+    @Override
     public JSONObject visitEqEqualsNode(LogicalEqEqualsNode n) {
         return new JSONObject().put("type", "eq_eq").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitBiggerEqualsNode(LogicalBiggerEqualsNode n) {
         return new JSONObject().put("type", "bigger_eq").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitSmallerEqualsNode(LogicalSmallerEqualsNode n) {
         return new JSONObject().put("type", "smaller_eq").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitBiggerNode(LogicalBiggerNode n) {
         return new JSONObject().put("type", "bigger").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitSmallerNode(LogicalSmallerNode n) {
         return new JSONObject().put("type", "smaller").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitLogicalAndNode(LogicalAndNode n) {
         return new JSONObject().put("type", "logical_and").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
     public JSONObject visitLogicalOrNode(LogicalOrNode n) {
         return new JSONObject().put("type", "logical_or").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
     }
 
+    @Override
+    public JSONObject visitLogicalXOrNode(LogicalXOrNode n) {
+        return new JSONObject().put("type", "logical_xor").put("left", visit(n.getLeft())).put("right", visit(n.getRight()));
+    }
+
+    @Override
     public JSONObject visitWhileNode(WhileNode n) {
         return new JSONObject().put("type", "while").put("condition", visit(n.getCondition())).put("body", visit(n.getBody()));
     }
 
+    @Override
     public JSONObject visitDoWhileNode(DoWhileNode n) {
         return new JSONObject().put("type", "do_while").put("condition", visit(n.getCondition())).put("body", visit(n.getBody()));
     }
 
+    @Override
     public JSONObject visitForNode(ForNode n) {
         return new JSONObject()
                 .put("type", "for")
@@ -192,6 +217,7 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("body", visit(n.getBody()));
     }
 
+    @Override
     public JSONObject visitIfNode(IfNode n) {
         return new JSONObject()
                 .put("type", "if")
@@ -200,6 +226,7 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("else_body", visit(n.getElseBody()));
     }
 
+    @Override
     public JSONObject visitFunctionDeclarationNode(FunctionDeclarationNode n) {
 
         JSONArray args = new JSONArray();
@@ -220,6 +247,7 @@ public class JsonGenerator extends Generator<JSONObject> {
 
     }
 
+    @Override
     public JSONObject visitClassDeclarationNode(ClassDeclarationNode n) {
 
         JSONArray methods = new JSONArray();
@@ -242,6 +270,7 @@ public class JsonGenerator extends Generator<JSONObject> {
                 .put("fields", fields);
     }
 
+    @Override
     public JSONObject visitClassConstruction(ClassConstructionNode n) {
 
         JSONArray args = new JSONArray();
@@ -256,6 +285,7 @@ public class JsonGenerator extends Generator<JSONObject> {
 
     }
 
+    @Override
     public JSONObject visitFunctionCallNode(FunctionCallNode n) {
 
         JSONArray args = new JSONArray();
@@ -270,6 +300,7 @@ public class JsonGenerator extends Generator<JSONObject> {
 
     }
 
+    @Override
     public JSONObject visitIdentifierNode(IdentifierNode n) {
 
         JSONObject obj = new JSONObject().put("type", "identifier");
@@ -286,6 +317,27 @@ public class JsonGenerator extends Generator<JSONObject> {
     @Override
     public JSONObject visitLogicalFalseNode(LogicalFalseNode n) {
         return new JSONObject().put("type", "logical_false");
+    }
+
+    @Override
+    public JSONObject visitImportNode(ImportNode n) {
+
+        return new JSONObject().put("type", "import").put("import", n.getImport());
+
+    }
+
+    @Override
+    public JSONObject visitCastNode(CastNode n) {
+        return new JSONObject().put("type", "cast")
+                .put("target", visitCastTarget(n.getCastTarget()))
+                .put("value", n.getValue());
+    }
+
+    public JSONObject visitCastTarget(CastNode.CastTarget target) {
+        JSONObject result = new JSONObject().put("type", target.getType().toString());
+        if(target.getType() == CastNode.CastTarget.CastTargetType.OBJECT)
+            result.put("subtype", visit(target.getSubtype()));
+        return result;
     }
 
     @Override

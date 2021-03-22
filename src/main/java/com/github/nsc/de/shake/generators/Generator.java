@@ -45,6 +45,7 @@ public abstract class Generator<T> implements ShakeGenerator {
         if(n instanceof LogicalSmallerNode) return visitSmallerNode((LogicalSmallerNode) n);
         if(n instanceof LogicalAndNode) return visitLogicalAndNode((LogicalAndNode) n);
         if(n instanceof LogicalOrNode) return visitLogicalOrNode((LogicalOrNode) n);
+        if(n instanceof LogicalXOrNode) return visitLogicalXOrNode((LogicalXOrNode) n);
         if(n instanceof WhileNode) return visitWhileNode((WhileNode) n);
         if(n instanceof DoWhileNode) return visitDoWhileNode((DoWhileNode) n);
         if(n instanceof ForNode) return visitForNode((ForNode) n);
@@ -56,6 +57,8 @@ public abstract class Generator<T> implements ShakeGenerator {
         if(n instanceof ClassDeclarationNode) return visitClassDeclarationNode((ClassDeclarationNode) n);
         if(n instanceof LogicalTrueNode) return visitLogicalTrueNode((LogicalTrueNode) n);
         if(n instanceof LogicalFalseNode) return visitLogicalFalseNode((LogicalFalseNode) n);
+        if(n instanceof ImportNode) return visitImportNode((ImportNode) n);
+        if(n instanceof CastNode) return visitCastNode((CastNode) n);
         throw new Error(String.format("It looks like that node is not implemented in the Interpreter: %s", n.getClass().toString()));
 
     }
@@ -87,6 +90,7 @@ public abstract class Generator<T> implements ShakeGenerator {
     public abstract T visitSmallerNode(LogicalSmallerNode n);
     public abstract T visitLogicalAndNode(LogicalAndNode n);
     public abstract T visitLogicalOrNode(LogicalOrNode n);
+    public abstract T visitLogicalXOrNode(LogicalXOrNode n);
     public abstract T visitWhileNode(WhileNode n);
     public abstract T visitDoWhileNode(DoWhileNode n);
     public abstract T visitForNode(ForNode n);
@@ -98,4 +102,7 @@ public abstract class Generator<T> implements ShakeGenerator {
     public abstract T visitIdentifierNode(IdentifierNode n);
     public abstract T visitLogicalTrueNode(LogicalTrueNode n);
     public abstract T visitLogicalFalseNode(LogicalFalseNode n);
+    public abstract T visitImportNode(ImportNode n);
+    public abstract T visitCastNode(CastNode n);
+
 }

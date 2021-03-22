@@ -65,11 +65,6 @@ public class Interpreter implements ShakeGenerator {
     public Interpreter(Scope global) {
         // set the global field
         this.global = global;
-        try {
-            getDefaults();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -80,7 +75,6 @@ public class Interpreter implements ShakeGenerator {
     public Interpreter() {
         // set the global scope to a new scope
         this.global = new Scope(null, this);
-        global.getVariables().declare(new Variable<>("java", Java.class, new Java()));
 
         try {
             getDefaults();
@@ -90,14 +84,34 @@ public class Interpreter implements ShakeGenerator {
     }
 
     private void getDefaults() throws IOException {
+
+        global.getVariables().declare(new Variable<>("java", Java.class, new Java()));
+        load("/shake/java/system.shake", "shake/system.shake");
+        load("/shake/java/io.shake", "shake/io.shake");
+
+    }
+
+    private void load(String src, String src_name) throws IOException {
         CharacterSource source = CharacterSource.from(
-                getClass().getResourceAsStream("/shake/java/system.shake"), "shake/system.shake");
+                getClass().getResourceAsStream(src), src_name);
         CharacterInputStream inputStream = new SourceCharacterInputStream(source);
         Lexer lexer = new Lexer(inputStream);
         TokenInputStream tokens = lexer.makeTokens();
         Parser parser = new Parser(tokens);
         Tree tree = parser.parse();
         this.visit(tree);
+    }
+
+    public void resetGlobals() {
+
+        this.global.reset();
+
+        try {
+            this.getDefaults();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -157,6 +171,7 @@ public class Interpreter implements ShakeGenerator {
         if(n instanceof LogicalBiggerNode) return visitBiggerNode((LogicalBiggerNode) n, scope);
         if(n instanceof LogicalSmallerNode) return visitSmallerNode((LogicalSmallerNode) n, scope);
         if(n instanceof LogicalAndNode) return visitLogicalAndNode((LogicalAndNode) n, scope);
+        if(n instanceof LogicalXOrNode) return visitLogicalXOrNode((LogicalXOrNode) n, scope);
         if(n instanceof LogicalOrNode) return visitLogicalOrNode((LogicalOrNode) n, scope);
         if(n instanceof WhileNode) return visitWhileNode((WhileNode) n, scope);
         if(n instanceof DoWhileNode) return visitDoWhileNode((DoWhileNode) n, scope);
@@ -168,6 +183,8 @@ public class Interpreter implements ShakeGenerator {
         if(n instanceof IdentifierNode) return visitIdentifier((IdentifierNode) n, scope);
         if(n instanceof ClassConstructionNode) return visitClassConstruction((ClassConstructionNode) n, scope);
         if(n instanceof ClassDeclarationNode) return visitClassDeclarationNode((ClassDeclarationNode) n, scope);
+        if(n instanceof ImportNode) return visitImportNode((ImportNode) n, scope);
+        if(n instanceof CastNode) return visitCastNode((CastNode) n, scope);
 
         // if the node a LogicalTrueNode return TRUE, if it is a LogicalFalseNode return false
         if(n instanceof LogicalTrueNode) return BooleanValue.TRUE;
@@ -272,7 +289,11 @@ public class Interpreter implements ShakeGenerator {
         // visit both sides of the term
         // call the method add() on the result of the left InterpreterValue and
         // give the right result as argument.
-        return visit(n.getLeft(), scope).add(visit(n.getRight(), scope));
+        try {
+            return visit(n.getLeft(), scope).add(visit(n.getRight(), scope));
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(), n.getOperatorPosition(), error);
+        }
     }
 
     /**
@@ -288,7 +309,11 @@ public class Interpreter implements ShakeGenerator {
         // visit both sides of the term
         // call the method sub() on the result of the left InterpreterValue and
         // give the right result as argument.
-        return visit(n.getLeft(), scope).sub(visit(n.getRight(), scope));
+        try {
+            return visit(n.getLeft(), scope).sub(visit(n.getRight(), scope));
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(), n.getOperatorPosition(), error);
+        }
     }
 
     /**
@@ -304,7 +329,11 @@ public class Interpreter implements ShakeGenerator {
         // visit both sides of the term
         // call the method mul() on the result of the left InterpreterValue and
         // give the right result as argument.
-        return visit(n.getLeft(), scope).mul(visit(n.getRight(), scope));
+        try {
+            return visit(n.getLeft(), scope).mul(visit(n.getRight(), scope));
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(), n.getOperatorPosition(), error);
+        }
     }
 
     /**
@@ -320,7 +349,11 @@ public class Interpreter implements ShakeGenerator {
         // visit both sides of the term
         // call the method div() on the result of the left InterpreterValue and
         // give the right result as argument.
-        return visit(n.getLeft(), scope).div(visit(n.getRight(), scope));
+        try {
+            return visit(n.getLeft(), scope).div(visit(n.getRight(), scope));
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(), n.getOperatorPosition(), error);
+        }
     }
 
     /**
@@ -336,7 +369,11 @@ public class Interpreter implements ShakeGenerator {
         // visit both sides of the term
         // call the method mod() on the result of the left InterpreterValue and
         // give the right result as argument.
-        return visit(n.getLeft(), scope).mod(visit(n.getRight(), scope));
+        try {
+            return visit(n.getLeft(), scope).mod(visit(n.getRight(), scope));
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(), n.getOperatorPosition(), error);
+        }
     }
 
     /**
@@ -352,7 +389,12 @@ public class Interpreter implements ShakeGenerator {
         // visit both sides of the term
         // call the method pow() on the result of the left InterpreterValue and
         // give the right result one as argument.
-        return visit(n.getLeft(), scope).pow(visit(n.getRight(), scope));
+        try {
+            return visit(n.getLeft(), scope).pow(visit(n.getRight(), scope));
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(), n.getOperatorPosition(),
+                    n.getOperatorPosition() + 1, error);
+        }
     }
 
 
@@ -373,7 +415,7 @@ public class Interpreter implements ShakeGenerator {
         InterpreterValue value = n.getAssignment() != null ? visit(n.getAssignment().getValue(), scope) : null;
         if(!scope.getScopeVariables().declare(Variable.create(n.getName(), n.getType(), n.isFinal(), value))) throw new Error("Variable is already defined");
         else return NullValue.NULL;
-    }
+}
 
     /**
      * Visit a {@link VariableAssignmentNode}
@@ -403,8 +445,17 @@ public class Interpreter implements ShakeGenerator {
     public InterpreterValue visitVariableAddAssignmentNode(VariableAddAssignmentNode n, Scope scope) {
         Variable variable = (Variable) visit(n.getVariable(), scope);
         InterpreterValue value = visit(n.getValue(), scope);
-        variable.setValue(variable.getValue().add(value));
-        return variable.getValue();
+
+        InterpreterValue newValue;
+        try {
+            newValue = variable.getValue().add(value);
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(),
+                    n.getOperatorPosition(), n.getOperatorPosition() + 1, error);
+        }
+
+        variable.setValue(newValue);
+        return newValue;
     }
 
     /**
@@ -419,8 +470,17 @@ public class Interpreter implements ShakeGenerator {
     public InterpreterValue visitVariableSubAssignmentNode(VariableSubAssignmentNode n, Scope scope) {
         Variable variable = (Variable) visit(n.getVariable(), scope);
         InterpreterValue value = visit(n.getValue(), scope);
-        variable.setValue(variable.getValue().sub(value));
-        return variable.getValue();
+
+        InterpreterValue newValue;
+        try {
+            newValue = variable.getValue().sub(value);
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(),
+                    n.getOperatorPosition(), n.getOperatorPosition() + 1, error);
+        }
+
+        variable.setValue(newValue);
+        return newValue;
     }
 
     /**
@@ -435,8 +495,17 @@ public class Interpreter implements ShakeGenerator {
     public InterpreterValue visitVariableMulAssignmentNode(VariableMulAssignmentNode n, Scope scope) {
         Variable variable = (Variable) visit(n.getVariable(), scope);
         InterpreterValue value = visit(n.getValue(), scope);
-        variable.setValue(variable.getValue().mul(value));
-        return variable.getValue();
+
+        InterpreterValue newValue;
+        try {
+            newValue = variable.getValue().mul(value);
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(),
+                    n.getOperatorPosition(), n.getOperatorPosition() + 1, error);
+        }
+
+        variable.setValue(newValue);
+        return newValue;
     }
 
     /**
@@ -451,8 +520,17 @@ public class Interpreter implements ShakeGenerator {
     public InterpreterValue visitVariableDivAssignmentNode(VariableDivAssignmentNode n, Scope scope) {
         Variable variable = (Variable) visit(n.getVariable(), scope);
         InterpreterValue value = visit(n.getValue(), scope);
-        variable.setValue(variable.getValue().div(value));
-        return variable.getValue();
+
+        InterpreterValue newValue;
+        try {
+            newValue = variable.getValue().div(value);
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(),
+                    n.getOperatorPosition(), n.getOperatorPosition() + 1, error);
+        }
+
+        variable.setValue(newValue);
+        return newValue;
     }
 
     /**
@@ -467,8 +545,17 @@ public class Interpreter implements ShakeGenerator {
     public InterpreterValue visitVariableModAssignmentNode(VariableModAssignmentNode n, Scope scope) {
         Variable variable = (Variable) visit(n.getVariable(), scope);
         InterpreterValue value = visit(n.getValue(), scope);
-        variable.setValue(variable.getValue().mod(value));
-        return variable.getValue();
+
+        InterpreterValue newValue;
+        try {
+            newValue = variable.getValue().mod(value);
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(),
+                    n.getOperatorPosition(), n.getOperatorPosition() + 1, error);
+        }
+
+        variable.setValue(newValue);
+        return newValue;
     }
 
     /**
@@ -483,8 +570,17 @@ public class Interpreter implements ShakeGenerator {
     public InterpreterValue visitVariablePowAssignmentNode(VariablePowAssignmentNode n, Scope scope) {
         Variable variable = (Variable) visit(n.getVariable(), scope);
         InterpreterValue value = visit(n.getValue(), scope);
-        variable.setValue(variable.getValue().pow(value));
-        return variable.getValue();
+
+        InterpreterValue newValue;
+        try {
+            newValue = variable.getValue().pow(value);
+        } catch(UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(),
+                    n.getOperatorPosition(), n.getOperatorPosition() + 2, error);
+        }
+
+        variable.setValue(newValue);
+        return newValue;
     }
 
     /**
@@ -646,6 +742,19 @@ public class Interpreter implements ShakeGenerator {
      */
     public InterpreterValue visitLogicalOrNode(LogicalOrNode n, Scope scope) {
         return visit(n.getLeft(), scope).or(visit(n.getRight(), scope));
+    }
+
+    /**
+     * Visit a {@link LogicalXOrNode}
+     *
+     * @param n the {@link LogicalXOrNode} to visit
+     * @param scope the {@link Scope} for visiting the {@link LogicalOrNode}
+     * @return are both sides true
+     *
+     * @author <a href="https://github.com/nsc-de">Nicolas Schmidt &lt;@nsc-de&gt;</a>
+     */
+    public InterpreterValue visitLogicalXOrNode(LogicalXOrNode n, Scope scope) {
+        return visit(n.getLeft(), scope).xor(visit(n.getRight(), scope));
     }
 
 
@@ -849,7 +958,7 @@ public class Interpreter implements ShakeGenerator {
     public InterpreterValue visitFunctionCallNode(FunctionCallNode node, Scope scope) {
 
         // get the function
-        InterpreterValue v = visit(node.getFunction());
+        InterpreterValue v = visit(node.getFunction(), scope);
 
         // call the function & return it's result
         return v.invoke(node, scope);
@@ -1005,7 +1114,12 @@ public class Interpreter implements ShakeGenerator {
         InterpreterValue v = visit(n.getType(), scope);
 
         // create a new ObjectValue from the class
-        return v.newInstance(n, scope);
+        try {
+            return v.newInstance(n, scope);
+        } catch (UnformattedInterpreterError error) {
+            throw new InterpreterError(error.getMessage(), n.getMap(), n.getNewKeywordPosition(),
+                    n.getNewKeywordPosition() + 2);
+        }
 
     }
 
@@ -1030,10 +1144,17 @@ public class Interpreter implements ShakeGenerator {
             InterpreterValue parent = visit(node.getParent(), scope);
 
             // get the child from the parent
-            Variable v = parent.getChild(node.getName());
+            Variable v;
+            try {
+                v = parent.getChild(node.getName());
+            } catch (UnformattedInterpreterError e) {
+                throw new InterpreterError(e.getMessage(), node.getMap(), node.getPosition(),
+                        node.getPosition() + node.getName().length() - 1, e);
+            }
 
             // if the variable not declared throw an error
-            if(v == null) throw new Error(String.format("Child \"%s\" is not defined", node.getName()));
+            if(v == null) throw new InterpreterError(String.format("Child \"%s\" is not defined", node.getName()),
+                    node.getMap(), node.getPosition(), node.getPosition() + node.getName().length() - 1);
 
             // return the variable
             return v;
@@ -1045,12 +1166,44 @@ public class Interpreter implements ShakeGenerator {
             Variable v = scope.getVariables().get(node.getName());
 
             // if the variable is not declared throw an error
-            if(v == null) throw new Error(String.format("Variable with name \"%s\" is not declared", node.getName()));
+            if(v == null) throw new InterpreterError(String.format("Variable with name \"%s\" is not declared", node.getName()),
+                    node.getMap(), node.getPosition(), node.getPosition() + node.getName().length() - 1);
 
             // return the variable
             return v;
 
         }
+
+    }
+
+    public InterpreterValue visitImportNode(ImportNode node, Scope scope) {
+
+        InterpreterValue actual = scope.getVariables();
+        String[] imported = node.getImport();
+        int lastIndex = imported.length - 1;
+
+        for(int i = 0; i < imported.length; i++) {
+            if(imported[i].equals(ImportNode.EVERYTHING)) {
+
+                String[] children = actual.getChildren();
+
+                for(int c = 0; c < children.length; c++)
+                    scope.getVariables().declare(Variable.finalOf(children[c], actual.getChild(children[c])));
+
+            }
+            else {
+                actual = actual.getChild(imported[i]);
+                if(i == lastIndex) scope.getVariables().declare(Variable.finalOf(imported[i], actual));
+            }
+        }
+
+        return NullValue.NULL;
+    }
+
+    public InterpreterValue visitCastNode(CastNode node, Scope scope) {
+
+        InterpreterValue v = visit(node.getValue(), scope);
+        return v.castTo(node.getCastTarget());
 
     }
 
