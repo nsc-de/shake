@@ -1,5 +1,7 @@
 package com.github.nsc.de.shake.generators.java.nodes;
 
+import com.github.nsc.de.shake.generators.java.JavaVariableType;
+
 public class JavaFunction implements JavaNode {
 
     private final String name;

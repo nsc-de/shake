@@ -68,8 +68,8 @@ public class JavaGenerator implements ShakeGenerator {
         if(n instanceof FunctionCallNode) return visitFunctionCallNode((FunctionCallNode) n, context);
         if(n instanceof IdentifierNode) return visitIdentifierNode((IdentifierNode) n, context);
         if(n instanceof ClassDeclarationNode) return visitClassDeclarationNode((ClassDeclarationNode) n, context);
-        if(n instanceof LogicalTrueNode) return new JavaValued.JavaValue("true");
-        if(n instanceof LogicalFalseNode) return new JavaValued.JavaValue("false");
+        if(n instanceof LogicalTrueNode) return JavaValued.JavaBooleanValue.TRUE;
+        if(n instanceof LogicalFalseNode) return JavaValued.JavaBooleanValue.FALSE;
         if(n instanceof StringNode) return visitStringNode((StringNode) n);
         if(n instanceof CharacterNode) return visitCharacterNode((CharacterNode) n);
         throw new Error(String.format("It looks like that node is not implemented in the Interpreter: %s", n.getClass().toString()));
@@ -104,13 +104,13 @@ public class JavaGenerator implements ShakeGenerator {
     }
 
 
-    public JavaValued.JavaValue visitStringNode(StringNode n) {
-        return new JavaValued.JavaValue('"' + n.getValue() + '"');
+    public JavaValued.JavaStringPart visitStringNode(StringNode n) {
+        return new JavaValued.JavaStringPart(n.getValue());
     }
 
 
-    public JavaValued.JavaValue visitCharacterNode(CharacterNode n) {
-        return new JavaValued.JavaValue("'" + n.getValue() + "'");
+    public JavaValued.JavaCharacterPart visitCharacterNode(CharacterNode n) {
+        return new JavaValued.JavaCharacterPart(n.getValue());
     }
 
 
@@ -147,23 +147,40 @@ public class JavaGenerator implements ShakeGenerator {
 
     public JavaNode visitVariableDeclarationNode(VariableDeclarationNode n, JavaGenerationContext context) {
         JavaVariableType type = JavaVariableType.from(n.getType(), this, context);
+        JavaVariable variable = new JavaVariable(n.getName(), type);
+        if(!context.getMap().declare(variable))
+            throw new Error(String.format("Couldn't declare variable \"%s\" because it is already declared", n.getName()));
+
         if(context.isInRoot()) {
-            context.getActualClass().getFields().add(new JavaVariableDeclaration(type, n.getName(), true, false, JavaAccessDescriptor.PUBLIC));
+            context.getActualClass().getFields().add(new JavaVariableDeclaration(variable, true, false, JavaAccessDescriptor.PUBLIC));
             if(n.getAssignment() != null) return visit(n.getAssignment(), context);
             else return null;
         }
         else {
             if(n.getAssignment() != null)
-                return new JavaVariableDeclaration(type, n.getName(),
-                        (JavaValued) visit(n.getAssignment().getValue(), context), false, n.isFinal(), JavaAccessDescriptor.PACKAGE);
-            return new JavaVariableDeclaration(type, n.getName(), n.isStatic(), n.isFinal(), JavaAccessDescriptor.PACKAGE);
+                return new JavaVariableDeclaration(variable, (JavaValued) visit(n.getAssignment().getValue(), context),
+                        false, n.isFinal(), JavaAccessDescriptor.PACKAGE);
+            return new JavaVariableDeclaration(variable, n.isStatic(), n.isFinal(), JavaAccessDescriptor.PACKAGE);
         }
     }
 
 
-    public JavaValued.JavaVariableAssignment visitVariableAssignmentNode(VariableAssignmentNode n, JavaGenerationContext context) {
-        return new JavaValued.JavaVariableAssignment((JavaIdentifier) visit(n.getVariable(), context),
-                (JavaValued) visit(n.getValue(), context));
+    public JavaValued.JavaVariableAssignment visitVariableAssignmentNode(
+            VariableAssignmentNode n, JavaGenerationContext context) {
+
+        JavaIdentifier identifier = (JavaIdentifier) visit(n.getVariable(), context);
+        JavaValued value = (JavaValued) visit(n.getValue(), context);
+
+        JavaVariable variable = context.getMap().get(identifier.toString());
+        if(variable == null)
+            throw new Error(
+                    String.format("Variable \"%s\" seems not to be declared in this scope", identifier.toString()));
+        JavaVariableType t = value.getType();
+        if(variable.getType() != JavaVariableType.UNKNOWN && !variable.expectVariableToBe(t))
+            throw new Error(String.format("Type %s is not assignable to variable %s with type %s",
+                    t.toString(), variable.getIdentifier(), variable.getType().toString()));
+
+        return new JavaValued.JavaVariableAssignment(identifier, value);
     }
 
 
@@ -315,7 +332,7 @@ public class JavaGenerator implements ShakeGenerator {
 
     public JavaNode visitFunctionDeclarationNode(FunctionDeclarationNode n, JavaGenerationContext context) {
 
-        boolean is_static = n.isInClass() ? n.isStatic() : true;
+        boolean is_static = !n.isInClass() || n.isStatic();
 
         context.getActualClass().getFunctions().add(new JavaFunction(
                 n.getName(),

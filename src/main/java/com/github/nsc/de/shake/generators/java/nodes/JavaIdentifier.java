@@ -1,5 +1,7 @@
 package com.github.nsc.de.shake.generators.java.nodes;
 
+import com.github.nsc.de.shake.generators.java.JavaVariableType;
+
 import java.util.Arrays;
 
 public class JavaIdentifier implements JavaValued {
@@ -23,5 +25,15 @@ public class JavaIdentifier implements JavaValued {
     @Override
     public String toString(String indent, String add) {
         return (this.parent != null ? this.parent.toString(indent, add) + '.': "") + identifier;
+    }
+
+    @Override
+    public JavaVariableType getType() {
+        return JavaVariableType.UNKNOWN;
+    }
+
+    @Override
+    public String toString() {
+        return (parent != null ? this.parent.toString() + '.' : "") + this.identifier;
     }
 }

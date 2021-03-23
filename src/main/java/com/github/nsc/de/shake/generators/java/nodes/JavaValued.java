@@ -1,5 +1,7 @@
 package com.github.nsc.de.shake.generators.java.nodes;
 
+import com.github.nsc.de.shake.generators.java.JavaVariableType;
+
 public interface JavaValued extends JavaNode {
 
     class JavaExpression implements JavaValued {
@@ -18,18 +20,127 @@ public interface JavaValued extends JavaNode {
         public String toString(String indent, String add) {
             return left.toString(indent, add) + ' ' + operator + ' ' + right.toString(indent, add);
         }
+
+        @Override
+        public JavaVariableType getType() {
+            // TODO Check
+            return JavaVariableType.findNearestEqualParent(left.getType(), right.getType());
+        }
     }
 
-    class JavaValue implements JavaValued {
-        private final String value;
+    class JavaIntegerPart implements JavaValued {
+        private final int value;
 
-        public JavaValue(String value) {
+        public JavaIntegerPart(int value) {
+            this.value = value;
+        }
+
+        public int getNumber() {
+            return this.value;
+        }
+
+        @Override
+        public String toString(String indent, String add) {
+            return String.valueOf(this.value);
+        }
+
+
+        @Override
+        public JavaVariableType getType() {
+            return JavaVariableType.INT;
+        }
+    }
+
+    class JavaDoublePart implements JavaValued {
+        private final double value;
+
+        public JavaDoublePart(double value) {
             this.value = value;
         }
 
         @Override
         public String toString(String indent, String add) {
-            return value;
+            return String.valueOf(this.value);
+        }
+
+        public double getNumber() {
+            return this.value;
+        }
+
+
+        @Override
+        public JavaVariableType getType() {
+            return JavaVariableType.DOUBLE;
+        }
+    }
+
+    class JavaCharacterPart implements JavaValued {
+        private final char value;
+
+        public JavaCharacterPart(char value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString(String indent, String add) {
+            return "'" + this.value + '\'';
+        }
+
+        public double getValue() {
+            return this.value;
+        }
+
+        @Override
+        public JavaVariableType getType() {
+            return JavaVariableType.CHAR;
+        }
+    }
+
+    class JavaStringPart implements JavaValued {
+        private final String value;
+
+        public JavaStringPart(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString(String indent, String add) {
+            return "\"" + this.value + '"';
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+
+        @Override
+        public JavaVariableType getType() {
+            return JavaVariableType.CHAR;
+        }
+    }
+
+    enum JavaBooleanValue implements JavaValued {
+        TRUE(true), FALSE(false);
+
+        private final boolean value;
+
+        JavaBooleanValue(boolean value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString(String indent, String add) {
+            return String.valueOf(this.value);
+        }
+
+
+        @Override
+        public JavaVariableType getType() {
+            return JavaVariableType.BOOLEAN;
+        }
+
+        public static JavaBooleanValue of(boolean b) {
+            if(b) return TRUE;
+            return FALSE;
         }
     }
 
@@ -45,35 +156,11 @@ public interface JavaValued extends JavaNode {
         public String toString(String indent, String add) {
             return '(' + operation.toString() + ')';
         }
-    }
-
-    class JavaDoublePart implements JavaValued {
-
-        private final double value;
-
-        public JavaDoublePart(double value) {
-            this.value = value;
-        }
 
         @Override
-        public String toString(String indent, String add) {
-            return String.valueOf(this.value);
+        public JavaVariableType getType() {
+            return this.operation.getType();
         }
-    }
-
-    class JavaIntegerPart implements JavaValued {
-
-        private final int value;
-
-        public JavaIntegerPart(int value) {
-            this.value = value;
-        }
-
-        @Override
-        public String toString(String indent, String add) {
-            return String.valueOf(this.value);
-        }
-
     }
 
     class JavaVariable implements JavaValued {
@@ -87,6 +174,12 @@ public interface JavaValued extends JavaNode {
         @Override
         public String toString(String indent, String add) {
             return this.variable.toString(indent, add);
+        }
+
+        @Override
+        public JavaVariableType getType() {
+            // TODO automatically track type
+            return JavaVariableType.UNKNOWN;
         }
     }
 
@@ -111,6 +204,11 @@ public interface JavaValued extends JavaNode {
             return str.append(")").toString();
         }
 
+        @Override
+        public JavaVariableType getType() {
+            // TODO automatically track type
+            return JavaVariableType.UNKNOWN;
+        }
     }
 
     class JavaConstruction implements JavaValuedOperation {
@@ -133,6 +231,11 @@ public interface JavaValued extends JavaNode {
             return str.append(")").toString();
         }
 
+        @Override
+        public JavaVariableType getType() {
+            // TODO automatically track type
+            return null;
+        }
     }
 
     class JavaVariableAssignment implements JavaValuedOperation {
@@ -148,6 +251,11 @@ public interface JavaValued extends JavaNode {
         @Override
         public String toString(String indent, String add) {
             return name.toString(indent, add) + " = " + value.toString(indent, add);
+        }
+
+        @Override
+        public JavaVariableType getType() {
+            return this.value.getType();
         }
     }
 
@@ -167,6 +275,12 @@ public interface JavaValued extends JavaNode {
         public String toString(String indent, String add) {
             return name.toString(indent, add) + ' ' + this.operator + "= " + value.toString(indent, add);
         }
+
+        @Override
+        public JavaVariableType getType() {
+            // TODO Automatically track type
+            return JavaVariableType.UNKNOWN;
+        }
     }
 
     class JavaVariableIncr implements JavaValuedOperation {
@@ -180,6 +294,11 @@ public interface JavaValued extends JavaNode {
         @Override
         public String toString(String indent, String add) {
             return this.variable.toString(indent, add) + "++";
+        }
+
+        @Override
+        public JavaVariableType getType() {
+            return variable.getType();
         }
     }
 
@@ -195,7 +314,14 @@ public interface JavaValued extends JavaNode {
         public String toString(String indent, String add) {
             return this.variable.toString(indent, add) + "--";
         }
+
+        @Override
+        public JavaVariableType getType() {
+            return variable.getType();
+        }
     }
 
     interface JavaValuedOperation extends JavaOperation, JavaValued {  }
+
+    JavaVariableType getType();
 }

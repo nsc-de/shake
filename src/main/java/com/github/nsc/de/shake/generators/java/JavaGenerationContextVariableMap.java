@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class JavaGenerationContextVariableMap {
 
-    private final Map<String, JavaGenerationContextVariable> variables;
+    private final Map<String, JavaVariable> variables;
     private final JavaGenerationContextVariableMap parentList;
 
 
@@ -19,7 +19,7 @@ public class JavaGenerationContextVariableMap {
     // *******************************
     // Constructors
 
-    public JavaGenerationContextVariableMap(Map<String, JavaGenerationContextVariable> variables,
+    public JavaGenerationContextVariableMap(Map<String, JavaVariable> variables,
                                             JavaGenerationContextVariableMap parentList) {
         // apply values to fields
         this.variables = variables;
@@ -32,7 +32,7 @@ public class JavaGenerationContextVariableMap {
         this.parentList = parentList;
     }
 
-    public JavaGenerationContextVariableMap(HashMap<String, JavaGenerationContextVariable> variables) {
+    public JavaGenerationContextVariableMap(HashMap<String, JavaVariable> variables) {
         // apply given values to fields
         this.variables = variables;
         this.parentList = null;
@@ -49,7 +49,7 @@ public class JavaGenerationContextVariableMap {
     // *******************************
     // getters
 
-    public Map<String, JavaGenerationContextVariable> getVariables() {
+    public Map<String, JavaVariable> getVariables() {
         // just return the variables field
         return variables;
     }
@@ -66,7 +66,7 @@ public class JavaGenerationContextVariableMap {
     // VariableList functionality
 
 
-    public boolean declare(JavaGenerationContextVariable v) {
+    public boolean declare(JavaVariable v) {
         // Check if the variable-map already contains a Variable with this name (if so return false).
         // In other case put the variable into the map using the identifier as key and return true
         if (this.variables.containsKey(v.getIdentifier())) return false;
@@ -74,7 +74,7 @@ public class JavaGenerationContextVariableMap {
         return true;
     }
 
-    public JavaGenerationContextVariable get(String name) {
+    public JavaVariable get(String name) {
 
         // If the variable map contains the variable then return it.
         if(variables.containsKey(name)) return variables.get(name);
@@ -91,7 +91,7 @@ public class JavaGenerationContextVariableMap {
     JavaGenerationContextVariableMap concat(JavaGenerationContextVariableMap list) {
 
         // Create a new HashMap from the variables of the VariableList
-        HashMap<String, JavaGenerationContextVariable> variables = new HashMap<>(this.variables);
+        HashMap<String, JavaVariable> variables = new HashMap<>(this.variables);
 
         // Loop over the given list and put the variables into the variables map
         list.getVariables().forEach(variables::put);
@@ -103,7 +103,7 @@ public class JavaGenerationContextVariableMap {
     public JavaGenerationContextVariableMap copy() {
 
         // Create a new HashMap for the variables
-        Map<String, JavaGenerationContextVariable> vars = new HashMap<>();
+        Map<String, JavaVariable> vars = new HashMap<>();
 
         // Loop over the variables and put a copy of the variable into the vars Map
         this.variables.forEach((k, v) -> vars.put(k, v));
