@@ -234,7 +234,7 @@ public interface JavaValued extends JavaNode {
         @Override
         public JavaVariableType getType() {
             // TODO automatically track type
-            return null;
+            return JavaVariableType.UNKNOWN;
         }
     }
 

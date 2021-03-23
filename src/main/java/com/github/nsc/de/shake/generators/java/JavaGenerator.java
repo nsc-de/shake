@@ -176,7 +176,7 @@ public class JavaGenerator implements ShakeGenerator {
             throw new Error(
                     String.format("Variable \"%s\" seems not to be declared in this scope", identifier.toString()));
         JavaVariableType t = value.getType();
-        if(variable.getType() != JavaVariableType.UNKNOWN && !variable.expectVariableToBe(t))
+        if(!variable.expectVariableToBe(t))
             throw new Error(String.format("Type %s is not assignable to variable %s with type %s",
                     t.toString(), variable.getIdentifier(), variable.getType().toString()));
 
