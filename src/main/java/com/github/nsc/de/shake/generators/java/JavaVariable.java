@@ -1,7 +1,9 @@
 package com.github.nsc.de.shake.generators.java;
 
-public class JavaVariable {
+import com.github.nsc.de.shake.generators.java.nodes.JavaIdentifier;
+import com.github.nsc.de.shake.generators.java.nodes.JavaValued;
 
+public class JavaVariable {
 
     private final String identifier;
     private JavaVariableType type;
@@ -52,5 +54,35 @@ public class JavaVariable {
     public void setType(JavaVariableType type) {
         if(!this.typeFixed) throw new Error("Variable-Type is fixed");
         this.type = type;
+    }
+
+    public JavaVariableAccessDescriptor access(JavaIdentifier identifier) {
+        return new JavaVariableAccessDescriptor(identifier);
+    }
+
+    public class JavaVariableAccessDescriptor implements JavaValued {
+
+        private final JavaIdentifier accessIdentifier;
+
+        public JavaVariableAccessDescriptor(JavaIdentifier accessIdentifier) {
+            this.accessIdentifier = accessIdentifier;
+        }
+
+        /**
+         * Generates Java code
+         *
+         * @param indent the space the code should be indented with
+         * @param add    the space to be added to indent per indention
+         * @return the generated java code
+         */
+        @Override
+        public String toString(String indent, String add) {
+            return accessIdentifier.toString(indent, add);
+        }
+
+        @Override
+        public JavaVariableType getType() {
+            return JavaVariable.this.getType();
+        }
     }
 }

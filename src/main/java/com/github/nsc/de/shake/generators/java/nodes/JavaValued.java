@@ -163,26 +163,6 @@ public interface JavaValued extends JavaNode {
         }
     }
 
-    class JavaVariable implements JavaValued {
-
-        private final JavaIdentifier variable;
-
-        public JavaVariable(JavaIdentifier variable) {
-            this.variable = variable;
-        }
-
-        @Override
-        public String toString(String indent, String add) {
-            return this.variable.toString(indent, add);
-        }
-
-        @Override
-        public JavaVariableType getType() {
-            // TODO automatically track type
-            return JavaVariableType.UNKNOWN;
-        }
-    }
-
     class JavaFunctionCall implements JavaValuedOperation {
 
         private final JavaIdentifier function;

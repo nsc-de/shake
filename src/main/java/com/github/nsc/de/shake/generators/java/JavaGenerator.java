@@ -171,7 +171,7 @@ public class JavaGenerator implements ShakeGenerator {
         JavaIdentifier identifier = (JavaIdentifier) visit(n.getVariable(), context);
         JavaValued value = (JavaValued) visit(n.getValue(), context);
 
-        JavaVariable variable = context.getMap().get(identifier.toString());
+        JavaVariable variable = context.getMap().get(identifier.toString()); // FIXME recursive (attributes are not supported here)
         if(variable == null)
             throw new Error(
                     String.format("Variable \"%s\" seems not to be declared in this scope", identifier.toString()));
@@ -185,8 +185,20 @@ public class JavaGenerator implements ShakeGenerator {
 
 
     public JavaNode visitVariableAddAssignmentNode(VariableAddAssignmentNode n, JavaGenerationContext context) {
-        return new JavaValued.JavaVariableExpressionAssignment((JavaIdentifier) visit(n.getVariable(), context),
-                (JavaValued) visit(n.getValue(), context), '+');
+
+        JavaIdentifier identifier = (JavaIdentifier) visit(n.getVariable(), context);
+        JavaValued value = (JavaValued) visit(n.getValue(), context);
+
+        JavaVariable variable = context.getMap().get(identifier.toString());
+        if(variable == null)
+            throw new Error(
+                    String.format("Variable \"%s\" seems not to be declared in this scope", identifier.toString()));
+        JavaVariableType t = value.getType();
+        if(!variable.expectVariableToBe(t))
+            throw new Error(String.format("Type %s is not assignable to variable %s with type %s",
+                    t.toString(), variable.getIdentifier(), variable.getType().toString()));
+
+        return new JavaValued.JavaVariableExpressionAssignment(identifier, value, '+');
     }
 
 
@@ -236,8 +248,14 @@ public class JavaGenerator implements ShakeGenerator {
     }
 
 
-    public JavaValued.JavaVariable visitVariableUsageNode(VariableUsageNode n, JavaGenerationContext context) {
-        return new JavaValued.JavaVariable(visitIdentifierNode(n.getVariable(), context));
+    public JavaVariable.JavaVariableAccessDescriptor visitVariableUsageNode(VariableUsageNode n,
+                                                                            JavaGenerationContext context) {
+        JavaIdentifier identifier = visitIdentifierNode(n.getVariable(), context);
+        JavaVariable variable = context.getMap().get(identifier.toString()); // FIXME recursive (attributes are not supported here)
+        if(variable == null)
+            throw new Error(
+                    String.format("Variable \"%s\" seems not to be declared in this scope", identifier.toString()));
+        return variable.access(identifier);
     }
 
 
