@@ -7,6 +7,9 @@ public class JavaVariableType {
     public static final JavaVariableType OBJECT =
             new JavaVariableType("Object", new JavaVariableType[0]);
 
+    public static final JavaVariableType STRING =
+            new JavaVariableType("String", new JavaVariableType[] { OBJECT });
+
     // Object Primitives
     public static final JavaVariableType DOUBLE_OBJ
             = new JavaVariableType("Double", new JavaVariableType[] { OBJECT });

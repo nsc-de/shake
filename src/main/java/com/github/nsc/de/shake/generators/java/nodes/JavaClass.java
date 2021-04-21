@@ -1,5 +1,6 @@
 package com.github.nsc.de.shake.generators.java.nodes;
 
+import com.github.nsc.de.shake.generators.java.JavaVariable;
 import com.github.nsc.de.shake.util.Characters;
 
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.List;
 public class JavaClass implements JavaNode {
 
     private final String name;
-    private final List<JavaVariableDeclaration> fields;
+    private final List<JavaVariable> fields;
     private final List<JavaFunction> functions;
     private final List<JavaClass> subClasses;
     private final JavaAccessDescriptor access;
@@ -38,7 +39,7 @@ public class JavaClass implements JavaNode {
         return subClasses;
     }
 
-    public List<JavaVariableDeclaration> getFields() {
+    public List<JavaVariable> getFields() {
         return fields;
     }
 
@@ -66,7 +67,7 @@ public class JavaClass implements JavaNode {
         str.append("class ").append(this.name).append(" {\n\n");
 
         String indent2 = indent + add;
-        for(JavaVariableDeclaration f : this.getFields()) {
+        for(JavaVariable f : this.getFields()) {
             str.append(indent2).append(f.toString(indent2, add)).append(";\n");
         }
         if(this.getFields().size() > 0) str.append('\n');

@@ -1,5 +1,6 @@
 package com.github.nsc.de.shake.generators.java.nodes;
 
+import com.github.nsc.de.shake.generators.java.JavaVariable;
 import com.github.nsc.de.shake.generators.java.JavaVariableType;
 
 public interface JavaValued extends JavaNode {
@@ -26,6 +27,11 @@ public interface JavaValued extends JavaNode {
             // TODO Check
             return JavaVariableType.findNearestEqualParent(left.getType(), right.getType());
         }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return true; // FIXME implement
+        }
     }
 
     class JavaIntegerPart implements JavaValued {
@@ -44,10 +50,14 @@ public interface JavaValued extends JavaNode {
             return String.valueOf(this.value);
         }
 
-
         @Override
         public JavaVariableType getType() {
             return JavaVariableType.INT;
+        }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return JavaVariableType.INT.is(type);
         }
     }
 
@@ -72,6 +82,11 @@ public interface JavaValued extends JavaNode {
         public JavaVariableType getType() {
             return JavaVariableType.DOUBLE;
         }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return JavaVariableType.DOUBLE == type;
+        }
     }
 
     class JavaCharacterPart implements JavaValued {
@@ -94,6 +109,11 @@ public interface JavaValued extends JavaNode {
         public JavaVariableType getType() {
             return JavaVariableType.CHAR;
         }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return JavaVariableType.CHAR.is(type);
+        }
     }
 
     class JavaStringPart implements JavaValued {
@@ -115,6 +135,11 @@ public interface JavaValued extends JavaNode {
         @Override
         public JavaVariableType getType() {
             return JavaVariableType.CHAR;
+        }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return true; // FIXME implement
         }
     }
 
@@ -142,6 +167,11 @@ public interface JavaValued extends JavaNode {
             if(b) return TRUE;
             return FALSE;
         }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return type == JavaVariableType.BOOLEAN;
+        }
     }
 
     class JavaPriorityPart implements JavaValued {
@@ -160,6 +190,11 @@ public interface JavaValued extends JavaNode {
         @Override
         public JavaVariableType getType() {
             return this.operation.getType();
+        }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return operation.expectToBe(type);
         }
     }
 
@@ -189,6 +224,11 @@ public interface JavaValued extends JavaNode {
             // TODO automatically track type
             return JavaVariableType.UNKNOWN;
         }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return true; // FIXME implement
+        }
     }
 
     class JavaConstruction implements JavaValuedOperation {
@@ -216,44 +256,58 @@ public interface JavaValued extends JavaNode {
             // TODO automatically track type
             return JavaVariableType.UNKNOWN;
         }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return true; // FIXME implement
+        }
     }
 
     class JavaVariableAssignment implements JavaValuedOperation {
 
-        private final JavaIdentifier name;
+        private final JavaVariable.JavaVariableAccessDescriptor variable;
         private final JavaValued value;
 
-        public JavaVariableAssignment(JavaIdentifier name, JavaValued value) {
-            this.name = name;
+        public JavaVariableAssignment(JavaVariable.JavaVariableAccessDescriptor variable, JavaValued value) {
+            this.variable = variable;
             this.value = value;
         }
 
         @Override
         public String toString(String indent, String add) {
-            return name.toString(indent, add) + " = " + value.toString(indent, add);
+            return variable.toString(indent, add) + " = " + value.toString(indent, add);
         }
 
         @Override
         public JavaVariableType getType() {
             return this.value.getType();
         }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return variable.expectToBe(type) && value.expectToBe(type);
+        }
     }
 
     class JavaVariableExpressionAssignment implements JavaValuedOperation {
 
-        private final JavaIdentifier name;
+        private final JavaVariable.JavaVariableAccessDescriptor variable;
         private final JavaValued value;
         private final char operator;
 
-        public JavaVariableExpressionAssignment(JavaIdentifier name, JavaValued value, char operator) {
-            this.name = name;
+        public JavaVariableExpressionAssignment(JavaVariable.JavaVariableAccessDescriptor variable, JavaValued value,
+                                                char operator) {
+            if(!variable.getType().is(JavaVariableType.DOUBLE) && !variable.getType().is(JavaVariableType.STRING))
+                throw new Error(String.format("Operator '+=' is not declared for type %s in java.",
+                        variable.getType().toString()));
+            this.variable = variable;
             this.value = value;
             this.operator = operator;
         }
 
         @Override
         public String toString(String indent, String add) {
-            return name.toString(indent, add) + ' ' + this.operator + "= " + value.toString(indent, add);
+            return variable.toString(indent, add) + ' ' + this.operator + "= " + value.toString(indent, add);
         }
 
         @Override
@@ -261,13 +315,20 @@ public interface JavaValued extends JavaNode {
             // TODO Automatically track type
             return JavaVariableType.UNKNOWN;
         }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return variable.expectToBe(type) && value.expectToBe(type);
+        }
     }
 
     class JavaVariableIncr implements JavaValuedOperation {
 
-        private final JavaIdentifier variable;
+        private final JavaVariable.JavaVariableAccessDescriptor variable;
 
-        public JavaVariableIncr(JavaIdentifier variable) {
+        public JavaVariableIncr(JavaVariable.JavaVariableAccessDescriptor variable) {
+            if(!variable.getType().is(JavaVariableType.DOUBLE))
+                throw new Error(String.format("Operator '--' is not declared for type %s in java.", variable.getType().toString()));
             this.variable = variable;
         }
 
@@ -280,13 +341,20 @@ public interface JavaValued extends JavaNode {
         public JavaVariableType getType() {
             return variable.getType();
         }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return variable.expectToBe(type);
+        }
     }
 
     class JavaVariableDecr implements JavaValuedOperation {
 
-        private final JavaIdentifier variable;
+        private final JavaVariable.JavaVariableAccessDescriptor variable;
 
-        public JavaVariableDecr(JavaIdentifier variable) {
+        public JavaVariableDecr(JavaVariable.JavaVariableAccessDescriptor variable) {
+            if(!variable.getType().is(JavaVariableType.DOUBLE))
+                throw new Error(String.format("Operator '++' is not declared for type %s in java.", variable.getType().toString()));
             this.variable = variable;
         }
 
@@ -299,9 +367,14 @@ public interface JavaValued extends JavaNode {
         public JavaVariableType getType() {
             return variable.getType();
         }
+
+        @Override
+        public boolean expectToBe(JavaVariableType type) {
+            return variable.expectToBe(type);
+        }
     }
 
     interface JavaValuedOperation extends JavaOperation, JavaValued {  }
-
     JavaVariableType getType();
+    boolean expectToBe(JavaVariableType type);
 }

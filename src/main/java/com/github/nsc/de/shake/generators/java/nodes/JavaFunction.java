@@ -1,18 +1,19 @@
 package com.github.nsc.de.shake.generators.java.nodes;
 
+import com.github.nsc.de.shake.generators.java.JavaVariable;
 import com.github.nsc.de.shake.generators.java.JavaVariableType;
 
 public class JavaFunction implements JavaNode {
 
     private final String name;
     private final JavaVariableType type;
-    private final JavaFunctionArgument[] args;
+    private final JavaVariable[] args;
     private final JavaTree body;
     private final JavaAccessDescriptor access;
     private final boolean isStatic;
     private final boolean isFinal;
 
-    public JavaFunction(String name, JavaVariableType type, JavaFunctionArgument[] args, JavaTree body,
+    public JavaFunction(String name, JavaVariableType type, JavaVariable[] args, JavaTree body,
                         JavaAccessDescriptor access, boolean isStatic, boolean isFinal) {
         this.name = name;
         this.type = type;
@@ -34,22 +35,6 @@ public class JavaFunction implements JavaNode {
             if(i < args.length - 1) str.append(", ");
         }
         return str.append(") ").append(this.body.toString(indent, add)).toString();
-    }
-
-    public static class JavaFunctionArgument implements JavaNode {
-
-        private final String type;
-        private final String name;
-
-        public JavaFunctionArgument(String type, String name) {
-            this.type = type;
-            this.name = name;
-        }
-
-        @Override
-        public String toString(String _indent, String _add) {
-            return this.type + ' ' + this.name;
-        }
     }
 
 }
