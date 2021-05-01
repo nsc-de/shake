@@ -437,12 +437,20 @@ public class JavaGenerator implements ShakeGenerator {
 
     public JavaNode visitFunctionDeclarationNode(FunctionDeclarationNode n, JavaGenerationContext context) {
 
+        context.getActualClass().getFunctions().add(createFunctionDeclarationNode(n, context));
+        return null;
+
+    }
+
+
+    public JavaFunction createFunctionDeclarationNode(FunctionDeclarationNode n, JavaGenerationContext context) {
+
         boolean is_static = !n.isInClass() || n.isStatic();
 
         JavaGenerationContextVariableMap functionMap = new JavaGenerationContextVariableMap(context.getMap());
         JavaGenerationContext ctx = new JavaGenerationContext(context.getActualClass(), false, functionMap);
 
-        context.getActualClass().getFunctions().add(new JavaFunction(
+        return new JavaFunction(
                 n.getName(),
                 JavaVariableType.VOID,
                 ArrayUtil.map(n.getArgs(), new JavaVariable[]{}, arg -> {
@@ -454,21 +462,33 @@ public class JavaGenerator implements ShakeGenerator {
                 visitTree(n.getBody(), ctx),
                 JavaAccessDescriptor.from(n.getAccess()),
                 is_static,
-                n.isFinal()));
-        return null;
+                n.isFinal());
     }
 
 
     public JavaNode visitClassDeclarationNode(ClassDeclarationNode n, JavaGenerationContext context) {
 
-        JavaClass javaClass = new JavaClass(n.getName(), JavaAccessDescriptor.from(n.getAccess()), n.isStatic(), n.isFinal());
-        context.getActualClass().getSubClasses().add(javaClass);
-        JavaGenerationContext ctx = new JavaGenerationContext(javaClass, false);
-        for(FunctionDeclarationNode node : n.getMethods()) visitFunctionDeclarationNode(node, ctx);
-        for(ClassDeclarationNode node : n.getClasses()) visitClassDeclarationNode(node, ctx);
-        // for(FunctionDeclarationNode node : n.getMethods()) visitFunctionDeclarationNode(node, ctx);
-
+        context.getActualClass().getSubClasses().add(createClassDeclarationNode(n, context));
         return null;
+
+    }
+
+
+    public JavaClass createClassDeclarationNode(ClassDeclarationNode n, JavaGenerationContext context) {
+
+        JavaClass javaClass = new JavaClass(n.getName(), JavaAccessDescriptor.from(n.getAccess()), n.isStatic(), n.isFinal());
+
+        JavaGenerationContextVariableMap classVariableMap = new JavaGenerationContextVariableMap(context.getMap());
+        JavaGenerationContext ctx = new JavaGenerationContext(javaClass, false, classVariableMap);
+
+        for(VariableDeclarationNode node : n.getFields())
+            javaClass.getFields().add((JavaVariable) visitVariableDeclarationNode(node, ctx));
+        for(FunctionDeclarationNode node : n.getMethods())
+            javaClass.getFunctions().add(createFunctionDeclarationNode(node, ctx));
+        for(ClassDeclarationNode node : n.getClasses())
+            javaClass.getFunctions().add((JavaFunction) visitClassDeclarationNode(node, ctx));
+
+        return javaClass;
 
     }
 
