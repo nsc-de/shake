@@ -1,6 +1,6 @@
 package com.github.nsc.de.shake.generators.json;
 
-import com.github.nsc.de.shake.generators.Generator;
+import com.github.nsc.de.shake.generation.ShakeGenerator;
 import com.github.nsc.de.shake.parser.node.*;
 import com.github.nsc.de.shake.parser.node.expression.*;
 import com.github.nsc.de.shake.parser.node.factor.DoubleNode;
@@ -15,10 +15,10 @@ import com.github.nsc.de.shake.parser.node.loops.WhileNode;
 import com.github.nsc.de.shake.parser.node.objects.ClassConstructionNode;
 import com.github.nsc.de.shake.parser.node.objects.ClassDeclarationNode;
 import com.github.nsc.de.shake.parser.node.variables.*;
-import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
-public class JsonGenerator extends Generator<JSONObject> {
+public class JsonGenerator extends ShakeGenerator<JSONObject> {
 
     @Override
     public JSONObject visitTree(Tree t) {

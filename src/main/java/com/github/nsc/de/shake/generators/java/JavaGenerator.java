@@ -1,8 +1,11 @@
 package com.github.nsc.de.shake.generators.java;
 
-import com.github.nsc.de.shake.generators.ShakeGenerator;
+import com.github.nsc.de.shake.generation.ShakeGeneratorBase;
 import com.github.nsc.de.shake.generators.java.nodes.*;
-import com.github.nsc.de.shake.parser.node.*;
+import com.github.nsc.de.shake.parser.node.IdentifierNode;
+import com.github.nsc.de.shake.parser.node.IfNode;
+import com.github.nsc.de.shake.parser.node.Node;
+import com.github.nsc.de.shake.parser.node.Tree;
 import com.github.nsc.de.shake.parser.node.expression.*;
 import com.github.nsc.de.shake.parser.node.factor.CharacterNode;
 import com.github.nsc.de.shake.parser.node.factor.DoubleNode;
@@ -19,7 +22,7 @@ import com.github.nsc.de.shake.parser.node.objects.ClassDeclarationNode;
 import com.github.nsc.de.shake.parser.node.variables.*;
 import com.github.nsc.de.shake.util.ArrayUtil;
 
-public class JavaGenerator implements ShakeGenerator {
+public class JavaGenerator implements ShakeGeneratorBase {
 
     public JavaClass visitProgram(Tree t, String filename) {
         JavaClass cls = new JavaClass(filename, JavaAccessDescriptor.PUBLIC, false, false);
@@ -403,8 +406,10 @@ public class JavaGenerator implements ShakeGenerator {
 
 
     public JavaValued.JavaExpression visitLogicalXOrNode(LogicalXOrNode n, JavaGenerationContext context) {
-        return new JavaValued.JavaExpression((JavaValued) visit(n.getLeft(), context),
-                (JavaValued) visit(n.getRight(), context), "^");
+        return new JavaValued.JavaExpression(
+                (JavaValued) visit(n.getLeft(), context),
+                (JavaValued) visit(n.getRight(), context),
+                "^");
     }
 
 
