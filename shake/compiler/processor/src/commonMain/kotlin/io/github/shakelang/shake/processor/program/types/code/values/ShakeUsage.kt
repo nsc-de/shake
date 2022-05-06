@@ -1,5 +1,6 @@
 package io.github.shakelang.shake.processor.program.types.code.values
 
+import io.github.shakelang.shake.processor.program.types.ShakeClassField
 import io.github.shakelang.shake.processor.program.types.ShakeDeclaration
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVariableDeclaration
@@ -9,8 +10,9 @@ interface ShakeUsage : ShakeValue {
     val declaration: ShakeDeclaration
 }
 
-interface ShakeClassFieldUsage {
-    val scope: ShakeScope
+interface ShakeClassFieldUsage : ShakeUsage {
+    override val scope: ShakeScope
+    override val declaration: ShakeClassField
     val receiver: ShakeValue?
     val name : String
 }

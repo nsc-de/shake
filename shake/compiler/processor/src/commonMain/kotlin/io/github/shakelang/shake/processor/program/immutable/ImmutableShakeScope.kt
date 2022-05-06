@@ -1,7 +1,5 @@
 package io.github.shakelang.shake.processor.program.immutable
 
-import io.github.shakelang.shake.processor.program.types.ShakeClass
-import io.github.shakelang.shake.processor.program.types.ShakeFunction
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 

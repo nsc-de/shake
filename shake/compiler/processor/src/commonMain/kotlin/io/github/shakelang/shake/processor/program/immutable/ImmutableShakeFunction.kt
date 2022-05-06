@@ -1,6 +1,9 @@
 package io.github.shakelang.shake.processor.program.immutable
 
-import io.github.shakelang.shake.processor.program.types.*
+import io.github.shakelang.shake.processor.program.types.ShakeAssignable
+import io.github.shakelang.shake.processor.program.types.ShakeFunction
+import io.github.shakelang.shake.processor.program.types.ShakeParameter
+import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.ShakeCode
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVariableDeclaration
 

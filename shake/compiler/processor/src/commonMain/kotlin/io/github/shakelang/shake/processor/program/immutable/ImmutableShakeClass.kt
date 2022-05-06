@@ -1,6 +1,9 @@
 package io.github.shakelang.shake.processor.program.immutable
 
-import io.github.shakelang.shake.processor.program.types.*
+import io.github.shakelang.shake.processor.program.types.ShakeAssignable
+import io.github.shakelang.shake.processor.program.types.ShakeClass
+import io.github.shakelang.shake.processor.program.types.ShakeClassField
+import io.github.shakelang.shake.processor.program.types.ShakeConstructor
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.util.Pointer
 import kotlin.math.min

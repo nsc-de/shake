@@ -3,7 +3,6 @@ package io.github.shakelang.shake.processor.program.creation.code.values
 import io.github.shakelang.shake.processor.program.creation.CreationShakeClassField
 import io.github.shakelang.shake.processor.program.creation.CreationShakeDeclaration
 import io.github.shakelang.shake.processor.program.creation.CreationShakeField
-import io.github.shakelang.shake.processor.program.creation.CreationShakeType
 import io.github.shakelang.shake.processor.program.creation.CreationShakeScope
 import io.github.shakelang.shake.processor.program.creation.code.statements.CreationShakeVariableDeclaration
 import io.github.shakelang.shake.processor.program.types.ShakeType

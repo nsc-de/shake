@@ -1,6 +1,8 @@
 package io.github.shakelang.shake.processor.program.immutable
 
-import io.github.shakelang.shake.processor.program.types.*
+import io.github.shakelang.shake.processor.program.types.ShakeAssignable
+import io.github.shakelang.shake.processor.program.types.ShakeField
+import io.github.shakelang.shake.processor.program.types.ShakePackage
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 
 open class ImmutableShakePackage : ShakePackage {
