@@ -103,12 +103,10 @@ open class CreationShakeVariableUsage(
     override val declaration: CreationShakeVariableDeclaration
 ) : CreationShakeUsage(), ShakeVariableUsage {
     override val type get() = declaration.type
-    override val name get() = declaration.name
 
     override fun toJson(): Map<String, Any?> {
         return mapOf(
             "type" to "variable",
-            "name" to name,
             "type" to type.toJson()
         )
     }

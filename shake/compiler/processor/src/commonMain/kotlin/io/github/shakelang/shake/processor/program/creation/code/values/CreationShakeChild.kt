@@ -16,6 +16,8 @@ class CreationShakeChild (
 
 ) : CreationShakeAssignable, ShakeChild {
 
+    override val qualifiedName: String get() = TODO("not implemented")
+
     override val type : ShakeType = parent.type.childType(name)!!
     override val actualValue: CreationShakeChildUsage get() = CreationShakeChildUsage(this)
     override val actualType: ShakeType

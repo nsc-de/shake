@@ -20,8 +20,5 @@ interface CreationShakeScope : ShakeScope {
         }
         return functions
     }
-    override fun use(name: String) {
-        val declaration = get(name)
-    }
     val processor : ShakeCodeProcessor
 }

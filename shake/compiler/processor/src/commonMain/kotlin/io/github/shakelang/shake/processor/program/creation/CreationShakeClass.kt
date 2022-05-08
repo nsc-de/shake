@@ -160,7 +160,7 @@ open class CreationShakeClass: ShakeClass {
         return min(scd, intDistance)
     }
 
-    fun asType(): CreationShakeType {
+    override fun asType(): CreationShakeType {
         return CreationShakeType.Object(this)
     }
 

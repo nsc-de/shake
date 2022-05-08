@@ -149,6 +149,9 @@ interface CreationShakeAssignable : ShakeAssignable {
                         "value" to v.toJson()
                     )
                 }
+
+                override val qualifiedName: String
+                    get() = "anonymous"
             }
         }
     }

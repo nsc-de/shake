@@ -4,6 +4,7 @@ import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 
 interface ShakeAssignable {
 
+    val qualifiedName: String
     val actualValue: ShakeValue?
     val actualType: ShakeType
     val type: ShakeType

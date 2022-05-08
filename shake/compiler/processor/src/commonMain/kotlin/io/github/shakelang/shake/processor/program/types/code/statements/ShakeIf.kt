@@ -9,4 +9,17 @@ interface ShakeIf : ShakeStatement {
     val body: ShakeCode
     val elseBody: ShakeCode?
 
+    class Impl(
+        override val condition: ShakeValue,
+        override val body: ShakeCode,
+        override val elseBody: ShakeCode?
+    ) : ShakeIf {
+        override fun toJson(): Map<String, Any?> = mapOf(
+            "condition" to condition,
+            "body" to body,
+            "elseBody" to elseBody
+        )
+    }
+
+
 }
