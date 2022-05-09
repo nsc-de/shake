@@ -92,6 +92,9 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
                 "actualType" to actualType.toJson(),
             )
         }
+    }
 
+    companion object {
+        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeField): ShakeField = TODO()
     }
 }

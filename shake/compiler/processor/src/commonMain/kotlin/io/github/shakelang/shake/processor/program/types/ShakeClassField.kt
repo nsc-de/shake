@@ -88,4 +88,8 @@ interface ShakeClassField : ShakeField {
             )
         }
     }
+
+    companion object {
+        fun from(clazz: ShakeClass, it: ShakeClassField): ShakeClassField = TODO()
+    }
 }

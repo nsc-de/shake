@@ -65,4 +65,8 @@ interface ShakeMethod : ShakeFunction {
             )
         }
     }
+
+    companion object {
+        fun from(clazz: ShakeClass, it: ShakeMethod): ShakeMethod = TODO()
+    }
 }

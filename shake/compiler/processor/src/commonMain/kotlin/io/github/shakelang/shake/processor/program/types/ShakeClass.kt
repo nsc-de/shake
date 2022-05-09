@@ -30,21 +30,72 @@ interface ShakeClass {
 
     fun toJson(): Map<String, Any?>
 
-    class Impl(
-        override val prj: ShakeProject,
-        override val pkg: ShakePackage?,
-        override val parentScope: ShakeScope,
-        override val name: String,
-        override val methods: List<ShakeMethod>,
-        override val fields: List<ShakeClassField>,
-        override val classes: List<ShakeClass>,
-        override val staticMethods: List<ShakeMethod>,
-        override val staticFields: List<ShakeClassField>,
-        override val staticClasses: List<ShakeClass>,
-        override val constructors: List<ShakeConstructor>,
-        override val superClass: ShakeClass?,
+    class Impl : ShakeClass {
+        override val prj: ShakeProject
+        override val pkg: ShakePackage?
+        override val parentScope: ShakeScope
+        override val name: String
+        override val methods: List<ShakeMethod>
+        override val fields: List<ShakeClassField>
+        override val classes: List<ShakeClass>
+        override val staticMethods: List<ShakeMethod>
+        override val staticFields: List<ShakeClassField>
+        override val staticClasses: List<ShakeClass>
+        override val constructors: List<ShakeConstructor>
+        override val superClass: ShakeClass?
         override val interfaces: List<ShakeClass>
-    ) : ShakeClass {
+
+        constructor(
+            prj: ShakeProject,
+            pkg: ShakePackage?,
+            parentScope: ShakeScope,
+            name: String,
+            methods: List<ShakeMethod>,
+            fields: List<ShakeClassField>,
+            classes: List<ShakeClass>,
+            staticMethods: List<ShakeMethod>,
+            staticFields: List<ShakeClassField>,
+            staticClasses: List<ShakeClass>,
+            constructors: List<ShakeConstructor>,
+            superClass: ShakeClass?,
+            interfaces: List<ShakeClass>
+        ) {
+            this.prj = prj
+            this.pkg = pkg
+            this.parentScope = parentScope
+            this.name = name
+            this.methods = methods
+            this.fields = fields
+            this.classes = classes
+            this.staticMethods = staticMethods
+            this.staticFields = staticFields
+            this.staticClasses = staticClasses
+            this.constructors = constructors
+            this.superClass = superClass
+            this.interfaces = interfaces
+        }
+
+        constructor(
+            prj: ShakeProject,
+            pkg: ShakePackage?,
+            parentScope: ShakeScope,
+            it: ShakeClass
+        ) {
+            this.prj = prj
+            this.pkg = pkg
+            this.parentScope = parentScope
+            this.name = it.name
+            this.methods = it.methods.map { ShakeMethod.from(this, it) }
+            this.fields = it.fields.map { ShakeClassField.from(this, it) }
+            this.classes = it.classes.map { from(this.prj, this.pkg, it) } // TODO Parent class?
+            this.staticMethods = it.staticMethods.map { ShakeMethod.from(this, it) }
+            this.staticFields = it.staticFields.map { ShakeClassField.from(this, it) }
+            this.staticClasses = it.staticClasses.map { from(this.prj, this.pkg, it) }
+            this.constructors = it.constructors.map { ShakeConstructor.from(this, it) }
+            this.superClass = it.superClass // TODO Transform
+            this.interfaces = it.interfaces // TODO Transform
+        }
+
 
         override val instanceScope: ShakeScope
             get() = InstanceScope()
@@ -131,5 +182,9 @@ interface ShakeClass {
                 return getFunctions(name) + parent.getInvokable(name)
             }
         }
+    }
+
+    companion object {
+        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeClass): ShakeClass = TODO()
     }
 }

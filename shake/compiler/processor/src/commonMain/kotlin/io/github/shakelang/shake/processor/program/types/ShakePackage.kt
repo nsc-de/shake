@@ -17,36 +17,48 @@ interface ShakePackage {
     fun getPackage(name: Array<String>): ShakePackage
     fun toJson(): Map<String, Any?>
 
-    class Impl(
-        override val baseProject: ShakeProject,
-        override val name: String,
-        override val parent: ShakePackage?,
-        override val subpackages: List<ShakePackage>,
-        override val classes: List<ShakeClass>,
-        override val functions: List<ShakeFunction>,
+    class Impl : ShakePackage {
+        override val baseProject: ShakeProject
+        override val name: String
+        override val parent: ShakePackage?
+        override val subpackages: List<ShakePackage>
+        override val classes: List<ShakeClass>
+        override val functions: List<ShakeFunction>
         override val fields: List<ShakeField>
-    ) : ShakePackage {
 
-        override val qualifiedName: String = if (parent == null) name else "${parent.qualifiedName}.$name"
+        override val qualifiedName: String get() = if (parent == null) name else "${parent.qualifiedName}.$name"
+        override val scope: ShakeScope = PackageScope()
 
-        override val scope: ShakeScope = object : ShakeScope {
-            override val parent: ShakeScope get() = baseProject.projectScope
+        constructor(
+            baseProject: ShakeProject,
+            name: String,
+            parent: ShakePackage?,
+            subpackages: List<ShakePackage>,
+            classes: List<ShakeClass>,
+            functions: List<ShakeFunction>,
+            fields: List<ShakeField>
+        ) {
+            this.baseProject = baseProject
+            this.name = name
+            this.parent = parent
+            this.subpackages = subpackages
+            this.classes = classes
+            this.functions = functions
+            this.fields = fields
+        }
 
-            override fun get(name: String): ShakeAssignable? {
-                return fields.find { it.name == name }
-            }
-
-            override fun getFunctions(name: String): List<ShakeFunction> {
-                return functions.filter { it.name == name }
-            }
-
-            override fun getClass(name: String): ShakeClass? {
-                return classes.find { it.name == name }
-            }
-
-            override fun getInvokable(name: String): List<ShakeInvokable> {
-                return functions.filter { it.name == name }
-            }
+        internal constructor(
+            baseProject: ShakeProject,
+            parent: ShakePackage?,
+            it: ShakePackage
+        ) {
+            this.baseProject = baseProject
+            this.name = it.name
+            this.parent = parent
+            this.subpackages = it.subpackages.map { from(baseProject, this, it) }
+            this.classes = it.classes.map { ShakeClass.from(baseProject, this, it) }
+            this.functions = it.functions.map { ShakeFunction.from(baseProject, this, it) }
+            this.fields = it.fields.map { ShakeField.from(baseProject, this, it) }
         }
 
         override fun getPackage(name: String): ShakePackage {
@@ -68,5 +80,29 @@ interface ShakePackage {
                 "fields" to fields.map { it.name }
             )
         }
+
+        inner class PackageScope: ShakeScope {
+            override val parent: ShakeScope get() = baseProject.projectScope
+
+            override fun get(name: String): ShakeAssignable? {
+                return fields.find { it.name == name }
+            }
+
+            override fun getFunctions(name: String): List<ShakeFunction> {
+                return functions.filter { it.name == name }
+            }
+
+            override fun getClass(name: String): ShakeClass? {
+                return classes.find { it.name == name }
+            }
+
+            override fun getInvokable(name: String): List<ShakeInvokable> {
+                return functions.filter { it.name == name }
+            }
+        }
+    }
+
+    companion object {
+        fun from(project: ShakeProject, parent: ShakePackage?, it: ShakePackage): ShakePackage = Impl(project, parent, it)
     }
 }

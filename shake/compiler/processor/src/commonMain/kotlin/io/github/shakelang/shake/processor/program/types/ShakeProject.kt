@@ -19,31 +19,32 @@ interface ShakeProject {
     fun toJson(): Map<String, Any?>
     fun toJsonString(format: Boolean = false): String
 
-    class Impl(
-        override val subpackages: List<ShakePackage>,
-        override val classes: List<ShakeClass>,
-        override val functions: List<ShakeFunction>,
+    class Impl : ShakeProject {
+        override val subpackages: List<ShakePackage>
+        override val classes: List<ShakeClass>
+        override val functions: List<ShakeFunction>
         override val fields: List<ShakeField>
-    ) : ShakeProject {
+        override val projectScope: ShakeScope = ProjectScope()
 
-        override val projectScope: ShakeScope = object : ShakeScope {
-            override val parent: ShakeScope? = null
+        constructor(
+            subpackages: List<ShakePackage>,
+            classes: List<ShakeClass>,
+            functions: List<ShakeFunction>,
+            fields: List<ShakeField>
+        ) {
+            this.subpackages = subpackages
+            this.classes = classes
+            this.functions = functions
+            this.fields = fields
+        }
 
-            override fun get(name: String): ShakeAssignable? {
-                return fields.find { it.name == name }
-            }
-
-            override fun getFunctions(name: String): List<ShakeFunction> {
-                return functions.filter { it.name == name }
-            }
-
-            override fun getClass(name: String): ShakeClass? {
-                return classes.find { it.name == name }
-            }
-
-            override fun getInvokable(name: String): List<ShakeInvokable> {
-                return functions.filter { it.name == name }
-            }
+        internal constructor(
+            it: ShakeProject
+        ) {
+            this.subpackages = it.subpackages.map { ShakePackage.from(this, null, it) }
+            this.classes = it.classes.map { ShakeClass.from(this, null, it) }
+            this.functions = it.functions.map { ShakeFunction.from(this, null, it) }
+            this.fields = it.fields.map { ShakeField.from(this, null, it) }
         }
 
         override fun getPackage(name: String): ShakePackage {
@@ -81,5 +82,28 @@ interface ShakeProject {
             return json.stringify(toJson(), format)
         }
 
+        inner class ProjectScope : ShakeScope {
+            override val parent: ShakeScope? = null
+
+            override fun get(name: String): ShakeAssignable? {
+                return fields.find { it.name == name }
+            }
+
+            override fun getFunctions(name: String): List<ShakeFunction> {
+                return functions.filter { it.name == name }
+            }
+
+            override fun getClass(name: String): ShakeClass? {
+                return classes.find { it.name == name }
+            }
+
+            override fun getInvokable(name: String): List<ShakeInvokable> {
+                return functions.filter { it.name == name }
+            }
+        }
+    }
+
+    companion object {
+        fun from(it: ShakeProject): ShakeProject = Impl(it)
     }
 }

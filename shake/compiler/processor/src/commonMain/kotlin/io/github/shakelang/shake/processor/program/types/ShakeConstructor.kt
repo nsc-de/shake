@@ -39,4 +39,8 @@ interface ShakeConstructor {
         )
     }
 
+    companion object {
+        fun from(clazz: ShakeClass, it: ShakeConstructor): ShakeConstructor = TODO()
+    }
+
 }

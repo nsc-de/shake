@@ -83,4 +83,8 @@ interface ShakeFunction : ShakeInvokable {
         }
     }
 
+    companion object {
+        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeFunction): ShakeFunction = TODO()
+    }
+
 }
