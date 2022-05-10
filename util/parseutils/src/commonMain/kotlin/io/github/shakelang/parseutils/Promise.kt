@@ -99,3 +99,21 @@ expect open class Promise<out T>(
     open fun <S> catch(onRejected: RejectedFunction<S>): Promise<S>
 
 }
+
+fun <T> promiseCombine(promises: List<Promise<T>>): Promise<List<T>> {
+    return Promise { resolve, reject ->
+        val values = mutableListOf<T?>()
+        val finished = BooleanArray(promises.size)
+        promises.forEachIndexed { index, promise ->
+            values.add(null)
+            promise.then { value ->
+                values[index] = value
+                finished[index] = true
+                if (finished.all { it }) resolve(values.map { it!! })
+            }.catch {
+                reject(it)
+            }
+        }
+    }
+}
+fun <T> promiseCombine(vararg promises: Promise<T>): Promise<List<T>> = promiseCombine(promises.toList())

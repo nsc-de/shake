@@ -15,22 +15,74 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
     val isPublic: Boolean
     val initialValue: ShakeValue?
 
-    class Impl(
-        override val project: ShakeProject,
-        override val pkg: ShakePackage?,
-        override val name: String,
-        override val type: ShakeType,
-        override val parentScope: ShakeScope,
-        override val isStatic: Boolean,
-        override val isFinal: Boolean,
-        override val isAbstract: Boolean,
-        override val isPrivate: Boolean,
-        override val isProtected: Boolean,
-        override val isPublic: Boolean,
-        override val initialValue: ShakeValue?,
-        override val actualValue: ShakeValue?,
-        override val actualType: ShakeType,
-    ) : ShakeField {
+    class Impl : ShakeField {
+        override val project: ShakeProject
+        override val pkg: ShakePackage?
+        override val name: String
+        override val type: ShakeType
+        override val parentScope: ShakeScope
+        override val isStatic: Boolean
+        override val isFinal: Boolean
+        override val isAbstract: Boolean
+        override val isPrivate: Boolean
+        override val isProtected: Boolean
+        override val isPublic: Boolean
+        override val initialValue: ShakeValue?
+        override val actualValue: ShakeValue?
+        override val actualType: ShakeType
+
+        constructor(
+            project: ShakeProject,
+            pkg: ShakePackage?,
+            name: String,
+            type: ShakeType,
+            parentScope: ShakeScope,
+            isStatic: Boolean,
+            isFinal: Boolean,
+            isAbstract: Boolean,
+            isPrivate: Boolean,
+            isProtected: Boolean,
+            isPublic: Boolean,
+            initialValue: ShakeValue?
+        ) {
+            this.project = project
+            this.pkg = pkg
+            this.name = name
+            this.type = type
+            this.parentScope = parentScope
+            this.isStatic = isStatic
+            this.isFinal = isFinal
+            this.isAbstract = isAbstract
+            this.isPrivate = isPrivate
+            this.isProtected = isProtected
+            this.isPublic = isPublic
+            this.initialValue = initialValue
+            this.actualValue = initialValue
+            this.actualType = type
+        }
+
+        constructor(
+            project: ShakeProject,
+            pkg: ShakePackage?,
+            it: ShakeField,
+            parentScope: ShakeScope
+        ) {
+            this.project = project
+            this.pkg = pkg
+            this.name = it.name
+            this.type = it.type
+            this.parentScope = parentScope
+            this.isStatic = it.isStatic
+            this.isFinal = it.isFinal
+            this.isAbstract = it.isAbstract
+            this.isPrivate = it.isPrivate
+            this.isProtected = it.isProtected
+            this.isPublic = it.isPublic
+            this.initialValue = it.initialValue // TODO: copy initial value
+            this.actualValue = it.actualValue // TODO: copy actual value
+            this.actualType = it.actualType // TODO: copy actual type
+        }
+
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}.$name"
 
         override fun assignType(other: ShakeType): ShakeType? {

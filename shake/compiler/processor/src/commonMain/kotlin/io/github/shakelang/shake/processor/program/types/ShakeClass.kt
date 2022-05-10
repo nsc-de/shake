@@ -1,5 +1,7 @@
 package io.github.shakelang.shake.processor.program.types
 
+import io.github.shakelang.parseutils.Promise
+import io.github.shakelang.parseutils.promiseCombine
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import kotlin.math.min
@@ -42,9 +44,10 @@ interface ShakeClass {
         override val staticFields: List<ShakeClassField>
         override val staticClasses: List<ShakeClass>
         override val constructors: List<ShakeConstructor>
-        override val superClass: ShakeClass?
-        override val interfaces: List<ShakeClass>
-
+        override var superClass: ShakeClass? = null
+            private set
+        override var interfaces: List<ShakeClass> = listOf()
+            private set
         constructor(
             prj: ShakeProject,
             pkg: ShakePackage?,
@@ -76,8 +79,8 @@ interface ShakeClass {
         }
 
         constructor(
-            prj: ShakeProject,
-            pkg: ShakePackage?,
+            prj: ShakeProject.Impl,
+            pkg: ShakePackage.Impl?,
             parentScope: ShakeScope,
             it: ShakeClass
         ) {
@@ -92,8 +95,9 @@ interface ShakeClass {
             this.staticFields = it.staticFields.map { ShakeClassField.from(this, it) }
             this.staticClasses = it.staticClasses.map { from(this.prj, this.pkg, it) }
             this.constructors = it.constructors.map { ShakeConstructor.from(this, it) }
-            this.superClass = it.superClass // TODO Transform
-            this.interfaces = it.interfaces // TODO Transform
+
+            prj.expectClass(it.qualifiedName) { this.superClass = it }
+            promiseCombine(it.interfaces.map { prj.expectClass(it.qualifiedName) }).then { this.interfaces = it }
         }
 
 

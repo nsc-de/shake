@@ -48,8 +48,8 @@ interface ShakePackage {
         }
 
         internal constructor(
-            baseProject: ShakeProject,
-            parent: ShakePackage?,
+            baseProject: ShakeProject.Impl,
+            parent: Impl?,
             it: ShakePackage
         ) {
             this.baseProject = baseProject
@@ -103,6 +103,6 @@ interface ShakePackage {
     }
 
     companion object {
-        fun from(project: ShakeProject, parent: ShakePackage?, it: ShakePackage): ShakePackage = Impl(project, parent, it)
+        fun from(project: ShakeProject.Impl, parent: Impl?, it: ShakePackage): ShakePackage = Impl(project, parent, it)
     }
 }

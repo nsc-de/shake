@@ -1,10 +1,15 @@
 package io.github.shakelang.shake.processor.program.types
 
+import io.github.shakelang.parseutils.Promise
+import io.github.shakelang.shake.parser.node.ShakeIdentifierNode
+import io.github.shakelang.shake.parser.node.ShakeValuedNode
+import io.github.shakelang.shake.parser.node.ShakeVariableType
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shason.json
 
 interface ShakeProject {
+
     val subpackages: List<ShakePackage>
     val classes: List<ShakeClass>
     val functions: List<ShakeFunction>
@@ -20,6 +25,10 @@ interface ShakeProject {
     fun toJsonString(format: Boolean = false): String
 
     class Impl : ShakeProject {
+
+        private val classRequirements = mutableListOf<ClassRequirement>()
+        private val packageRequirements = mutableListOf<PackageRequirement>()
+
         override val subpackages: List<ShakePackage>
         override val classes: List<ShakeClass>
         override val functions: List<ShakeFunction>
@@ -46,6 +55,10 @@ interface ShakeProject {
             this.functions = it.functions.map { ShakeFunction.from(this, null, it) }
             this.fields = it.fields.map { ShakeField.from(this, null, it) }
         }
+
+        fun expectPackage(pkg: String) = Promise<ShakePackage> { resolve, _ -> expectPackage(pkg) { resolve(it) } }
+        fun expectClass(clazz: String) = Promise<ShakeClass> { resolve, _ -> expectClass(clazz) { resolve(it) } }
+
 
         override fun getPackage(name: String): ShakePackage {
             if(name.contains(".")) return getPackage(name.split(".").toTypedArray())
@@ -82,6 +95,58 @@ interface ShakeProject {
             return json.stringify(toJson(), format)
         }
 
+        fun expectPackage(name: String, then: (ShakePackage) -> Unit) {
+            this.packageRequirements.add(PackageRequirement(name, then))
+        }
+
+        fun expectClass(name: String, then: (ShakeClass) -> Unit) {
+            this.classRequirements.add(ClassRequirement(name, then))
+        }
+
+        fun getType(type: ShakeVariableType, then: (ShakeType) -> Unit) {
+            when (type.type) {
+                ShakeVariableType.Type.BYTE -> then(ShakeType.Primitive.BYTE)
+                ShakeVariableType.Type.SHORT -> then(ShakeType.Primitive.SHORT)
+                ShakeVariableType.Type.INTEGER -> then(ShakeType.Primitive.INT)
+                ShakeVariableType.Type.LONG -> then(ShakeType.Primitive.LONG)
+                ShakeVariableType.Type.FLOAT -> then(ShakeType.Primitive.FLOAT)
+                ShakeVariableType.Type.DOUBLE -> then(ShakeType.Primitive.DOUBLE)
+                ShakeVariableType.Type.BOOLEAN -> then(ShakeType.Primitive.BOOLEAN)
+                ShakeVariableType.Type.CHAR -> then(ShakeType.Primitive.CHAR)
+                ShakeVariableType.Type.OBJECT -> {
+                    val clz = mutableListOf<String>()
+                    var identifier: ShakeValuedNode? = type.subtype!!
+                    while(identifier != null) {
+                        if(identifier !is ShakeIdentifierNode) throw IllegalArgumentException("Invalid type ${type.subtype}")
+                        clz.add(identifier.name)
+                        identifier = identifier.parent
+                    }
+                    val clzName = clz.reversed().joinToString(".")
+                    this.expectClass(clzName) {
+                        then(ShakeType.objectType(it))
+                    }
+                }
+            }
+        }
+
+        fun finish() {
+
+            classRequirements.forEach {
+                val cls = this.getClass(it.name)
+                it.then(cls!!)
+            }
+
+            classRequirements.clear()
+
+            packageRequirements.forEach {
+                val pkg = this.getPackage(it.name)
+                it.then(pkg)
+            }
+
+            packageRequirements.clear()
+
+        }
+
         inner class ProjectScope : ShakeScope {
             override val parent: ShakeScope? = null
 
@@ -101,6 +166,9 @@ interface ShakeProject {
                 return functions.filter { it.name == name }
             }
         }
+
+        private class ClassRequirement(val name: String, val then: (ShakeClass) -> Unit)
+        private class PackageRequirement(val name: String, val then: (ShakePackage) -> Unit)
     }
 
     companion object {
