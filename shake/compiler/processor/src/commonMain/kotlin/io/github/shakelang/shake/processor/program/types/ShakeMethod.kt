@@ -81,13 +81,15 @@ interface ShakeMethod : ShakeFunction {
             this.isPrivate = it.isPrivate
             this.isProtected = it.isProtected
             this.isPublic = it.isPublic
-            this.returnType = it.returnType // TODO copy return type
+            this.returnType = ShakeType.from(prj, it.returnType)
             this.parameters = it.parameters // TODO: copy parameters
             this.body = it.body // TODO copy body
         }
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}$name"
         override val scope: ShakeScope = MethodScope()
+        override val signature: String
+            get() = "${clazz.qualifiedName}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
 
         override fun toJson(): Map<String, Any?> {
             return mapOf(

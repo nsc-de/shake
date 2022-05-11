@@ -22,6 +22,8 @@ interface ShakeClassField : ShakeField {
         override val isPublic: Boolean
         override val initialValue: ShakeValue?
 
+        val signature: String get() = "${clazz.qualifiedName}#$name"
+
         constructor(
             clazz: ShakeClass,
             name: String,

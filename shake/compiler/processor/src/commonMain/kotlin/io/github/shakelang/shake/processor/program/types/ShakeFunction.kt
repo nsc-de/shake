@@ -23,6 +23,8 @@ interface ShakeFunction : ShakeInvokable {
     override val qualifiedName: String
     override val returnType: ShakeType
     val scope : ShakeScope
+    val signature: String
+        get() = "${pkg?.qualifiedName ?: ""}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
 
     override fun toJson(): Map<String, Any?>
 

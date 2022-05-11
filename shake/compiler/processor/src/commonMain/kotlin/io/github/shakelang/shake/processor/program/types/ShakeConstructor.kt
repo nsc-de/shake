@@ -14,6 +14,9 @@ interface ShakeConstructor {
     val parameters: List<ShakeParameter>
     val scope: ShakeScope
 
+    val signature: String
+        get() = "${clazz.qualifiedName}${name?.let { "#$it" } ?: ""}(${parameters.joinToString(",") { it.type.signature }})"
+
     fun toJson(): Map<String, Any?>
 
     class Impl(

@@ -29,6 +29,8 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
         override val isPublic: Boolean
         override val initialValue: ShakeValue?
 
+        val signature: String get() = "${pkg?.qualifiedName?: ""}#$name"
+
         constructor(
             project: ShakeProject,
             pkg: ShakePackage?,

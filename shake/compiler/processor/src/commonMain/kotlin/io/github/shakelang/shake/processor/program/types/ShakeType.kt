@@ -3,6 +3,7 @@ package io.github.shakelang.shake.processor.program.types
 interface ShakeType {
 
     val name: String
+    val signature: String
 
     fun assignType(other: ShakeType): ShakeType?
     fun additionAssignType(other: ShakeType): ShakeType?
@@ -50,26 +51,29 @@ interface ShakeType {
         LAMBDA,
     }
 
-    enum class PrimitiveType {
-        BOOLEAN,
-        BYTE,
-        CHAR,
-        SHORT,
-        INT,
-        LONG,
-        FLOAT,
-        DOUBLE,
-        UNSIGNED_BYTE,
-        UNSIGNED_SHORT,
-        UNSIGNED_INT,
-        UNSIGNED_LONG,
-        VOID,
+    enum class PrimitiveType(val signature: String) {
+
+        BOOLEAN("b"),
+        BYTE("B"),
+        CHAR("C"),
+        SHORT("S"),
+        INT("I"),
+        LONG("L"),
+        FLOAT("F"),
+        DOUBLE("D"),
+        UNSIGNED_BYTE("UB"),
+        UNSIGNED_SHORT("US"),
+        UNSIGNED_INT("UI"),
+        UNSIGNED_LONG("UL"),
+        VOID("V");
     }
 
     interface Primitive : ShakeType {
 
         val type: PrimitiveType
         override val kind: Kind get() = Kind.PRIMITIVE
+        override val signature: String get() = type.signature
+
         override fun assignType(other: ShakeType): ShakeType? = null
         override fun additionAssignType(other: ShakeType): ShakeType? = null
         override fun subtractionAssignType(other: ShakeType): ShakeType? = null
@@ -817,7 +821,8 @@ interface ShakeType {
         val qualifiedName: String
 
         class Impl(override val clazz: ShakeClass) : Object {
-            override val name: String get() = "L${clazz.qualifiedName}"
+            override val name: String get() = signature
+            override val signature: String = "L${clazz.qualifiedName}"
             override val qualifiedName: String get() = clazz.qualifiedName
 
             override fun assignType(other: ShakeType): ShakeType? = null
@@ -867,7 +872,9 @@ interface ShakeType {
         val elementType: ShakeType
 
         class Impl(override val elementType: ShakeType) : Array {
-            override val name: String get() = "[${elementType.name}"
+            override val name: String get() = signature
+            override val signature: String = "[${elementType.name}"
+
             override fun assignType(other: ShakeType): ShakeType? = null
             override fun additionAssignType(other: ShakeType): ShakeType? = null
             override fun subtractionAssignType(other: ShakeType): ShakeType? = null
