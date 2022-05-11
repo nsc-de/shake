@@ -1,5 +1,7 @@
 package io.github.shakelang.shake.processor.program.types.code.values
 
+import io.github.shakelang.shake.parser.node.factor.ShakeIntegerNode
+import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 
 interface ShakeDoubleLiteral : ShakeValue {
@@ -13,7 +15,12 @@ interface ShakeDoubleLiteral : ShakeValue {
                 "value" to value
             )
         }
+    }
 
+    companion object {
+        fun from(prj: ShakeProject, it: ShakeDoubleLiteral): ShakeDoubleLiteral {
+            return it
+        }
     }
 }
 
@@ -27,6 +34,12 @@ interface ShakeIntLiteral : ShakeValue {
                 "type" to "int_literal",
                 "value" to value
             )
+        }
+    }
+
+    companion object {
+        fun from(prj: ShakeProject, it: ShakeIntLiteral): ShakeIntLiteral {
+            return it
         }
     }
 }
@@ -43,6 +56,12 @@ interface ShakeBooleanLiteral : ShakeValue {
             )
         }
     }
+
+    companion object {
+        fun from(prj: ShakeProject, it: ShakeBooleanLiteral): ShakeBooleanLiteral {
+            return it
+        }
+    }
 }
 
 interface ShakeCharacterLiteral : ShakeValue {
@@ -55,6 +74,12 @@ interface ShakeCharacterLiteral : ShakeValue {
                 "type" to "character_literal",
                 "value" to value
             )
+        }
+    }
+
+    companion object {
+        fun from(prj: ShakeProject, it: ShakeCharacterLiteral): ShakeCharacterLiteral {
+            return it
         }
     }
 }

@@ -1,6 +1,7 @@
 package io.github.shakelang.shake.processor.program.types.code
 
 import io.github.shakelang.shake.processor.program.types.ShakeConstructor
+import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeStatement
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
@@ -27,6 +28,18 @@ interface ShakeNew : ShakeValue, ShakeStatement {
                 "name" to name,
                 "type" to type.toJson()
             )
+        }
+    }
+
+    companion object {
+        fun from(prj: ShakeProject, it: ShakeNew): ShakeNew {TODO()/*
+            return Impl(
+                reference =
+                arguments = it.arguments.map { ShakeValue.from(prj, it) },
+                parent = it.parent?.let { ShakeValue.from(prj, it) },
+                name = it.name,
+                type = it.type
+            )*/
         }
     }
 

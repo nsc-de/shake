@@ -814,10 +814,11 @@ interface ShakeType {
         val clazz: ShakeClass
         override val kind: Kind
             get() = Kind.OBJECT
+        val qualifiedName: String
 
         class Impl(override val clazz: ShakeClass) : Object {
-            override val name: String
-                get() = "L${clazz.qualifiedName}"
+            override val name: String get() = "L${clazz.qualifiedName}"
+            override val qualifiedName: String get() = clazz.qualifiedName
 
             override fun assignType(other: ShakeType): ShakeType? = null
             override fun additionAssignType(other: ShakeType): ShakeType? = null
@@ -938,6 +939,15 @@ interface ShakeType {
     companion object {
         fun objectType(clazz: ShakeClass): Object {
             return Object.Impl(clazz)
+        }
+        fun from(project: ShakeProject, type: ShakeType) : ShakeType {
+            return when(type) {
+                is Primitive -> type
+                is Object -> project.getClass(type.qualifiedName)?.let { objectType(it) } ?: throw IllegalStateException("Class ${type.qualifiedName} not found")
+                is Array -> Array.Impl(from(project, type.elementType))
+                is Lambda -> TODO()
+                else -> throw IllegalStateException("Unknown type ${type.name}")
+            }
         }
     }
 }

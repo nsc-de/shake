@@ -1,5 +1,6 @@
 package io.github.shakelang.shake.processor.program.types.code.values
 
+import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 
 interface ShakeCast : ShakeValue {
@@ -15,6 +16,11 @@ interface ShakeCast : ShakeValue {
                 "type" to type.toJson()
             )
         }
+    }
 
+    companion object {
+        fun from(prj: ShakeProject, it: ShakeCast): ShakeCast {
+            return Impl(ShakeValue.from(prj, it.value), ShakeType.from(prj, it.castTarget))
+        }
     }
 }
