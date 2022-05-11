@@ -1,5 +1,7 @@
 package io.github.shakelang.shake.lexer.token
 
+import io.github.shakelang.parseutils.lexer.token.Token
+
 
 /**
  * The input of the [io.github.shakelang.shake.lexer.ShakeLexer] gets converted into [ShakeToken]s. These get parsed

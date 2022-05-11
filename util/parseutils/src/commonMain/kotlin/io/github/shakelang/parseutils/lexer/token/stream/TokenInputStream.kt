@@ -1,7 +1,7 @@
 package io.github.shakelang.parseutils.lexer.token.stream
 
 import io.github.shakelang.parseutils.characters.position.PositionMap
-import io.github.shakelang.shake.lexer.token.Token
+import io.github.shakelang.parseutils.lexer.token.Token
 import io.github.shakelang.parseutils.lexer.token.TokenType
 
 /**
