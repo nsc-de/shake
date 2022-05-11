@@ -28,8 +28,6 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
         override val isProtected: Boolean
         override val isPublic: Boolean
         override val initialValue: ShakeValue?
-        override val actualValue: ShakeValue?
-        override val actualType: ShakeType
 
         constructor(
             project: ShakeProject,
@@ -57,11 +55,9 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
             this.isProtected = isProtected
             this.isPublic = isPublic
             this.initialValue = initialValue
-            this.actualValue = initialValue
-            this.actualType = type
         }
 
-        constructor(
+        internal constructor(
             project: ShakeProject,
             pkg: ShakePackage?,
             it: ShakeField,
@@ -79,8 +75,6 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
             this.isProtected = it.isProtected
             this.isPublic = it.isPublic
             this.initialValue = it.initialValue // TODO: copy initial value
-            this.actualValue = it.actualValue // TODO: copy actual value
-            this.actualType = it.actualType // TODO: copy actual type
         }
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}.$name"
@@ -140,13 +134,11 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
                 "isProtected" to isProtected,
                 "isPublic" to isPublic,
                 "initialValue" to initialValue?.toJson(),
-                "actualValue" to actualValue?.toJson(),
-                "actualType" to actualType.toJson(),
             )
         }
     }
 
     companion object {
-        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeField): ShakeField = TODO()
+        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeField): ShakeField = Impl(project, pkg, it, it.parentScope)
     }
 }

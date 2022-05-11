@@ -7,8 +7,8 @@ import io.github.shakelang.shake.processor.program.types.ShakeType
 
 interface CreationShakeAssignable : ShakeAssignable {
 
-    override val actualValue: CreationShakeValue?
-    override val actualType: ShakeType
+    val actualValue: CreationShakeValue?
+    val actualType: ShakeType
     override val type: ShakeType
 
     fun access(scope: CreationShakeScope): CreationShakeValue

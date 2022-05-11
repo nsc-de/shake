@@ -15,8 +15,6 @@ interface ShakeChild : ShakeAssignable {
         override val parent: ShakeValue,
         override val name: String,
         override val access: ShakeValue,
-        override val actualValue: ShakeValue?,
-        override val actualType: ShakeType,
         override val type: ShakeType
     ) : ShakeChild {
         override val qualifiedName: String get() = "${parent.type.name}.$name"

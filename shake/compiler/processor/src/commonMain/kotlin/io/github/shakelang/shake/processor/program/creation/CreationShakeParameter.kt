@@ -10,7 +10,7 @@ class CreationShakeParameter (
 
     override val qualifiedName: String get() = "parameter $name"
 
-    override val actualType: ShakeType
+    val actualType: ShakeType
         get() = TODO("Not yet implemented")
 
     override fun assignType(other: ShakeType): ShakeType? {
@@ -57,7 +57,7 @@ class CreationShakeParameter (
         TODO("Not yet implemented")
     }
 
-    override val actualValue: ShakeValue?
+    val actualValue: ShakeValue
         get() = TODO("Not yet implemented")
 
     constructor(name: String, type: CreationShakeType): this(name) {

@@ -11,8 +11,6 @@ interface ShakeParameter : ShakeAssignable {
 
         override val qualifiedName: String get() = "parameter $name"
         override fun toJson(): Map<String, Any?> = mapOf("name" to name, "type" to type.toJson())
-        override val actualValue: ShakeValue? get() = null
-        override val actualType: ShakeType get() = type
         override fun assignType(other: ShakeType): ShakeType? = type.assignType(other)
         override fun additionAssignType(other: ShakeType): ShakeType? = type.additionAssignType(other)
         override fun subtractionAssignType(other: ShakeType): ShakeType? = type.subtractionAssignType(other)

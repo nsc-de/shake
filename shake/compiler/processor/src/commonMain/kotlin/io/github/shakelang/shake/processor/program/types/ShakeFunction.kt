@@ -77,7 +77,7 @@ interface ShakeFunction : ShakeInvokable {
             this.body = body
         }
 
-        constructor(
+        internal constructor(
             prj: ShakeProject,
             pkg: ShakePackage?,
             parentScope: ShakeScope,
@@ -143,7 +143,7 @@ interface ShakeFunction : ShakeInvokable {
     }
 
     companion object {
-        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeFunction): ShakeFunction = TODO()
+        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeFunction): ShakeFunction = Impl(project, pkg, it.parentScope, it)
     }
 
 }

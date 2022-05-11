@@ -10,8 +10,6 @@ interface ShakeClassField : ShakeField {
     class Impl : ShakeClassField {
         override val clazz: ShakeClass
         override val name: String
-        override val actualValue: ShakeValue?
-        override val actualType: ShakeType
         override val type: ShakeType
         override val project: ShakeProject
         override val pkg: ShakePackage?
@@ -43,8 +41,6 @@ interface ShakeClassField : ShakeField {
         ) {
             this.clazz = clazz
             this.name = name
-            this.actualValue = actualValue
-            this.actualType = actualType
             this.type = type
             this.project = project
             this.pkg = pkg
@@ -65,8 +61,6 @@ interface ShakeClassField : ShakeField {
         ) {
             this.clazz = clazz
             this.name = it.name
-            this.actualValue = it.actualValue // TODO: copy actual value
-            this.actualType = it.actualType // TODO: copy actual type
             this.type = it.type // TODO: copy type
             this.project = clazz.prj
             this.pkg = clazz.pkg
@@ -131,8 +125,6 @@ interface ShakeClassField : ShakeField {
             return mapOf(
                 "clazz" to clazz.qualifiedName,
                 "name" to name,
-                "actualValue" to actualValue?.toJson(),
-                "actualType" to actualType.toJson(),
                 "type" to type.toJson(),
                 "isStatic" to isStatic,
                 "isFinal" to isFinal,

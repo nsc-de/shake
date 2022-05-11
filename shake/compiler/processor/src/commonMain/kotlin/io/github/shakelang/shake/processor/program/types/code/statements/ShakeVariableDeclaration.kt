@@ -20,8 +20,6 @@ interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeSta
         override val name: String,
         override val initialValue: ShakeValue?,
         override val isFinal: Boolean,
-        override val actualValue: ShakeValue?,
-        override val actualType: ShakeType,
         override val type: ShakeType,
         override val latestValue: ShakeValue?,
         override val latestType: ShakeType
@@ -82,8 +80,6 @@ interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeSta
                 "name" to name,
                 "initialValue" to initialValue,
                 "isFinal" to isFinal,
-                "actualValue" to actualValue,
-                "actualType" to actualType,
                 "type" to type,
                 "latestValue" to latestValue,
                 "latestType" to latestType
