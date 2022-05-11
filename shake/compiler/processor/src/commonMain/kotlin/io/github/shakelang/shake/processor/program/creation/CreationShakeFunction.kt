@@ -7,6 +7,7 @@ import io.github.shakelang.shake.processor.program.creation.code.CreationShakeCo
 import io.github.shakelang.shake.processor.program.creation.code.CreationShakeInvokable
 import io.github.shakelang.shake.processor.program.creation.code.statements.CreationShakeVariableDeclaration
 import io.github.shakelang.shake.processor.program.types.ShakeFunction
+import io.github.shakelang.shake.processor.program.types.ShakeType
 
 open class CreationShakeFunction (
     override val prj: CreationShakeProject,
@@ -27,7 +28,7 @@ open class CreationShakeFunction (
     override val qualifiedName: String
         get() = (pkg?.qualifiedName?.plus(".") ?: "") + name
 
-    final override lateinit var returnType: CreationShakeType
+    final override lateinit var returnType: ShakeType
         private set
 
     constructor(
@@ -36,7 +37,7 @@ open class CreationShakeFunction (
         parentScope: CreationShakeScope,
         name: String,
         parameters: List<CreationShakeParameter>,
-        returnType: CreationShakeType,
+        returnType: ShakeType,
         body: CreationShakeCode,
         isStatic: Boolean,
         isFinal: Boolean,
@@ -52,15 +53,17 @@ open class CreationShakeFunction (
     }
 
     override val scope : CreationShakeScope = ShakeFunctionScope()
+    override val signature: String
+        get() = "${pkg?.name ?: ""}#$name(${parameters.joinToString(", ") { it.type.signature }})${returnType.signature}"
 
-    fun lateinitReturnType(): (CreationShakeType) -> CreationShakeType {
+    fun lateinitReturnType(): (ShakeType) -> ShakeType {
         return {
             returnType = it
             it
         }
     }
 
-    fun lateinitParameterTypes(names: List<String>): List<(CreationShakeType) -> CreationShakeType> {
+    fun lateinitParameterTypes(names: List<String>): List<(ShakeType) -> ShakeType> {
         this.parameters = names.map {
             CreationShakeParameter(it)
         }

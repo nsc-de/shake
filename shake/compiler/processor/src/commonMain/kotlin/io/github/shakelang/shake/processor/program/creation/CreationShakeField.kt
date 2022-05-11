@@ -10,9 +10,9 @@ import io.github.shakelang.shake.processor.program.types.ShakeType
 
 open class CreationShakeField (
     override val project: CreationShakeProject,
-    override val pkg: CreationShakePackage?,
+    final override val pkg: CreationShakePackage?,
     override val parentScope: CreationShakeScope,
-    override val name: String,
+    final override val name: String,
     override val isStatic: Boolean,
     override val isFinal: Boolean,
     override val isAbstract: Boolean,
@@ -28,10 +28,11 @@ open class CreationShakeField (
     override val actualValue: CreationShakeValue?
         get() = TODO("Not yet implemented")
 
-    override val actualType: CreationShakeType
+    override val actualType: ShakeType
         get() = TODO("Not yet implemented")
+    override val signature: String = "${ pkg?.qualifiedName ?: "" }#$name"
 
-    final override lateinit var type: CreationShakeType
+    final override lateinit var type: ShakeType
         private set
 
     override fun assignType(other: ShakeType): ShakeType = type.assignType(other) ?: other
@@ -41,16 +42,16 @@ open class CreationShakeField (
     override fun divisionAssignType(other: ShakeType): ShakeType = type.divisionAssignType(other) ?: type
     override fun modulusAssignType(other: ShakeType): ShakeType = type.modulusAssignType(other) ?: type
     override fun powerAssignType(other: ShakeType): ShakeType = type.powerAssignType(other) ?: type
-    override fun incrementBeforeType(): CreationShakeType = type.incrementBeforeType() ?: type
-    override fun incrementAfterType(): CreationShakeType = type.incrementAfterType() ?: type
-    override fun decrementBeforeType(): CreationShakeType? = type.decrementBeforeType() ?: type
-    override fun decrementAfterType(): CreationShakeType? = type.decrementAfterType() ?: type
+    override fun incrementBeforeType(): ShakeType = type.incrementBeforeType() ?: type
+    override fun incrementAfterType(): ShakeType = type.incrementAfterType() ?: type
+    override fun decrementBeforeType(): ShakeType? = type.decrementBeforeType() ?: type
+    override fun decrementAfterType(): ShakeType? = type.decrementAfterType() ?: type
 
     override fun access(scope: CreationShakeScope): CreationShakeValue {
         return CreationShakeFieldUsage(scope, this)
     }
 
-    fun lateinitType(): (CreationShakeType) -> CreationShakeType {
+    fun lateinitType(): (ShakeType) -> ShakeType {
         return {
             type = it
             it
@@ -93,6 +94,8 @@ open class CreationShakeField (
 
                 override var initialValue: CreationShakeValue? = null
                     private set
+                override val signature: String
+                    get() = "${ pkg?.name ?: "" }#$name"
 
                 override fun processCode() {
                     initialValue = node.value?.let { this.parentScope.processor.visitValue(parentScope, it) }

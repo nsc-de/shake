@@ -15,6 +15,8 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
     val isPublic: Boolean
     val initialValue: ShakeValue?
 
+    val signature: String
+
     class Impl : ShakeField {
         override val project: ShakeProject
         override val pkg: ShakePackage?
@@ -29,7 +31,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
         override val isPublic: Boolean
         override val initialValue: ShakeValue?
 
-        val signature: String get() = "${pkg?.qualifiedName?: ""}#$name"
+        override val signature: String
 
         constructor(
             project: ShakeProject,
@@ -57,6 +59,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
             this.isProtected = isProtected
             this.isPublic = isPublic
             this.initialValue = initialValue
+            this.signature = "${pkg?.qualifiedName?: ""}#$name"
         }
 
         internal constructor(
@@ -77,6 +80,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
             this.isProtected = it.isProtected
             this.isPublic = it.isPublic
             this.initialValue = it.initialValue // TODO: copy initial value
+            this.signature = "${pkg?.qualifiedName?: ""}#$name"
         }
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}.$name"

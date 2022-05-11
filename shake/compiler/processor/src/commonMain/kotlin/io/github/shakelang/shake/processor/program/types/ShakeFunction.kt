@@ -24,7 +24,6 @@ interface ShakeFunction : ShakeInvokable {
     override val returnType: ShakeType
     val scope : ShakeScope
     val signature: String
-        get() = "${pkg?.qualifiedName ?: ""}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
 
     override fun toJson(): Map<String, Any?>
 
@@ -44,6 +43,7 @@ interface ShakeFunction : ShakeInvokable {
         override val returnType: ShakeType
         override val parameters: List<ShakeParameter>
         override val body: ShakeCode
+        override val signature: String
 
         constructor(
             prj: ShakeProject,
@@ -77,6 +77,7 @@ interface ShakeFunction : ShakeInvokable {
             this.returnType = returnType
             this.parameters = parameters
             this.body = body
+            this.signature =  "${pkg?.qualifiedName ?: ""}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
         }
 
         internal constructor(
@@ -100,6 +101,7 @@ interface ShakeFunction : ShakeInvokable {
             this.returnType = it.returnType // TODO: copy return type
             this.parameters = it.parameters // TODO: copy parameters
             this.body = it.body // TODO: copy body
+            this.signature =  "${pkg?.qualifiedName ?: ""}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
         }
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}$name"

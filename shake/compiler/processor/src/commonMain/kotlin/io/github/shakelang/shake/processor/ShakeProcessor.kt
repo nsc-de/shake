@@ -21,6 +21,7 @@ import io.github.shakelang.shake.processor.program.creation.*
 import io.github.shakelang.shake.processor.program.creation.code.*
 import io.github.shakelang.shake.processor.program.creation.code.statements.*
 import io.github.shakelang.shake.processor.program.creation.code.values.*
+import io.github.shakelang.shake.processor.program.types.ShakeType
 
 class ShakeProcessorOptions {
     var precalculate: Boolean = true
@@ -146,7 +147,7 @@ open class ShakeCodeProcessor {
         })
     }
 
-    fun visitType(scope: CreationShakeScope, t: ShakeVariableType): CreationShakeType? {
+    fun visitType(scope: CreationShakeScope, t: ShakeVariableType): ShakeType? {
         return when(t.type) {
             ShakeVariableType.Type.DYNAMIC -> null
             ShakeVariableType.Type.BYTE -> CreationShakeType.Primitives.BYTE

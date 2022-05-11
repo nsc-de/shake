@@ -90,7 +90,7 @@ interface ShakeType {
         override fun childType(name: String): ShakeType? = null
         override fun childFunctions(name: String): List<ShakeFunction>? = null
         override fun childInvokable(name: String): List<ShakeFunction>? = null
-        override fun compatibleTo(other: ShakeType): Boolean = other.compatibleTo(this)
+        override fun compatibleTo(other: ShakeType): Boolean = compatibilityDistance(other) >= 0
 
         override fun castableTo(other: ShakeType): Boolean =
             other is Primitive &&

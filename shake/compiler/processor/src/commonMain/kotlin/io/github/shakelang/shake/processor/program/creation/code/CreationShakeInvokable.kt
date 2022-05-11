@@ -2,6 +2,7 @@ package io.github.shakelang.shake.processor.program.creation.code
 
 import io.github.shakelang.shake.processor.program.creation.CreationShakeParameter
 import io.github.shakelang.shake.processor.program.creation.CreationShakeType
+import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 
 abstract class CreationShakeInvokable (
@@ -12,7 +13,7 @@ abstract class CreationShakeInvokable (
 
     override lateinit var parameters: List<CreationShakeParameter>
         protected set
-    abstract override val returnType: CreationShakeType
+    abstract override val returnType: ShakeType
 
     constructor(
         body: CreationShakeCode,

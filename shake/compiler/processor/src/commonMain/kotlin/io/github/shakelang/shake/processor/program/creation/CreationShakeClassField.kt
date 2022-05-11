@@ -8,7 +8,7 @@ import io.github.shakelang.shake.processor.program.creation.code.values.Creation
 import io.github.shakelang.shake.processor.program.types.ShakeClassField
 
 open class CreationShakeClassField (
-    override val clazz: CreationShakeClass,
+    final override val clazz: CreationShakeClass,
     parentScope: CreationShakeScope,
     name: String,
     isStatic: Boolean,
@@ -33,6 +33,8 @@ open class CreationShakeClassField (
 ), ShakeClassField {
     override val qualifiedName: String
         get() = "${clazz.qualifiedName}.$name"
+
+    override val signature: String = "${clazz.qualifiedName}#$name"
 
 
     override fun use(scope: CreationShakeScope): CreationShakeUsage {

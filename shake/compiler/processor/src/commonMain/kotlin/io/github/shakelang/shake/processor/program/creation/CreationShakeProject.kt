@@ -6,6 +6,7 @@ import io.github.shakelang.shake.parser.node.objects.ShakeClassDeclarationNode
 import io.github.shakelang.shake.parser.node.variables.ShakeVariableDeclarationNode
 import io.github.shakelang.shake.processor.ShakeCodeProcessor
 import io.github.shakelang.shake.processor.program.types.ShakeProject
+import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shason.json
 
 open class CreationShakeProject(
@@ -172,7 +173,7 @@ open class CreationShakeProject(
         else this.getPackage(pkg).classes.find { it.name == name }
     }
 
-    fun getType(type: ShakeVariableType, then: (CreationShakeType) -> Unit) {
+    fun getType(type: ShakeVariableType, then: (ShakeType) -> Unit) {
         when (type.type) {
             ShakeVariableType.Type.BYTE -> then(CreationShakeType.Primitives.BYTE)
             ShakeVariableType.Type.SHORT -> then(CreationShakeType.Primitives.SHORT)

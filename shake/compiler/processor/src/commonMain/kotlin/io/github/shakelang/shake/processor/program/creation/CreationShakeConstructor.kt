@@ -4,8 +4,9 @@ import io.github.shakelang.shake.processor.ShakeCodeProcessor
 import io.github.shakelang.shake.processor.program.creation.code.CreationShakeCode
 import io.github.shakelang.shake.processor.program.creation.code.statements.CreationShakeVariableDeclaration
 import io.github.shakelang.shake.processor.program.types.ShakeConstructor
+import io.github.shakelang.shake.processor.program.types.ShakeType
 
-open class CreationShakeConstructor (
+class CreationShakeConstructor (
     override val clazz: CreationShakeClass,
     override val body: CreationShakeCode,
     override val isStrict: Boolean,
@@ -16,6 +17,8 @@ open class CreationShakeConstructor (
 ): ShakeConstructor {
     final override lateinit var parameters: List<CreationShakeParameter>
         private set
+
+    override val signature: String = "${clazz.name}${name?.let { "#$it" }}${parameters.joinToString(", ") { it.name }}"
 
     constructor(
         clazz: CreationShakeClass,
@@ -32,7 +35,7 @@ open class CreationShakeConstructor (
 
     override val scope: CreationShakeScope = ShakeConstructorScope()
 
-    fun lateinitParameterTypes(names: List<String>): List<(CreationShakeType) -> CreationShakeType> {
+    fun lateinitParameterTypes(names: List<String>): List<(ShakeType) -> ShakeType> {
         this.parameters = names.map {
             CreationShakeParameter(it)
         }

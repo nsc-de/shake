@@ -64,10 +64,10 @@ class CreationShakeParameter (
         this.type = type
     }
 
-    override lateinit var type: CreationShakeType
+    override lateinit var type: ShakeType
         private set
 
-    fun lateinitType(): (CreationShakeType) -> CreationShakeType {
+    fun lateinitType(): (ShakeType) -> ShakeType {
         return {
             type = it
             it

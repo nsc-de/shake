@@ -15,7 +15,6 @@ interface ShakeConstructor {
     val scope: ShakeScope
 
     val signature: String
-        get() = "${clazz.qualifiedName}${name?.let { "#$it" } ?: ""}(${parameters.joinToString(",") { it.type.signature }})"
 
     fun toJson(): Map<String, Any?>
 
@@ -30,6 +29,9 @@ interface ShakeConstructor {
         override val parameters: List<ShakeParameter>,
         override val scope: ShakeScope
     ) : ShakeConstructor {
+
+        override val signature: String = "${clazz.qualifiedName}${name?.let { "#$it" } ?: ""}(${parameters.joinToString(",") { it.type.signature }})"
+
         override fun toJson(): Map<String, Any?> = mapOf(
             "clazz" to clazz.toJson(),
             "body" to body.toJson(),

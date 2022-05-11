@@ -22,7 +22,7 @@ interface ShakeClassField : ShakeField {
         override val isPublic: Boolean
         override val initialValue: ShakeValue?
 
-        val signature: String get() = "${clazz.qualifiedName}#$name"
+        override val signature: String
 
         constructor(
             clazz: ShakeClass,
@@ -54,6 +54,7 @@ interface ShakeClassField : ShakeField {
             this.isProtected = isProtected
             this.isPublic = isPublic
             this.initialValue = initialValue
+            this.signature = "${clazz.qualifiedName}#$name"
         }
 
         constructor(
@@ -74,6 +75,7 @@ interface ShakeClassField : ShakeField {
             this.isProtected = it.isProtected
             this.isPublic = it.isPublic
             this.initialValue = it.initialValue // TODO: copy initial value
+            this.signature = "${clazz.qualifiedName}#$name"
         }
 
 
