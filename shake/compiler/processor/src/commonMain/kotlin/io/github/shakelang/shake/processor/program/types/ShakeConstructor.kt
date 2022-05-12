@@ -30,7 +30,7 @@ interface ShakeConstructor {
         override val scope: ShakeScope
     ) : ShakeConstructor {
 
-        override val signature: String = "${clazz.qualifiedName}${name?.let { "#$it" } ?: ""}(${parameters.joinToString(",") { it.type.signature }})"
+        override val signature: String = "${clazz.signature}#${name?.let { "#$it" } ?: ""}(${parameters.joinToString(",") { it.type.signature }})"
 
         override fun toJson(): Map<String, Any?> = mapOf(
             "clazz" to clazz.toJson(),

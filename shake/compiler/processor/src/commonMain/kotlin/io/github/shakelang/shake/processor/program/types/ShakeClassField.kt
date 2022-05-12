@@ -23,6 +23,7 @@ interface ShakeClassField : ShakeField {
         override val initialValue: ShakeValue?
 
         override val signature: String
+        override val qualifiedName: String
 
         constructor(
             clazz: ShakeClass,
@@ -54,7 +55,8 @@ interface ShakeClassField : ShakeField {
             this.isProtected = isProtected
             this.isPublic = isPublic
             this.initialValue = initialValue
-            this.signature = "${clazz.qualifiedName}#$name"
+            this.signature = "${clazz.signature}#$name"
+            this.qualifiedName = "${clazz.qualifiedName}.$name"
         }
 
         constructor(
@@ -75,11 +77,9 @@ interface ShakeClassField : ShakeField {
             this.isProtected = it.isProtected
             this.isPublic = it.isPublic
             this.initialValue = it.initialValue // TODO: copy initial value
-            this.signature = "${clazz.qualifiedName}#$name"
+            this.signature = "${clazz.signature}#$name"
+            this.qualifiedName = "${clazz.qualifiedName}.$name"
         }
-
-
-        override val qualifiedName: String get() = "${clazz.qualifiedName}.$name"
 
         override fun assignType(other: ShakeType): ShakeType {
             return type.assignType(other) ?: this.type

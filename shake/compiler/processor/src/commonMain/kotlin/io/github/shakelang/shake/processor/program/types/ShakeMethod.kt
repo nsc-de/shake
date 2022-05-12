@@ -61,7 +61,7 @@ interface ShakeMethod : ShakeFunction {
             this.returnType = returnType
             this.parameters = parameters
             this.body = body
-            this.signature = "${clazz.qualifiedName}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
+            this.signature = "${clazz.signature}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
         }
 
         constructor(
@@ -85,7 +85,7 @@ interface ShakeMethod : ShakeFunction {
             this.returnType = ShakeType.from(prj, it.returnType)
             this.parameters = it.parameters // TODO: copy parameters
             this.body = it.body // TODO copy body
-            this.signature = "${clazz.qualifiedName}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
+            this.signature = "${clazz.signature}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
         }
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}$name"

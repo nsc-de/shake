@@ -21,9 +21,8 @@ open class CreationShakeClass: ShakeClass {
     override val staticFields: List<CreationShakeClassField>
     override val staticClasses: List<CreationShakeClass>
     override val constructors: List<CreationShakeConstructor>
-
+    override val signature: String
     override val qualifiedName: String
-        get() = (pkg?.qualifiedName?.plus(".") ?: "") + name
 
     final override var superClass: CreationShakeClass? = null
         private set
@@ -58,6 +57,8 @@ open class CreationShakeClass: ShakeClass {
         this.staticFields = staticFields
         this.staticClasses = staticClasses
         this.constructors = constructors
+        this.signature = (pkg?.qualifiedName ?: "") + "#$name"
+        this.qualifiedName = (pkg?.qualifiedName?.plus(".") ?: "") + name
     }
     private constructor(
         baseProject: CreationShakeProject,
@@ -69,6 +70,8 @@ open class CreationShakeClass: ShakeClass {
         this.pkg = pkg
         this.name = clz.name
         this.parentScope = parentScope
+        this.signature = (pkg?.qualifiedName ?: "") + "#$name"
+        this.qualifiedName = (pkg?.qualifiedName?.plus(".") ?: "") + name
 
         val mtds = clz.methods.map {
             val method = CreationShakeMethod(

@@ -1,6 +1,5 @@
 package io.github.shakelang.shake.processor.program.types
 
-import io.github.shakelang.parseutils.Promise
 import io.github.shakelang.parseutils.promiseCombine
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
@@ -25,10 +24,15 @@ interface ShakeClass {
     val superClass: ShakeClass?
 
     val interfaces: List<ShakeClass>
+    val signature: String
 
     fun compatibleTo(other: ShakeClass): Boolean
     fun compatibilityDistance(other: ShakeClass): Int
     fun asType(): ShakeType
+
+    fun getMethodBySignature(signature: String): ShakeMethod? = methods.find { it.signature == signature }
+    fun getFieldBySignature(signature: String): ShakeClassField? = fields.find { it.signature == signature }
+    fun getClassBySignature(signature: String): ShakeClass? = classes.find { it.signature == signature }
 
     fun toJson(): Map<String, Any?>
 
@@ -48,6 +52,9 @@ interface ShakeClass {
             private set
         override var interfaces: List<ShakeClass> = listOf()
             private set
+
+        override val signature: String
+
         constructor(
             prj: ShakeProject,
             pkg: ShakePackage?,
@@ -76,6 +83,7 @@ interface ShakeClass {
             this.constructors = constructors
             this.superClass = superClass
             this.interfaces = interfaces
+            this.signature = "${pkg ?: ""}#$name"
         }
 
         constructor(
@@ -98,6 +106,7 @@ interface ShakeClass {
 
             prj.expectClass(it.qualifiedName) { this.superClass = it }
             promiseCombine(it.interfaces.map { prj.expectClass(it.qualifiedName) }).then { this.interfaces = it }
+            this.signature = "${pkg ?: ""}#$name"
         }
 
 

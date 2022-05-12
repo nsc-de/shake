@@ -13,8 +13,15 @@ interface ShakePackage {
     val fields: List<ShakeField>
     val qualifiedName: String
     val scope: ShakeScope
+
     fun getPackage(name: String): ShakePackage
     fun getPackage(name: Array<String>): ShakePackage
+
+    fun getFunctionBySignature(signature: String): ShakeFunction? = functions.firstOrNull { it.signature == signature }
+    fun getFieldBySignature(signature: String): ShakeField? = fields.firstOrNull { it.signature == signature }
+    fun getClassBySignature(signature: String): ShakeClass? = classes.firstOrNull { it.signature == signature }
+
+
     fun toJson(): Map<String, Any?>
 
     class Impl : ShakePackage {

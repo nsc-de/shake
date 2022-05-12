@@ -7,6 +7,7 @@ import io.github.shakelang.shake.parser.node.ShakeVariableType
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shason.json
+import kotlin.math.sign
 
 interface ShakeProject {
 
@@ -17,12 +18,42 @@ interface ShakeProject {
 
     val projectScope: ShakeScope
 
-    fun getPackage(name: String): ShakePackage
-    fun getPackage(name: Array<String>): ShakePackage
+    fun getPackage(name: String): ShakePackage?
+    fun getPackage(name: Array<String>): ShakePackage?
     fun getClass(pkg: Array<String>, name: String): ShakeClass?
     fun getClass(clz: String): ShakeClass?
     fun toJson(): Map<String, Any?>
     fun toJsonString(format: Boolean = false): String
+
+    fun getFunctionBySignature(signature: String): ShakeFunction? {
+        val parts = signature.split("#")
+        val pkg = getPackage(parts[0])
+        return pkg?.getFunctionBySignature(signature)
+    }
+
+    fun getFieldBySignature(signature: String): ShakeField? {
+        val parts = signature.split("#")
+        val pkg = getPackage(parts[0])
+        return pkg?.getFieldBySignature(signature)
+    }
+
+    fun getClassBySignature(signature: String): ShakeClass? {
+        val parts = signature.split("#")
+        val pkg = getPackage(parts[0])
+        return pkg?.getClassBySignature(signature)
+    }
+
+    fun getMethodBySignature(signature: String): ShakeMethod? {
+        val parts = signature.split("#")
+        val clz = getClassBySignature("${parts[0]}#${parts[1]}") ?: return null
+        return clz.getMethodBySignature(signature)
+    }
+
+    fun getClassFieldBySignature(signature: String): ShakeClassField? {
+        val parts = signature.split("#")
+        val clz = getClassBySignature("${parts[0]}#${parts[1]}") ?: return null
+        return clz.getFieldBySignature(signature)
+    }
 
     class Impl : ShakeProject {
 
