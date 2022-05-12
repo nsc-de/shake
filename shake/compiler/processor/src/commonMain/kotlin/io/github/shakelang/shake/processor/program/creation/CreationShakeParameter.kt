@@ -1,16 +1,17 @@
 package io.github.shakelang.shake.processor.program.creation
 
+import io.github.shakelang.shake.processor.program.creation.code.values.CreationShakeValue
 import io.github.shakelang.shake.processor.program.types.ShakeParameter
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 
 class CreationShakeParameter (
     override val name: String,
-): ShakeParameter {
+): ShakeParameter, CreationShakeAssignable {
 
     override val qualifiedName: String get() = "parameter $name"
 
-    val actualType: ShakeType
+    override val actualType: ShakeType
         get() = TODO("Not yet implemented")
 
     override fun assignType(other: ShakeType): ShakeType? {
@@ -57,7 +58,7 @@ class CreationShakeParameter (
         TODO("Not yet implemented")
     }
 
-    val actualValue: ShakeValue
+    override val actualValue: CreationShakeValue
         get() = TODO("Not yet implemented")
 
     constructor(name: String, type: CreationShakeType): this(name) {
@@ -66,6 +67,10 @@ class CreationShakeParameter (
 
     override lateinit var type: ShakeType
         private set
+
+    override fun access(scope: CreationShakeScope): CreationShakeValue {
+        TODO("Not yet implemented")
+    }
 
     fun lateinitType(): (ShakeType) -> ShakeType {
         return {

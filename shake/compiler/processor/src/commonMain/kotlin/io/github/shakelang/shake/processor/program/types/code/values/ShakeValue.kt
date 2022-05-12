@@ -2,6 +2,7 @@ package io.github.shakelang.shake.processor.program.types.code.values
 
 import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
+import io.github.shakelang.shake.processor.program.types.code.*
 
 interface ShakeValue {
     val type: ShakeType
@@ -29,8 +30,19 @@ interface ShakeValue {
                 is ShakeAnd -> ShakeAnd.from(prj, it)
                 is ShakeOr -> ShakeOr.from(prj, it)
                 is ShakeNot -> ShakeNot.from(prj, it)
+                is ShakeAssignment -> ShakeAssignment.from(prj, it)
+                is ShakeAddAssignment -> ShakeAddAssignment.from(prj, it)
+                is ShakeSubAssignment -> ShakeSubAssignment.from(prj, it)
+                is ShakeMulAssignment -> ShakeMulAssignment.from(prj, it)
+                is ShakeDivAssignment -> ShakeDivAssignment.from(prj, it)
+                is ShakeModAssignment -> ShakeModAssignment.from(prj, it)
+                is ShakePowAssignment -> ShakePowAssignment.from(prj, it)
+                is ShakeIncrementBefore -> ShakeIncrementBefore.from(prj, it)
+                is ShakeIncrementAfter -> ShakeIncrementAfter.from(prj, it)
+                is ShakeDecrementBefore -> ShakeDecrementBefore.from(prj, it)
+                is ShakeDecrementAfter -> ShakeDecrementAfter.from(prj, it)
                 else -> {
-                    throw IllegalArgumentException("Unknown value type: ${it::class.qualifiedName}")
+                    throw IllegalArgumentException("Unknown value type: ${it::class.simpleName}")
                 }
             }
             TODO()

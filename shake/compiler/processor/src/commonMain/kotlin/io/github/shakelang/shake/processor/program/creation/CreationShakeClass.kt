@@ -7,9 +7,9 @@ import io.github.shakelang.shake.processor.program.creation.code.CreationShakeCo
 import io.github.shakelang.shake.processor.program.types.ShakeClass
 import kotlin.math.min
 
-open class CreationShakeClass: ShakeClass {
-    override val staticScope = StaticScope()
-    override val instanceScope = InstanceScope()
+class CreationShakeClass: ShakeClass {
+    override val staticScope = CreationShakeScope.CreationShakeClassStaticScope.from(this)
+    override val instanceScope = CreationShakeScope.CreationShakeClassInstanceScope.from(this)
     override val prj: CreationShakeProject
     override val pkg: CreationShakePackage?
     override val parentScope: CreationShakeScope
@@ -114,7 +114,8 @@ open class CreationShakeClass: ShakeClass {
                 it.access == ShakeAccessDescriber.PRIVATE,
                 it.access == ShakeAccessDescriber.PROTECTED,
                 it.access == ShakeAccessDescriber.PUBLIC,
-                name = it.name
+                name = it.name,
+                this.instanceScope
             )
             constr.lateinitParameterTypes(it.args.map { p -> p.name })
                 .forEachIndexed { i, run -> baseProject.getType(it.args[i].type) { type -> run(type) } }
@@ -190,68 +191,6 @@ open class CreationShakeClass: ShakeClass {
             "classes" to this.classes.map { it.toJson() },
             "staticClasses" to this.staticClasses.map { it.toJson() },
         )
-    }
-
-    inner class StaticScope : CreationShakeScope {
-
-        override val processor: ShakeCodeProcessor get() = parent.processor
-        override val parent: CreationShakeScope get() = parentScope
-
-        override fun get(name: String): CreationShakeAssignable? {
-            return staticFields.find { it.name == name } ?: parent.get(name)
-        }
-
-        override fun set(value: CreationShakeDeclaration) {
-            throw IllegalStateException("Cannot set in this scope")
-        }
-
-        override fun getFunctions(name: String): List<CreationShakeFunction> {
-            return staticMethods.filter { it.name == name } + parent.getFunctions(name)
-        }
-
-        override fun setFunctions(function: CreationShakeFunction) {
-            throw IllegalStateException("Cannot set in this scope")
-        }
-
-        override fun getClass(name: String): CreationShakeClass? {
-            return staticClasses.find { it.name == name } ?: parent.getClass(name)
-        }
-
-        override fun setClass(klass: CreationShakeClass) {
-            throw IllegalStateException("Cannot set in this scope")
-        }
-
-    }
-
-    inner class InstanceScope : CreationShakeScope {
-
-        override val processor: ShakeCodeProcessor get() = parent.processor
-        override val parent: CreationShakeScope get() = parentScope
-
-        override fun get(name: String): CreationShakeAssignable? {
-            return fields.find { it.name == name } ?: staticFields.find { it.name == name } ?: parent.get(name)
-        }
-
-        override fun set(value: CreationShakeDeclaration) {
-            throw IllegalStateException("Cannot set in this scope")
-        }
-
-        override fun getFunctions(name: String): List<CreationShakeFunction> {
-            return methods.filter { it.name == name } + staticMethods.filter { it.name == name } + parent.getFunctions(name)
-        }
-
-        override fun setFunctions(function: CreationShakeFunction) {
-            throw IllegalStateException("Cannot set in this scope")
-        }
-
-        override fun getClass(name: String): CreationShakeClass? {
-            return classes.find { it.name == name } ?: parent.getClass(name)
-        }
-
-        override fun setClass(klass: CreationShakeClass) {
-            throw IllegalStateException("Cannot set in this scope")
-        }
-
     }
 
     companion object {

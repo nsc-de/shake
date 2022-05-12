@@ -3,8 +3,6 @@ package io.github.shakelang.shake.processor.program.types
 import io.github.shakelang.shake.processor.program.types.code.ShakeCode
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
-import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVariableDeclaration
-
 
 interface ShakeFunction : ShakeInvokable {
     val prj: ShakeProject
@@ -105,7 +103,7 @@ interface ShakeFunction : ShakeInvokable {
         }
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}$name"
-        override val scope: ShakeScope = FunctionScope()
+        override val scope: ShakeScope = ShakeScope.ShakeFunctionScope.from(this)
 
         override fun toJson(): Map<String, Any?> {
             return mapOf(
@@ -120,29 +118,6 @@ interface ShakeFunction : ShakeInvokable {
                 "isPublic" to isPublic,
                 "returnType" to returnType.toJson()
             )
-        }
-
-
-        inner class FunctionScope : ShakeScope {
-            val variables = mutableListOf<ShakeVariableDeclaration>()
-
-            override val parent: ShakeScope get() = parentScope
-
-            override fun get(name: String): ShakeAssignable? {
-                return variables.find { it.name == name } ?: parameters.find { it.name == name } ?: parent.get(name)
-            }
-
-            override fun getFunctions(name: String): List<ShakeFunction> {
-                return parent.getFunctions(name)
-            }
-
-            override fun getInvokable(name: String): List<ShakeInvokable> {
-                return parent.getInvokable(name)
-            }
-
-            override fun getClass(name: String): ShakeClass? {
-                return parent.getClass(name)
-            }
         }
     }
 

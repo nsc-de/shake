@@ -1,5 +1,6 @@
 package io.github.shakelang.shake.processor.program.types.code.statements
 
+import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 
 interface ShakeReturn : ShakeStatement {
@@ -10,5 +11,11 @@ interface ShakeReturn : ShakeStatement {
             "type" to "return",
             "value" to value
         )
+    }
+
+    companion object {
+        fun from(prj: ShakeProject, it: ShakeReturn): ShakeReturn {
+            return Impl(it.value?.let { ShakeValue.from(prj, it) })
+        }
     }
 }

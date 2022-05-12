@@ -34,7 +34,7 @@ class CreationShakeMethod (
     isPublic
 ), ShakeMethod {
 
-    override val scope = ShakeMethodScope()
+    override val scope = CreationShakeScope.CreationShakeMethodScope.from(this)
 
     override fun processCode() {
         if(body is CreationShakeCode.ShakeLateProcessCode) body.process(scope)
@@ -47,41 +47,4 @@ class CreationShakeMethod (
             "body" to body.toJson()
         )
     }
-
-    inner class ShakeMethodScope : CreationShakeScope {
-        override val parent: CreationShakeScope = if(isStatic) clazz.staticScope else clazz.instanceScope
-
-        val variables = mutableListOf<CreationShakeVariableDeclaration>()
-
-        override fun get(name: String): CreationShakeAssignable? {
-            return variables.find { it.name == name } ?: parent.get(name)
-        }
-
-        override fun set(value: CreationShakeDeclaration) {
-            if(value !is CreationShakeVariableDeclaration) throw IllegalArgumentException("Only variable declarations can be set in a method scope")
-            if(variables.any { it.name == value.name }) throw IllegalArgumentException("Variable ${value.name} already exists in this scope")
-            variables.add(value)
-        }
-
-        override fun getFunctions(name: String): List<CreationShakeFunction> {
-            return parent.getFunctions(name)
-        }
-
-        override fun setFunctions(function: CreationShakeFunction) {
-            throw IllegalStateException("Cannot set function in method scope")
-        }
-
-        override fun getClass(name: String): CreationShakeClass? {
-            return parent.getClass(name)
-        }
-
-        override fun setClass(klass: CreationShakeClass) {
-            throw IllegalStateException("Cannot set class in method scope")
-        }
-
-        override val processor: ShakeCodeProcessor
-            get() = parent.processor
-
-    }
-
 }

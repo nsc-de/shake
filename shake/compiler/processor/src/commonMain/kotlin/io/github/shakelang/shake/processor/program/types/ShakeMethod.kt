@@ -89,7 +89,7 @@ interface ShakeMethod : ShakeFunction {
         }
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}$name"
-        override val scope: ShakeScope = MethodScope()
+        override val scope: ShakeScope = ShakeScope.ShakeMethodScope.from(this)
         override val signature: String
 
         override fun toJson(): Map<String, Any?> {
@@ -106,28 +106,6 @@ interface ShakeMethod : ShakeFunction {
                 "isPublic" to isPublic,
                 "returnType" to returnType.toJson()
             )
-        }
-
-        inner class MethodScope : ShakeScope {
-            val variables = mutableListOf<ShakeVariableDeclaration>()
-
-            override val parent: ShakeScope = parentScope
-
-            override fun get(name: String): ShakeAssignable? {
-                return variables.find { it.name == name } ?: parameters.find { it.name == name } ?: parent.get(name)
-            }
-
-            override fun getFunctions(name: String): List<ShakeFunction> {
-                return parent.getFunctions(name)
-            }
-
-            override fun getInvokable(name: String): List<ShakeInvokable> {
-                return parent.getInvokable(name)
-            }
-
-            override fun getClass(name: String): ShakeClass? {
-                return parent.getClass(name)
-            }
         }
     }
 

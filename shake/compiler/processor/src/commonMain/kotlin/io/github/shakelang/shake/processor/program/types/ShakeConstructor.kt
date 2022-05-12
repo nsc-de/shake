@@ -12,6 +12,7 @@ interface ShakeConstructor {
     val isPublic: Boolean
     val name: String?
     val parameters: List<ShakeParameter>
+    val parentScope: ShakeScope
     val scope: ShakeScope
 
     val signature: String
@@ -27,6 +28,7 @@ interface ShakeConstructor {
         override val isPublic: Boolean,
         override val name: String?,
         override val parameters: List<ShakeParameter>,
+        override val parentScope: ShakeScope,
         override val scope: ShakeScope
     ) : ShakeConstructor {
 

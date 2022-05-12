@@ -1,6 +1,7 @@
 package io.github.shakelang.shake.processor.program.types.code
 
 import io.github.shakelang.shake.processor.program.types.ShakeAssignable
+import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeStatement
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
@@ -25,6 +26,12 @@ interface ShakeAssignment : ShakeAssignmentType {
             )
         }
     }
+
+    companion object {
+        fun from(prj: ShakeProject, assignment: ShakeAssignment): ShakeAssignment {
+            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        }
+    }
 }
 
 interface ShakeAddAssignment : ShakeAssignmentType {
@@ -40,6 +47,12 @@ interface ShakeAddAssignment : ShakeAssignmentType {
                 "value" to value.toJson(),
                 "valueType" to type.toJson(),
             )
+        }
+    }
+
+    companion object {
+        fun from(prj: ShakeProject, assignment: ShakeAddAssignment): ShakeAddAssignment {
+            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
         }
     }
 }
@@ -59,6 +72,12 @@ interface ShakeSubAssignment : ShakeAssignmentType {
             )
         }
     }
+
+    companion object {
+        fun from(prj: ShakeProject, assignment: ShakeSubAssignment): ShakeSubAssignment {
+            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        }
+    }
 }
 
 interface ShakeMulAssignment : ShakeAssignmentType {
@@ -74,6 +93,12 @@ interface ShakeMulAssignment : ShakeAssignmentType {
                 "value" to value.toJson(),
                 "valueType" to type.toJson(),
             )
+        }
+    }
+
+    companion object {
+        fun from(prj: ShakeProject, assignment: ShakeMulAssignment): ShakeMulAssignment {
+            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
         }
     }
 }
@@ -93,6 +118,12 @@ interface ShakeDivAssignment : ShakeAssignmentType {
             )
         }
     }
+
+    companion object {
+        fun from(prj: ShakeProject, assignment: ShakeDivAssignment): ShakeDivAssignment {
+            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        }
+    }
 }
 
 interface ShakeModAssignment : ShakeAssignmentType {
@@ -110,6 +141,12 @@ interface ShakeModAssignment : ShakeAssignmentType {
             )
         }
     }
+
+    companion object {
+        fun from(prj: ShakeProject, assignment: ShakeModAssignment): ShakeModAssignment {
+            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        }
+    }
 }
 
 interface ShakePowAssignment : ShakeAssignmentType {
@@ -125,6 +162,12 @@ interface ShakePowAssignment : ShakeAssignmentType {
                 "value" to value.toJson(),
                 "valueType" to type.toJson(),
             )
+        }
+    }
+
+    companion object {
+        fun from(prj: ShakeProject, assignment: ShakePowAssignment): ShakePowAssignment {
+            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
         }
     }
 }
@@ -146,6 +189,12 @@ interface ShakeIncrementBefore : ShakeMutateType {
             )
         }
     }
+
+    companion object {
+        fun from(prj: ShakeProject, increment: ShakeIncrementBefore): ShakeIncrementBefore {
+            return Impl(ShakeAssignable.from(prj, increment.variable), ShakeType.from(prj, increment.type))
+        }
+    }
 }
 
 interface ShakeIncrementAfter : ShakeMutateType {
@@ -159,6 +208,12 @@ interface ShakeIncrementAfter : ShakeMutateType {
                 "variable" to variable,
                 "valueType" to type.toJson(),
             )
+        }
+    }
+
+    companion object {
+        fun from(prj: ShakeProject, increment: ShakeIncrementAfter): ShakeIncrementAfter {
+            return Impl(ShakeAssignable.from(prj, increment.variable), ShakeType.from(prj, increment.type))
         }
     }
 }
@@ -176,6 +231,12 @@ interface ShakeDecrementBefore : ShakeMutateType {
             )
         }
     }
+
+    companion object {
+        fun from(prj: ShakeProject, decrement: ShakeDecrementBefore): ShakeDecrementBefore {
+            return Impl(ShakeAssignable.from(prj, decrement.variable), ShakeType.from(prj, decrement.type))
+        }
+    }
 }
 
 interface ShakeDecrementAfter : ShakeMutateType {
@@ -189,6 +250,12 @@ interface ShakeDecrementAfter : ShakeMutateType {
                 "variable" to variable,
                 "valueType" to type.toJson(),
             )
+        }
+    }
+
+    companion object {
+        fun from(prj: ShakeProject, decrement: ShakeDecrementAfter): ShakeDecrementAfter {
+            return Impl(ShakeAssignable.from(prj, decrement.variable), ShakeType.from(prj, decrement.type))
         }
     }
 }

@@ -52,7 +52,7 @@ open class CreationShakeFunction (
         this.returnType = returnType
     }
 
-    override val scope : CreationShakeScope = ShakeFunctionScope()
+    override val scope : CreationShakeScope = CreationShakeScope.CreationShakeFunctionScope.from(this)
     override val signature: String
         get() = "${pkg?.name ?: ""}#$name(${parameters.joinToString(", ") { it.type.signature }})${returnType.signature}"
 
@@ -91,43 +91,6 @@ open class CreationShakeFunction (
             "parameters" to parameters.map { it.toJson() },
             "body" to body.toJson()
         )
-    }
-
-    inner class ShakeFunctionScope: CreationShakeScope {
-
-        val variables = mutableListOf<CreationShakeVariableDeclaration>()
-
-        override val parent: CreationShakeScope = parentScope
-
-        override fun get(name: String): CreationShakeAssignable? {
-            return variables.find { it.name == name } ?: parent.get(name)
-        }
-
-        override fun set(value: CreationShakeDeclaration) {
-            if(value !is CreationShakeVariableDeclaration) throw IllegalArgumentException("Only variable declarations can be set in a method scope")
-            if(variables.any { it.name == value.name }) throw IllegalArgumentException("Variable ${value.name} already exists in this scope")
-            variables.add(value)
-        }
-
-        override fun getFunctions(name: String): List<CreationShakeFunction> {
-            return parent.getFunctions(name)
-        }
-
-        override fun setFunctions(function: CreationShakeFunction) {
-            throw IllegalArgumentException("Cannot set a function in a method scope")
-        }
-
-        override fun getClass(name: String): CreationShakeClass? {
-            return parent.getClass(name)
-        }
-
-        override fun setClass(klass: CreationShakeClass) {
-            throw IllegalArgumentException("Cannot set a class in a method scope")
-        }
-
-        override val processor: ShakeCodeProcessor
-            get() = prj.projectScope.processor
-
     }
 
     companion object {

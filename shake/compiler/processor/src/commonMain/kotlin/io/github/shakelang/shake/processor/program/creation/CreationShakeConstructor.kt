@@ -5,6 +5,7 @@ import io.github.shakelang.shake.processor.program.creation.code.CreationShakeCo
 import io.github.shakelang.shake.processor.program.creation.code.statements.CreationShakeVariableDeclaration
 import io.github.shakelang.shake.processor.program.types.ShakeConstructor
 import io.github.shakelang.shake.processor.program.types.ShakeType
+import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 
 class CreationShakeConstructor (
     override val clazz: CreationShakeClass,
@@ -13,7 +14,8 @@ class CreationShakeConstructor (
     override val isPrivate: Boolean,
     override val isProtected: Boolean,
     override val isPublic: Boolean,
-    override val name: String? = null
+    override val name: String? = null,
+    override val parentScope: ShakeScope
 ): ShakeConstructor {
     final override lateinit var parameters: List<CreationShakeParameter>
         private set
@@ -28,8 +30,9 @@ class CreationShakeConstructor (
         isPrivate: Boolean,
         isProtected: Boolean,
         isPublic: Boolean,
-        name: String? = null
-    ): this(clazz, body, isStrict, isPrivate, isProtected, isPublic, name) {
+        name: String? = null,
+        parentScope: ShakeScope
+    ): this(clazz, body, isStrict, isPrivate, isProtected, isPublic, name, parentScope) {
         this.parameters = parameters
     }
 
@@ -45,7 +48,7 @@ class CreationShakeConstructor (
     }
 
     fun processCode() {
-        if(body is CreationShakeCode.ShakeLateProcessCode) (body as CreationShakeCode.ShakeLateProcessCode).process(scope)
+        if(body is CreationShakeCode.ShakeLateProcessCode) body.process(scope)
     }
 
     override fun toJson(): Map<String, Any?> {
@@ -94,6 +97,8 @@ class CreationShakeConstructor (
 
         override val processor: ShakeCodeProcessor
             get() = parent.processor
+        override val signature: String
+            = "${clazz.signature}#constructor${name?.let { "#$it" } ?: ""}(${parameters.joinToString(",") { it.type.signature }})"
 
     }
 }

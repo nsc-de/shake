@@ -2,6 +2,7 @@ package io.github.shakelang.shake.processor.program.types.code.statements
 
 import io.github.shakelang.shake.processor.program.types.ShakeAssignable
 import io.github.shakelang.shake.processor.program.types.ShakeDeclaration
+import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
@@ -87,4 +88,9 @@ interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeSta
         }
     }
 
+    companion object {
+        fun from(prj: ShakeProject, it: ShakeVariableDeclaration): ShakeVariableDeclaration {
+            return Impl(it.scope, it.name, it.initialValue, it.isFinal, it.type, it.latestValue, it.latestType)
+        }
+    }
 }

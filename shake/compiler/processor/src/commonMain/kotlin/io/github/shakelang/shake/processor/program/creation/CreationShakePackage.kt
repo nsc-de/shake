@@ -43,52 +43,7 @@ open class CreationShakePackage (
             }
         }
 
-        val fileScope = object : CreationShakeScope {
-            override val parent: CreationShakeScope = scope
-
-            override fun get(name: String): CreationShakeAssignable? {
-                return imports.zip(imported).filter {
-                    val last = it.first.import.last()
-                    last == name || last == "*"
-                }.firstNotNullOfOrNull {
-                    it.second!!.fields.find { f -> f.name == name }
-                } ?: parent.get(name)
-            }
-
-            override fun set(value: CreationShakeDeclaration) {
-                parent.set(value)
-            }
-
-            override fun getFunctions(name: String): List<CreationShakeFunction> {
-                return imports.zip(imported).filter {
-                    val last = it.first.import.last()
-                    last == name || last == "*"
-                }.flatMap {
-                    it.second!!.functions.filter { f -> f.name == name }
-                } + parent.getFunctions(name)
-            }
-
-            override fun setFunctions(function: CreationShakeFunction) {
-                parent.setFunctions(function)
-            }
-
-            override fun getClass(name: String): CreationShakeClass? {
-                return imports.zip(imported).filter {
-                    val last = it.first.import.last()
-                    last == name || last == "*"
-                }.firstNotNullOfOrNull {
-                    it.second!!.classes.find { c -> c.name == name }
-                } ?: parent.getClass(name)
-            }
-
-            override fun setClass(klass: CreationShakeClass) {
-                parent.setClass(klass)
-            }
-
-            override val processor: ShakeCodeProcessor
-                get() = parent.processor
-
-        }
+        val fileScope =
 
         contents.children.forEach {
             when (it) {

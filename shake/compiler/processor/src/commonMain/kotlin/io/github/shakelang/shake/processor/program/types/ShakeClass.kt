@@ -111,10 +111,10 @@ interface ShakeClass {
 
 
         override val instanceScope: ShakeScope
-            get() = InstanceScope()
+            get() = ShakeScope.ShakeClassInstanceScope.from(this)
 
         override val staticScope: ShakeScope
-            get() = StaticScope()
+            get() = ShakeScope.ShakeClassStaticScope.from(this)
 
         override val qualifiedName: String
             get() = (pkg?.qualifiedName?.plus(".") ?: "") + name
@@ -151,49 +151,6 @@ interface ShakeClass {
                 "classes" to this.classes.map { it.toJson() },
                 "staticClasses" to this.staticClasses.map { it.toJson() },
             )
-        }
-
-        inner class StaticScope : ShakeScope {
-
-            override val parent: ShakeScope get() = parentScope
-
-            override fun get(name: String): ShakeAssignable? {
-                return staticFields.find { it.name == name } ?: parent.get(name)
-            }
-
-            override fun getFunctions(name: String): List<ShakeFunction> {
-                return staticMethods.filter { it.name == name } + parent.getFunctions(name)
-            }
-
-            override fun getClass(name: String): ShakeClass? {
-                return staticClasses.find { it.name == name } ?: parent.getClass(name)
-            }
-
-            override fun getInvokable(name: String): List<ShakeInvokable> {
-                return getFunctions(name) + parent.getInvokable(name)
-            }
-
-        }
-
-        inner class InstanceScope : ShakeScope {
-
-            override val parent: ShakeScope get() = parentScope
-
-            override fun get(name: String): ShakeAssignable? {
-                return fields.find { it.name == name } ?: staticFields.find { it.name == name } ?: parent.get(name)
-            }
-
-            override fun getFunctions(name: String): List<ShakeFunction> {
-                return methods.filter { it.name == name } + staticMethods.filter { it.name == name } + parent.getFunctions(name)
-            }
-
-            override fun getClass(name: String): ShakeClass? {
-                return classes.find { it.name == name } ?: parent.getClass(name)
-            }
-
-            override fun getInvokable(name: String): List<ShakeInvokable> {
-                return getFunctions(name) + parent.getInvokable(name)
-            }
         }
     }
 

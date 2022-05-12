@@ -1,5 +1,6 @@
 package io.github.shakelang.shake.processor.program.types.code.statements
 
+import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.code.ShakeCode
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 
@@ -21,5 +22,13 @@ interface ShakeIf : ShakeStatement {
         )
     }
 
-
+    companion object {
+        fun from(prj: ShakeProject, it: ShakeIf): ShakeIf {
+            return Impl(
+                ShakeValue.from(prj, it.condition),
+                ShakeCode.from(prj, it.body),
+                it.elseBody?.let { ShakeCode.from(prj, it) }
+            )
+        }
+    }
 }
