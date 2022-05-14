@@ -1,7 +1,6 @@
 package io.github.shakelang.shake.processor.program.types.code
 
 import io.github.shakelang.shake.processor.ShakeCodeProcessor
-import io.github.shakelang.shake.processor.program.creation.*
 import io.github.shakelang.shake.processor.program.types.*
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVariableDeclaration
 
@@ -160,57 +159,100 @@ interface ShakeScope {
             override val signature: String
                 get() = "CM${it.signature}"
         }
+    }
 
-        interface ShakeFileScope : ShakeScope {
-            class Impl(val it: ShakeFile) : ShakeFileScope {
-                override val parent: CreationShakeScope = scope
-
-                override fun get(name: String): CreationShakeAssignable? {
-                    return imports.zip(imported).filter {
-                        val last = it.first.import.last()
-                        last == name || last == "*"
-                    }.firstNotNullOfOrNull {
-                        it.second!!.fields.find { f -> f.name == name }
-                    } ?: parent.get(name)
-                }
-
-                override fun set(value: CreationShakeDeclaration) {
-                    parent.set(value)
-                }
-
-                override fun getFunctions(name: String): List<CreationShakeFunction> {
-                    return imports.zip(imported).filter {
-                        val last = it.first.import.last()
-                        last == name || last == "*"
-                    }.flatMap {
-                        it.second!!.functions.filter { f -> f.name == name }
-                    } + parent.getFunctions(name)
-                }
-
-                override fun setFunctions(function: CreationShakeFunction) {
-                    parent.setFunctions(function)
-                }
-
-                override fun getClass(name: String): CreationShakeClass? {
-                    return imports.zip(imported).filter {
-                        val last = it.first.import.last()
-                        last == name || last == "*"
-                    }.firstNotNullOfOrNull {
-                        it.second!!.classes.find { c -> c.name == name }
-                    } ?: parent.getClass(name)
-                }
-
-                override fun setClass(klass: CreationShakeClass) {
-                    parent.setClass(klass)
-                }
-
-                override val processor: ShakeCodeProcessor
-                    get() = parent.processor
-
+    interface ShakeFileScope : ShakeScope {
+        class Impl(val it: ShakeFile, override val parent: ShakeScope) : ShakeFileScope {
+            override fun get(name: String): ShakeAssignable? {
+                return it.imports.firstNotNullOfOrNull { import ->
+                    val last = import.it.last()
+                    if (last == "*" || last == name) import.targetPackage.fields.find { it.name == name } else null
+                } ?: parent.get(name)
             }
 
+            override fun getFunctions(name: String): List<ShakeFunction> {
+                return it.imports.flatMap { import ->
+                    val last = import.it.last()
+                    if(last == "*" && last == name) import.targetPackage.functions.filter { it.name == name } else emptyList()
+                } + parent.getFunctions(name)
+            }
+
+            override fun getClass(name: String): ShakeClass? {
+                return it.imports.firstNotNullOfOrNull { import ->
+                    val last = import.it.last()
+                    if (last == "*" || last == name) import.targetPackage.classes.find { it.name == name } else null
+                } ?: parent.getClass(name)
+            }
+
+            override fun getInvokable(name: String): List<ShakeInvokable> {
+                return getFunctions(name) + parent.getInvokable(name)
+            }
+
+            override val signature: String
+                get() = "FI${it.signature}"
+
+        }
+
         companion object {
-            fun from(it: ShakeConstructor): ShakeConstructorScope = Impl(it)
+            fun from(it: ShakeFile, parent: ShakeScope): ShakeFileScope = Impl(it, parent)
+        }
+    }
+
+    interface ShakeProjectScope : ShakeScope {
+        class Impl(val it: ShakeProject) : ShakeProjectScope {
+            override val parent: ShakeScope? = null
+
+            override fun get(name: String): ShakeAssignable? {
+                return it.fields.find { it.name == name }
+            }
+
+            override fun getFunctions(name: String): List<ShakeFunction> {
+                return it.functions.filter { it.name == name }
+            }
+
+            override fun getClass(name: String): ShakeClass? {
+                return it.classes.find { it.name == name }
+            }
+
+            override fun getInvokable(name: String): List<ShakeInvokable> {
+                return it.functions.filter { it.name == name }
+            }
+
+            override val signature: String
+                get() = "PS"
+        }
+
+        companion object {
+            fun from(it: ShakeProject): ShakeProjectScope = Impl(it)
+        }
+    }
+
+    interface ShakePackageScope : ShakeScope {
+        class Impl(val it: ShakePackage) : ShakePackageScope {
+            override val parent: ShakeScope get() = it.baseProject.projectScope
+
+            override fun get(name: String): ShakeAssignable? {
+                return it.fields.find { it.name == name }
+            }
+
+            override fun getFunctions(name: String): List<ShakeFunction> {
+                return it.functions.filter { it.name == name }
+            }
+
+            override fun getClass(name: String): ShakeClass? {
+                return it.classes.find { it.name == name }
+            }
+
+            override fun getInvokable(name: String): List<ShakeInvokable> {
+                return it.functions.filter { it.name == name }
+            }
+
+            override val signature: String
+                get() = "PK${it.signature}"
+        }
+
+        companion object {
+            fun from(it: ShakePackage): ShakePackageScope = Impl(it)
         }
     }
 }

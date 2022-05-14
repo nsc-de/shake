@@ -1,5 +1,8 @@
 package io.github.shakelang.shake.processor.program.types
 
+import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.point
+
 interface ShakeType {
 
     val name: String
@@ -106,7 +109,7 @@ interface ShakeType {
                             || other.type == PrimitiveType.UNSIGNED_LONG
                             || other.type == PrimitiveType.CHAR)
 
-
+        fun pointer(): Pointer<Primitive>
 
         companion object {
 
@@ -154,6 +157,29 @@ interface ShakeType {
                 return UNSIGNED_LONG
             }
 
+            private fun char(): Primitive {
+                return CHAR
+            }
+
+            private fun void(): Primitive {
+                return VOID
+            }
+
+            val booleanPointer = point(bool())
+            val bytePointer = point(byte())
+            val shortPointer = point(short())
+            val intPointer = point(int())
+            val longPointer = point(long())
+            val floatPointer = point(float())
+            val doublePointer = point(double())
+            val unsignedBytePointer = point(unsignedByte())
+            val unsignedShortPointer = point(unsignedShort())
+            val unsignedIntPointer = point(unsignedInt())
+            val unsignedLongPointer = point(unsignedLong())
+            val charPointer = point(char())
+            val voidPointer = point(void())
+
+
             val BOOLEAN: Primitive = object : Primitive {
                 override val name: String get() = "boolean"
                 override val type: PrimitiveType get() = PrimitiveType.BOOLEAN
@@ -177,6 +203,8 @@ interface ShakeType {
                     other is Primitive && other.type == PrimitiveType.BOOLEAN
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other is Primitive && other.type == PrimitiveType.BOOLEAN) 0 else -1
+
+                override fun pointer() = booleanPointer
 
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "boolean")
@@ -233,6 +261,8 @@ interface ShakeType {
                         else -> -1
                     }
 
+                override fun pointer() = bytePointer
+
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "byte")
                 }
@@ -287,6 +317,8 @@ interface ShakeType {
                         else -> -1
                     }
 
+                override fun pointer() = shortPointer
+
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "short")
                 }
@@ -340,6 +372,8 @@ interface ShakeType {
                         else -> -1
                     }
 
+                override fun pointer() = intPointer
+
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "int")
                 }
@@ -392,6 +426,8 @@ interface ShakeType {
                         else -> -1
                     }
 
+                override fun pointer() = longPointer
+
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "long")
                 }
@@ -443,6 +479,8 @@ interface ShakeType {
                         else -> -1
                     }
 
+                override fun pointer() = floatPointer
+
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "float")
                 }
@@ -488,6 +526,8 @@ interface ShakeType {
                         PrimitiveType.DOUBLE -> 0
                         else -> -1
                     }
+
+                override fun pointer() = doublePointer
 
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "double")
@@ -547,6 +587,8 @@ interface ShakeType {
                         else -> -1
                     }
 
+                override fun pointer() = unsignedBytePointer
+
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "unsigned_byte")
                 }
@@ -605,6 +647,8 @@ interface ShakeType {
                         else -> -1
                     }
 
+                override fun pointer() = unsignedShortPointer
+
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "unsigned_short")
                 }
@@ -662,6 +706,8 @@ interface ShakeType {
                         else -> -1
                     }
 
+                override fun pointer() = unsignedIntPointer
+
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "unsigned_int")
                 }
@@ -717,6 +763,8 @@ interface ShakeType {
                         PrimitiveType.DOUBLE -> 6
                         else -> -1
                     }
+
+                override fun pointer() = unsignedLongPointer
 
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "unsigned_long")
@@ -776,6 +824,8 @@ interface ShakeType {
                         else -> -1
                     }
 
+                override fun pointer() = charPointer
+
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "char")
                 }
@@ -806,6 +856,8 @@ interface ShakeType {
                         PrimitiveType.VOID -> 0
                         else -> -1
                     }
+
+                override fun pointer(): Pointer<Primitive> = voidPointer
 
                 override fun toJson(): Map<String, Any?> {
                     return mapOf("type" to "void")

@@ -1,21 +1,32 @@
 package io.github.shakelang.shake.processor.program.types
 
-import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
+import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.PointerList
+import io.github.shakelang.shake.processor.util.latePoint
+import io.github.shakelang.shake.processor.util.point
 
 interface ShakePackage {
     val baseProject: ShakeProject
     val name: String
     val parent: ShakePackage?
+
+    val subpackagePointers: List<Pointer<ShakePackage>>
+    val classPointers: List<Pointer<ShakeClass>>
+    val functionPointers: List<Pointer<ShakeFunction>>
+    val fieldPointers: List<Pointer<ShakeField>>
+
     val subpackages: List<ShakePackage>
     val classes: List<ShakeClass>
     val functions: List<ShakeFunction>
     val fields: List<ShakeField>
+
     val qualifiedName: String
     val scope: ShakeScope
+    val signature: String
 
-    fun getPackage(name: String): ShakePackage
-    fun getPackage(name: Array<String>): ShakePackage
+    fun getPackage(name: String): Pointer<ShakePackage?>
+    fun getPackage(name: Array<String>): Pointer<ShakePackage?>
 
     fun getFunctionBySignature(signature: String): ShakeFunction? = functions.firstOrNull { it.signature == signature }
     fun getFieldBySignature(signature: String): ShakeField? = fields.firstOrNull { it.signature == signature }
@@ -28,13 +39,20 @@ interface ShakePackage {
         override val baseProject: ShakeProject
         override val name: String
         override val parent: ShakePackage?
+
+        override val subpackagePointers: List<Pointer<ShakePackage>>
+        override val classPointers: List<Pointer<ShakeClass>>
+        override val functionPointers: List<Pointer<ShakeFunction>>
+        override val fieldPointers: List<Pointer<ShakeField>>
+
         override val subpackages: List<ShakePackage>
         override val classes: List<ShakeClass>
         override val functions: List<ShakeFunction>
         override val fields: List<ShakeField>
 
         override val qualifiedName: String get() = if (parent == null) name else "${parent.qualifiedName}.$name"
-        override val scope: ShakeScope = PackageScope()
+        override val scope: ShakeScope = ShakeScope.ShakePackageScope.from(this)
+        override val signature: String get() = qualifiedName
 
         constructor(
             baseProject: ShakeProject,
@@ -48,10 +66,16 @@ interface ShakePackage {
             this.baseProject = baseProject
             this.name = name
             this.parent = parent
-            this.subpackages = subpackages
-            this.classes = classes
-            this.functions = functions
-            this.fields = fields
+
+            this.subpackagePointers = subpackages.map { it.point() }
+            this.classPointers = classes.map { it.point() }
+            this.functionPointers = functions.map { it.point() }
+            this.fieldPointers = fields.map { it.point() }
+
+            this.subpackages = PointerList.from(subpackagePointers)
+            this.classes = PointerList.from(classPointers)
+            this.functions = PointerList.from(functionPointers)
+            this.fields = PointerList.from(fieldPointers)
         }
 
         internal constructor(
@@ -62,20 +86,48 @@ interface ShakePackage {
             this.baseProject = baseProject
             this.name = it.name
             this.parent = parent
-            this.subpackages = it.subpackages.map { from(baseProject, this, it) }
-            this.classes = it.classes.map { ShakeClass.from(baseProject, this, it) }
-            this.functions = it.functions.map { ShakeFunction.from(baseProject, this, it) }
-            this.fields = it.fields.map { ShakeField.from(baseProject, this, it) }
+
+            val subpackagePointers = it.subpackages.map { latePoint<ShakePackage>() }.toMutableList()
+            val classPointers = it.classes.map { latePoint<ShakeClass>() }
+            val functionPointers = it.functions.map { latePoint<ShakeFunction>() }
+            val fieldPointers = it.fields.map { latePoint<ShakeField>() }
+
+            this.subpackagePointers = subpackagePointers
+            this.classPointers = classPointers
+            this.functionPointers = functionPointers
+            this.fieldPointers = fieldPointers
+
+            this.subpackages = PointerList.from(subpackagePointers)
+            this.classes = PointerList.from(classPointers)
+            this.functions = PointerList.from(functionPointers)
+            this.fields = PointerList.from(fieldPointers)
+
+            it.subpackages.zip(subpackagePointers) { pkg, pointer ->
+                pointer.init(from(baseProject, this, pkg))
+            }
+
+            it.classes.zip(classPointers) { clz, pointer ->
+                pointer.init(ShakeClass.from(baseProject, this, clz))
+            }
+
+            it.functions.zip(functionPointers) { fn, pointer ->
+                pointer.init(ShakeFunction.from(baseProject, this, fn))
+            }
+
+            it.fields.zip(fieldPointers) { f, pointer ->
+                pointer.init(ShakeField.from(baseProject, this, f))
+            }
+
         }
 
-        override fun getPackage(name: String): ShakePackage {
+        override fun getPackage(name: String): Pointer<ShakePackage?> {
             if(name.contains(".")) return getPackage(name.split(".").toTypedArray())
-            return subpackages.find { it.name == name } ?: throw Error("Package $name not found")
+            return Pointer.task { subpackages.find { it.name == name } ?: throw Error("Package $name not found") }
         }
 
-        override fun getPackage(name: Array<String>): ShakePackage {
+        override fun getPackage(name: Array<String>): Pointer<ShakePackage?> {
             if(name.isEmpty()) throw IllegalArgumentException("Cannot get package from empty name")
-            return getPackage(name.first()).getPackage(name.drop(1).toTypedArray())
+            return getPackage(name.first()).chainAllowNull { it?.getPackage(name.drop(1).toTypedArray())  }
         }
 
         override fun toJson(): Map<String, Any?> {
@@ -86,26 +138,6 @@ interface ShakePackage {
                 "functions" to functions.map { it.name },
                 "fields" to fields.map { it.name }
             )
-        }
-
-        inner class PackageScope: ShakeScope {
-            override val parent: ShakeScope get() = baseProject.projectScope
-
-            override fun get(name: String): ShakeAssignable? {
-                return fields.find { it.name == name }
-            }
-
-            override fun getFunctions(name: String): List<ShakeFunction> {
-                return functions.filter { it.name == name }
-            }
-
-            override fun getClass(name: String): ShakeClass? {
-                return classes.find { it.name == name }
-            }
-
-            override fun getInvokable(name: String): List<ShakeInvokable> {
-                return functions.filter { it.name == name }
-            }
         }
     }
 
