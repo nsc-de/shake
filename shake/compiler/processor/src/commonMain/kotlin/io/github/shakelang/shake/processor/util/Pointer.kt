@@ -83,6 +83,9 @@ fun <T> lateMutablePoint(): LateInitMutablePointer<T> = Pointer.lateMutable()
 fun <T> T.point(): Pointer<T> = Pointer.of(this)
 fun <T> T.mutablePoint(): MutablePointer<T> = Pointer.mutableOf(this)
 
+fun <T> Iterable<T>.points(): PointerList<T> = map { Pointer.of(it) }
+fun <T> Iterable<T>.mutablePoints(): MutablePointerList<T> = map { Pointer.of(it) }.toMutableList()
+
 interface MutablePointer<T> : Pointer<T> {
     override var value: T
 }
@@ -97,11 +100,17 @@ interface LateInitMutablePointer<T> : MutablePointer<T>, LateInitPointer<T> {
     override var value: T
 }
 
-interface PointerList<T> : List<T> {
+typealias PointerList<T> = List<Pointer<T>>
+typealias MutablePointerList<T> = MutableList<Pointer<T>>
+
+fun <T> PointerList<T>.values(): PointingList<T> = PointingList.from(this)
+fun <T> MutablePointerList<T>.values(): MutablePointingList<T> = MutablePointingList.from(this)
+
+interface PointingList<T> : List<T> {
     val pointers: List<Pointer<T>>
     private class Impl<T>(
         override val pointers: List<Pointer<T>>
-    ) : PointerList<T> {
+    ) : PointingList<T> {
         override val size: Int
             get() = pointers.size
 
@@ -182,18 +191,18 @@ interface PointerList<T> : List<T> {
     }
 
     companion object {
-        fun <T> from(it: List<Pointer<T>>): PointerList<T> {
+        fun <T> from(it: List<Pointer<T>>): PointingList<T> {
             return Impl(it)
         }
     }
 }
 
-interface MutablePointerList<T> : PointerList<T>, MutableList<T> {
+interface MutablePointingList<T> : PointingList<T>, MutableList<T> {
     override val pointers: MutableList<Pointer<T>>
 
     class Impl<T>(
-        override val pointers: MutableList<Pointer<T>>
-    ) : MutablePointerList<T> {
+        override val pointers: MutablePointerList<T>
+    ) : MutablePointingList<T> {
         override val size: Int
             get() = pointers.size
 
@@ -292,7 +301,7 @@ interface MutablePointerList<T> : PointerList<T>, MutableList<T> {
     }
 
     companion object {
-        fun <T> from(it: MutableList<Pointer<T>>): MutableList<T> {
+        fun <T> from(it: MutablePointerList<T>): MutablePointingList<T> {
             return Impl(it)
         }
     }

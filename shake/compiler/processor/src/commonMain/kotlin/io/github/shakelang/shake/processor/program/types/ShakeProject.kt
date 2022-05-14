@@ -5,7 +5,7 @@ import io.github.shakelang.shake.parser.node.ShakeValuedNode
 import io.github.shakelang.shake.parser.node.ShakeVariableType
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.util.Pointer
-import io.github.shakelang.shake.processor.util.PointerList
+import io.github.shakelang.shake.processor.util.PointingList
 import io.github.shakelang.shake.processor.util.latePoint
 import io.github.shakelang.shason.json
 
@@ -86,10 +86,10 @@ interface ShakeProject {
             functionPointers = functions.map { Pointer.of(it) }
             fieldPointers = fields.map { Pointer.of(it) }
 
-            this.subpackages = PointerList.from(subpackagePointers)
-            this.classes = PointerList.from(classPointers)
-            this.functions = PointerList.from(functionPointers)
-            this.fields = PointerList.from(fieldPointers)
+            this.subpackages = PointingList.from(subpackagePointers)
+            this.classes = PointingList.from(classPointers)
+            this.functions = PointingList.from(functionPointers)
+            this.fields = PointingList.from(fieldPointers)
         }
 
         internal constructor(
@@ -105,10 +105,10 @@ interface ShakeProject {
             this.functionPointers = functionPointers
             this.fieldPointers = fieldPointers
 
-            this.subpackages = PointerList.from(subpackagePointers)
-            this.classes = PointerList.from(classPointers)
-            this.functions = PointerList.from(functionPointers)
-            this.fields = PointerList.from(fieldPointers)
+            this.subpackages = PointingList.from(subpackagePointers)
+            this.classes = PointingList.from(classPointers)
+            this.functions = PointingList.from(functionPointers)
+            this.fields = PointingList.from(fieldPointers)
 
             it.subpackages.zip(subpackagePointers) { pkg, pointer ->
                 pointer.init(ShakePackage.from(this, null, pkg))

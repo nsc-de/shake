@@ -3,6 +3,7 @@ package io.github.shakelang.shake.processor.program.types
 import io.github.shakelang.parseutils.promiseCombine
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
+import io.github.shakelang.shake.processor.util.*
 import kotlin.math.min
 
 interface ShakeClass {
@@ -12,6 +13,15 @@ interface ShakeClass {
     val pkg: ShakePackage?
     val parentScope: ShakeScope
     val name: String
+
+    val methodPointers: PointerList<ShakeMethod>
+    val fieldPointers: PointerList<ShakeField>
+    val classPointers: PointerList<ShakeClass>
+    val staticFieldPointers: PointerList<ShakeField>
+    val staticMethodPointers: PointerList<ShakeMethod>
+    val staticClassPointers: PointerList<ShakeClass>
+    val constructorPointers: PointerList<ShakeConstructor>
+
     val methods: List<ShakeMethod>
     val fields: List<ShakeClassField>
     val classes: List<ShakeClass>
@@ -21,9 +31,13 @@ interface ShakeClass {
     val constructors: List<ShakeConstructor>
 
     val qualifiedName: String
+
+    val superClassPointer: Pointer<ShakeClass?>
     val superClass: ShakeClass?
 
+    val interfacePointers: PointerList<ShakeClass>
     val interfaces: List<ShakeClass>
+
     val signature: String
 
     fun compatibleTo(other: ShakeClass): Boolean
@@ -41,6 +55,15 @@ interface ShakeClass {
         override val pkg: ShakePackage?
         override val parentScope: ShakeScope
         override val name: String
+
+        override val methodPointers: PointerList<ShakeMethod>
+        override val fieldPointers: PointerList<ShakeField>
+        override val classPointers: PointerList<ShakeClass>
+        override val staticFieldPointers: PointerList<ShakeField>
+        override val staticMethodPointers: PointerList<ShakeMethod>
+        override val staticClassPointers: PointerList<ShakeClass>
+        override val constructorPointers: PointerList<ShakeConstructor>
+
         override val methods: List<ShakeMethod>
         override val fields: List<ShakeClassField>
         override val classes: List<ShakeClass>
@@ -48,8 +71,11 @@ interface ShakeClass {
         override val staticFields: List<ShakeClassField>
         override val staticClasses: List<ShakeClass>
         override val constructors: List<ShakeConstructor>
-        override var superClass: ShakeClass? = null
-            private set
+
+        override val superClassPointer: Pointer<ShakeClass?>
+        override val interfacePointers: PointerList<ShakeClass>
+
+        override val superClass: ShakeClass? get() = superClassPointer.value
         override var interfaces: List<ShakeClass> = listOf()
             private set
 
@@ -74,15 +100,28 @@ interface ShakeClass {
             this.pkg = pkg
             this.parentScope = parentScope
             this.name = name
-            this.methods = methods
-            this.fields = fields
-            this.classes = classes
-            this.staticMethods = staticMethods
-            this.staticFields = staticFields
-            this.staticClasses = staticClasses
-            this.constructors = constructors
-            this.superClass = superClass
-            this.interfaces = interfaces
+
+            this.methodPointers = methods.points()
+            this.fieldPointers = fields.points()
+            this.classPointers = classes.points()
+            this.staticMethodPointers = staticMethods.points()
+            this.staticFieldPointers = staticFields.points()
+            this.staticClassPointers = staticClasses.points()
+            this.constructorPointers = constructors.points()
+
+            this.superClassPointer = superClass.point()
+            this.interfacePointers = interfaces.points()
+
+            this.methods = methodPointers.values()
+            this.fields = fieldPointers.values()
+            this.classes = classPointers.values()
+            this.staticMethods = methodPointers.values()
+            this.staticFields = fieldPointers.values()
+            this.staticClasses = classPointers.values()
+            this.constructors = constructorPointers.values()
+
+            this.interfaces = interfacePointers.values()
+
             this.signature = "${pkg ?: ""}#$name"
         }
 
@@ -96,16 +135,42 @@ interface ShakeClass {
             this.pkg = pkg
             this.parentScope = parentScope
             this.name = it.name
-            this.methods = it.methods.map { ShakeMethod.from(this, it) }
-            this.fields = it.fields.map { ShakeClassField.from(this, it) }
-            this.classes = it.classes.map { from(this.prj, this.pkg, it) } // TODO Parent class?
-            this.staticMethods = it.staticMethods.map { ShakeMethod.from(this, it) }
-            this.staticFields = it.staticFields.map { ShakeClassField.from(this, it) }
-            this.staticClasses = it.staticClasses.map { from(this.prj, this.pkg, it) }
-            this.constructors = it.constructors.map { ShakeConstructor.from(this, it) }
 
-            prj.expectClass(it.qualifiedName) { this.superClass = it }
-            promiseCombine(it.interfaces.map { prj.expectClass(it.qualifiedName) }).then { this.interfaces = it }
+            val methodPointers = it.methods.map { Pointer.late<ShakeMethod>() }
+            val fieldPointers = it.fields.map { Pointer.late<ShakeClassField>() }
+            val classPointers = it.classes.map { Pointer.late<ShakeClass>() }
+            val staticMethodPointers = it.staticMethods.map { Pointer.late<ShakeMethod>() }
+            val staticFieldPointers = it.staticFields.map { Pointer.late<ShakeClassField>() }
+            val staticClassPointers = it.staticClasses.map { Pointer.late<ShakeClass>() }
+            val constructorPointers = it.constructors.map { Pointer.late<ShakeConstructor>() }
+
+            this.methodPointers = methodPointers
+            this.fieldPointers = fieldPointers
+            this.classPointers = classPointers
+            this.staticMethodPointers = staticMethodPointers
+            this.staticFieldPointers = staticFieldPointers
+            this.staticClassPointers = staticClassPointers
+            this.constructorPointers = constructorPointers
+
+            this.methods = methodPointers.map { it.value }
+            this.fields = fieldPointers.map { it.value }
+            this.classes = classPointers.map { it.value }
+            this.staticMethods = staticMethodPointers.map { it.value }
+            this.staticFields = staticFieldPointers.map { it.value }
+            this.staticClasses = staticClassPointers.map { it.value }
+            this.constructors = constructorPointers.map { it.value }
+
+            this.superClassPointer = it.superClass?.qualifiedName?.let { it1 -> prj.getClass(it1) } ?: Pointer.of(null)
+            this.interfacePointers = it.interfaces.map { it1 -> prj.getClass(it1.qualifiedName).transform { it ?: throw Error("Implemented class does not exist") } }
+
+            it.methods.zip(methodPointers).forEach { (method, pointer) -> pointer.init(ShakeMethod.from(this, method)) }
+            it.fields.zip(fieldPointers).forEach { (field, pointer) -> pointer.init(ShakeClassField.from(this, field)) }
+            it.classes.zip(classPointers).forEach { (clazz, pointer) -> pointer.init(from(prj, pkg, it)) }
+            it.staticMethods.zip(staticMethodPointers).forEach { (method, pointer) -> pointer.init(ShakeMethod.from(this, method)) }
+            it.staticFields.zip(staticFieldPointers).forEach { (field, pointer) -> pointer.init(ShakeClassField.from(this, field)) }
+            it.staticClasses.zip(staticClassPointers).forEach { (_, pointer) -> pointer.init(from(prj, pkg, it)) }
+            it.constructors.zip(constructorPointers).forEach { (constructor, pointer) -> pointer.init(ShakeConstructor.from(this, constructor)) }
+
             this.signature = "${pkg ?: ""}#$name"
         }
 
