@@ -3,6 +3,8 @@ package io.github.shakelang.shake.processor.program.types
 import io.github.shakelang.shake.processor.program.types.code.ShakeCode
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
+import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.point
 
 interface ShakeFunction : ShakeInvokable {
     val prj: ShakeProject
@@ -19,7 +21,6 @@ interface ShakeFunction : ShakeInvokable {
     val isPublic: Boolean
 
     override val qualifiedName: String
-    override val returnType: ShakeType
     val scope : ShakeScope
     val signature: String
 
@@ -38,7 +39,10 @@ interface ShakeFunction : ShakeInvokable {
         override val isPrivate: Boolean
         override val isProtected: Boolean
         override val isPublic: Boolean
-        override val returnType: ShakeType
+
+        override val returnTypePointer: Pointer<ShakeType>
+        override val returnType: ShakeType get () = returnTypePointer.value
+
         override val parameters: List<ShakeParameter>
         override val body: ShakeCode
         override val signature: String
@@ -72,7 +76,7 @@ interface ShakeFunction : ShakeInvokable {
             this.isPrivate = isPrivate
             this.isProtected = isProtected
             this.isPublic = isPublic
-            this.returnType = returnType
+            this.returnTypePointer = returnType.point()
             this.parameters = parameters
             this.body = body
             this.signature =  "${pkg?.qualifiedName ?: ""}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
@@ -96,7 +100,7 @@ interface ShakeFunction : ShakeInvokable {
             this.isPrivate = it.isPrivate
             this.isProtected = it.isProtected
             this.isPublic = it.isPublic
-            this.returnType = it.returnType // TODO: copy return type
+            this.returnTypePointer = ShakeType.from(prj, it.returnType)
             this.parameters = it.parameters // TODO: copy parameters
             this.body = it.body // TODO: copy body
             this.signature =  "${pkg?.qualifiedName ?: ""}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"

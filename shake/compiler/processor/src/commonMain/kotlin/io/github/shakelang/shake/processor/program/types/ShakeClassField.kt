@@ -2,6 +2,8 @@ package io.github.shakelang.shake.processor.program.types
 
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
+import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.point
 
 interface ShakeClassField : ShakeField {
     val clazz: ShakeClass
@@ -10,7 +12,8 @@ interface ShakeClassField : ShakeField {
     class Impl : ShakeClassField {
         override val clazz: ShakeClass
         override val name: String
-        override val type: ShakeType
+        override val typePointer: Pointer<ShakeType>
+        override val type: ShakeType get() = typePointer.value
         override val project: ShakeProject
         override val pkg: ShakePackage?
         override val parentScope: ShakeScope
@@ -44,7 +47,7 @@ interface ShakeClassField : ShakeField {
         ) {
             this.clazz = clazz
             this.name = name
-            this.type = type
+            this.typePointer = type.point()
             this.project = project
             this.pkg = pkg
             this.parentScope = parentScope
@@ -66,7 +69,7 @@ interface ShakeClassField : ShakeField {
         ) {
             this.clazz = clazz
             this.name = it.name
-            this.type = it.type // TODO: copy type
+            this.typePointer = ShakeType.from(clazz.prj, it.type)
             this.project = clazz.prj
             this.pkg = clazz.pkg
             this.parentScope = parentScope

@@ -19,20 +19,60 @@ interface ShakeConstructor {
 
     fun toJson(): Map<String, Any?>
 
-    class Impl(
-        override val clazz: ShakeClass,
-        override val body: ShakeCode,
-        override val isStrict: Boolean,
-        override val isPrivate: Boolean,
-        override val isProtected: Boolean,
-        override val isPublic: Boolean,
-        override val name: String?,
-        override val parameters: List<ShakeParameter>,
-        override val parentScope: ShakeScope,
-        override val scope: ShakeScope
-    ) : ShakeConstructor {
+    class Impl : ShakeConstructor {
 
-        override val signature: String = "${clazz.signature}#${name?.let { "#$it" } ?: ""}(${parameters.joinToString(",") { it.type.signature }})"
+        override val clazz: ShakeClass
+        override val body: ShakeCode
+        override val isStrict: Boolean
+        override val isPrivate: Boolean
+        override val isProtected: Boolean
+        override val isPublic: Boolean
+        override val name: String?
+        override val parameters: List<ShakeParameter>
+        override val parentScope: ShakeScope
+        override val scope: ShakeScope
+
+        constructor(
+            clazz: ShakeClass,
+            body: ShakeCode,
+            isStrict: Boolean,
+            isPrivate: Boolean,
+            isProtected: Boolean,
+            isPublic: Boolean,
+            name: String?,
+            parameters: List<ShakeParameter>,
+            parentScope: ShakeScope,
+            scope: ShakeScope
+        ) {
+            this.clazz = clazz
+            this.body = body
+            this.isStrict = isStrict
+            this.isPrivate = isPrivate
+            this.isProtected = isProtected
+            this.isPublic = isPublic
+            this.name = name
+            this.parameters = parameters
+            this.parentScope = parentScope
+            this.scope = scope
+        }
+
+        constructor(
+            clazz: ShakeClass,
+            it: ShakeConstructor
+        ) {
+            this.clazz = clazz
+            this.body = it.body // TODO: copy
+            this.isStrict = it.isStrict
+            this.isPrivate = it.isPrivate
+            this.isProtected = it.isProtected
+            this.isPublic = it.isPublic
+            this.name = it.name
+            this.parameters = it.parameters.map { ShakeParameter.from(clazz.prj, it) }
+            this.parentScope = it.parentScope
+            this.scope = it.scope
+        }
+
+        override val signature: String get() = "${clazz.signature}#${name?.let { "#$it" } ?: ""}(${parameters.joinToString(",") { it.type.signature }})"
 
         override fun toJson(): Map<String, Any?> = mapOf(
             "clazz" to clazz.toJson(),
@@ -47,7 +87,7 @@ interface ShakeConstructor {
     }
 
     companion object {
-        fun from(clazz: ShakeClass, it: ShakeConstructor): ShakeConstructor = TODO()
+        fun from(clazz: ShakeClass, it: ShakeConstructor): ShakeConstructor = Impl(clazz, it)
     }
 
 }

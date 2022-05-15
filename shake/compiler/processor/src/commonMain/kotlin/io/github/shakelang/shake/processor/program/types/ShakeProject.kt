@@ -56,7 +56,7 @@ interface ShakeProject {
         return clz.transform { it?.getMethodBySignature(signature) }
     }
 
-    fun getClassFieldBySignature(signature: String): Pointer<Unit>? {
+    fun getClassFieldBySignature(signature: String): Pointer<ShakeClassField?> {
         val parts = signature.split("#")
         val clz = getClassBySignature("${parts[0]}#${parts[1]}")
         return clz.transform { it?.getFieldBySignature(signature) }

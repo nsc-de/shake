@@ -2,6 +2,8 @@ package io.github.shakelang.shake.processor.program.types
 
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
+import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.point
 
 interface ShakeField : ShakeDeclaration, ShakeAssignable {
     val project: ShakeProject
@@ -21,7 +23,8 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
         override val project: ShakeProject
         override val pkg: ShakePackage?
         override val name: String
-        override val type: ShakeType
+        override val typePointer: Pointer<ShakeType>
+        override val type: ShakeType get() = typePointer.value
         override val parentScope: ShakeScope
         override val isStatic: Boolean
         override val isFinal: Boolean
@@ -50,7 +53,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
             this.project = project
             this.pkg = pkg
             this.name = name
-            this.type = type
+            this.typePointer = type.point()
             this.parentScope = parentScope
             this.isStatic = isStatic
             this.isFinal = isFinal
@@ -71,7 +74,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
             this.project = project
             this.pkg = pkg
             this.name = it.name
-            this.type = it.type
+            this.typePointer = ShakeType.from(project, it.type)
             this.parentScope = parentScope
             this.isStatic = it.isStatic
             this.isFinal = it.isFinal
@@ -85,7 +88,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}.$name"
 
-        override fun assignType(other: ShakeType): ShakeType? {
+        override fun assignType(other: ShakeType): ShakeType {
             return type.assignType(other) ?: this.type
         }
 

@@ -1,11 +1,12 @@
 package io.github.shakelang.shake.processor.program.types
 
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVariableDeclaration
-import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
+import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeAssignable {
 
     val qualifiedName: String
+    val typePointer: Pointer<ShakeType>
     val type: ShakeType
 
     //fun access(scope: ShakeScope): ShakeValue
@@ -23,11 +24,11 @@ interface ShakeAssignable {
     fun decrementAfterType(): ShakeType?
 
     companion object {
-        fun from(prj: ShakeProject, variable: ShakeAssignable): ShakeAssignable {
+        fun from(prj: ShakeProject, variable: ShakeAssignable): Pointer<ShakeAssignable> {
             return when (variable) {
                 is ShakeVariableDeclaration -> TODO("Implement ShakeVariableDeclaration")
-                is ShakeField -> prj.getFieldBySignature(variable.signature) ?: throw IllegalStateException("Field not found: ${variable.signature}")
-                is ShakeClassField -> prj.getClassFieldBySignature(variable.signature) ?: throw IllegalStateException("ClassField not found: ${variable.signature}")
+                is ShakeField -> prj.getFieldBySignature(variable.signature).transform { it ?: throw IllegalStateException("Field not found: ${variable.signature}")  }
+                is ShakeClassField -> prj.getClassFieldBySignature(variable.signature).transform { throw IllegalStateException("ClassField not found: ${variable.signature}") }
                 else -> {
                     throw IllegalStateException("Unknown assignable: $variable")
                 }

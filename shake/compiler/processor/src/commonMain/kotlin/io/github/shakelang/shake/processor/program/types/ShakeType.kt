@@ -999,11 +999,11 @@ interface ShakeType {
         fun objectType(clazz: ShakeClass): Object {
             return Object.Impl(clazz)
         }
-        fun from(project: ShakeProject, type: ShakeType) : ShakeType {
+        fun from(project: ShakeProject, type: ShakeType) : Pointer<ShakeType> {
             return when(type) {
-                is Primitive -> type
-                is Object -> project.getClass(type.qualifiedName)?.let { objectType(it) } ?: throw IllegalStateException("Class ${type.qualifiedName} not found")
-                is Array -> Array.Impl(from(project, type.elementType))
+                is Primitive -> type.point()
+                is Object -> project.getClass(type.qualifiedName).transform { objectType(it ?: throw IllegalStateException("Class ${type.qualifiedName} not found")) }
+                is Array -> from(project, type.elementType).transform { Array.Impl(it) }
                 is Lambda -> TODO()
                 else -> throw IllegalStateException("Unknown type ${type.name}")
             }

@@ -4,6 +4,8 @@ import io.github.shakelang.shake.processor.program.types.code.ShakeCode
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVariableDeclaration
+import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.point
 
 
 interface ShakeMethod : ShakeFunction {
@@ -23,7 +25,8 @@ interface ShakeMethod : ShakeFunction {
         override val isPrivate: Boolean
         override val isProtected: Boolean
         override val isPublic: Boolean
-        override val returnType: ShakeType
+        override val returnTypePointer: Pointer<ShakeType>
+        override val returnType: ShakeType get() = returnTypePointer.value
         override val parameters: List<ShakeParameter>
         override val body: ShakeCode
 
@@ -58,7 +61,7 @@ interface ShakeMethod : ShakeFunction {
             this.isPrivate = isPrivate
             this.isProtected = isProtected
             this.isPublic = isPublic
-            this.returnType = returnType
+            this.returnTypePointer = returnType.point()
             this.parameters = parameters
             this.body = body
             this.signature = "${clazz.signature}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
@@ -82,7 +85,7 @@ interface ShakeMethod : ShakeFunction {
             this.isPrivate = it.isPrivate
             this.isProtected = it.isProtected
             this.isPublic = it.isPublic
-            this.returnType = ShakeType.from(prj, it.returnType)
+            this.returnTypePointer = ShakeType.from(prj, it.returnType)
             this.parameters = it.parameters // TODO: copy parameters
             this.body = it.body // TODO copy body
             this.signature = "${clazz.signature}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
