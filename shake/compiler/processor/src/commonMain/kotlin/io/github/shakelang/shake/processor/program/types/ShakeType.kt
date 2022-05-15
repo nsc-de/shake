@@ -867,15 +867,27 @@ interface ShakeType {
     }
 
     interface Object : ShakeType {
+        val classPointer: Pointer<ShakeClass>
         val clazz: ShakeClass
         override val kind: Kind
             get() = Kind.OBJECT
         val qualifiedName: String
 
-        class Impl(override val clazz: ShakeClass) : Object {
+        class Impl : Object {
             override val name: String get() = signature
-            override val signature: String = "L${clazz.qualifiedName}"
+            override val signature: String get() = "L${clazz.qualifiedName}"
             override val qualifiedName: String get() = clazz.qualifiedName
+
+            override val classPointer: Pointer<ShakeClass>
+            override val clazz: ShakeClass get() = clazz
+
+            constructor(clazz: ShakeClass) {
+                this.classPointer = clazz.point()
+            }
+
+            constructor(classPointer: Pointer<ShakeClass>) {
+                this.classPointer = classPointer
+            }
 
             override fun assignType(other: ShakeType): ShakeType? = null
             override fun additionAssignType(other: ShakeType): ShakeType? = null
@@ -921,11 +933,27 @@ interface ShakeType {
     }
 
     interface Array : ShakeType {
+        val elementTypePointer: Pointer<ShakeType>
         val elementType: ShakeType
 
-        class Impl(override val elementType: ShakeType) : Array {
+        class Impl : Array {
             override val name: String get() = signature
             override val signature: String = "[${elementType.name}"
+
+            override val elementTypePointer: Pointer<ShakeType>
+            override val elementType: ShakeType get() = elementTypePointer.value
+
+            constructor(
+                elementType: ShakeType
+            ) : super() {
+                this.elementTypePointer = elementType.point()
+            }
+
+            constructor(
+                elementTypePointer: Pointer<ShakeType>
+            ) : super() {
+                this.elementTypePointer = elementTypePointer
+            }
 
             override fun assignType(other: ShakeType): ShakeType? = null
             override fun additionAssignType(other: ShakeType): ShakeType? = null
@@ -999,6 +1027,17 @@ interface ShakeType {
         fun objectType(clazz: ShakeClass): Object {
             return Object.Impl(clazz)
         }
+        fun objectType(clazz: Pointer<ShakeClass>): Object {
+            return Object.Impl(clazz)
+        }
+        fun arrayType(elementType: ShakeType): Array {
+            return Array.Impl(elementType)
+        }
+        fun arrayType(elementTypePointer: Pointer<ShakeType>): Array {
+            return Array.Impl(elementTypePointer)
+        }
+
+
         fun from(project: ShakeProject, type: ShakeType) : Pointer<ShakeType> {
             return when(type) {
                 is Primitive -> type.point()
