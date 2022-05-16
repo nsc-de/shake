@@ -1,15 +1,15 @@
 package io.github.shakelang.shake.processor
 
-import io.github.shakelang.shake.processor.program.creation.CreationShakeConstructor
-import io.github.shakelang.shake.processor.program.creation.code.CreationShakeInvokable
+import io.github.shakelang.shake.processor.program.types.ShakeConstructor
 import io.github.shakelang.shake.processor.program.types.ShakeType
+import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 
 object ShakeSelect {
 
     fun selectFunction(
-        functions: List<CreationShakeInvokable>,
+        functions: List<ShakeInvokable>,
         parameters: List<ShakeType>,
-    ): CreationShakeInvokable? = functions.filter {
+    ): ShakeInvokable? = functions.filter {
             it.parameters.size == parameters.size && // TODO default parameters
                     it.parameters.zip(parameters).all { (parameter, argument) ->
                         parameter.type.compatibleTo(argument)
@@ -21,9 +21,9 @@ object ShakeSelect {
         }
 
     fun selectConstructor(
-        constructors: List<CreationShakeConstructor>,
+        constructors: List<ShakeConstructor>,
         parameters: List<ShakeType>,
-    ): CreationShakeConstructor? = constructors.filter {
+    ): ShakeConstructor? = constructors.filter {
         it.parameters.size == parameters.size && // TODO default parameters
                 it.parameters.zip(parameters).all { (parameter, argument) ->
                     parameter.type.compatibleTo(argument)
