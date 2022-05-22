@@ -6,37 +6,182 @@ import io.github.shakelang.shake.processor.util.PointingList
 import io.github.shakelang.shake.processor.util.latePoint
 import io.github.shakelang.shake.processor.util.point
 
+/**
+ * Represents a package in the Shake language.
+ *
+ * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
+ */
 interface ShakePackage {
-    val baseProject: ShakeProject
+
+    /**
+     * The [ShakeProject] of this package.
+     */
+    val project: ShakeProject
+
+    /**
+     * The name of this package.
+     */
     val name: String
+
+    /**
+     * The parent [ShakePackage] of this package (if any).
+     */
     val parent: ShakePackage?
 
+    /**
+     * A list of pointers to all the sub-packages of this package.
+     */
     val subpackagePointers: List<Pointer<ShakePackage>>
+
+    /**
+     * A list of pointers to all the [ShakeClass]es in this package.
+     */
     val classPointers: List<Pointer<ShakeClass>>
+
+    /**
+     * A list of pointers to all the [ShakeFunction]s in this package.
+     */
     val functionPointers: List<Pointer<ShakeFunction>>
+
+    /**
+     * A list of pointers to all the [ShakeVariable]s in this package.
+     */
     val fieldPointers: List<Pointer<ShakeField>>
 
+    /**
+     * The subpackages of this package.
+     */
     val subpackages: List<ShakePackage>
+
+    /**
+     * The classes in this package.
+     */
     val classes: List<ShakeClass>
+
+    /**
+     * The functions in this package.
+     */
     val functions: List<ShakeFunction>
+
+    /**
+     * The fields in this package.
+     */
     val fields: List<ShakeField>
 
+    /**
+     * The qualified name of this package.
+     */
     val qualifiedName: String
+
+    /**
+     * The [ShakeScope] of this package. This is the scope that all the
+     * [ShakeClass]es, [ShakeFunction]s, and [ShakeField]s in this package
+     * will be added to. Its parent is the [ShakeScope] of the project.
+     * All the [ShakeClass]es, [ShakeFunction]s inside this package will
+     * use this scope as their parent and code executed statically to
+     * initialize [ShakeField] values directly use this scope.
+     */
     val scope: ShakeScope
+
+    /**
+     * The signature of this package. The package signature is used to
+     * determine if two packages are the same and to find the package
+     * from the [ShakeProject].
+     */
     val signature: String
 
+    /**
+     * Get a subpackage by its name. If the name contains a dot, it will be split and
+     * the package will be searched recursively in subpackages. This will give back
+     * a [Pointer] to the package, so if the package is not found, but created at a
+     * later point, it will be returned, but only if it is already created at the
+     * point of access of the [Pointer.value] property. Until creation the pointer
+     * will point to null.
+     *
+     * @param name The name of the package.
+     * @return A pointer to the package.
+     */
     fun getPackage(name: String): Pointer<ShakePackage?>
-    fun getPackage(name: Array<String>): Pointer<ShakePackage?>
 
-    fun getFunctionBySignature(signature: String): ShakeFunction? = functions.firstOrNull { it.signature == signature }
-    fun getFieldBySignature(signature: String): ShakeField? = fields.firstOrNull { it.signature == signature }
-    fun getClassBySignature(signature: String): ShakeClass? = classes.firstOrNull { it.signature == signature }
+    /**
+     * Get a package by the parts of its name. The parts must not contain dots.
+     * If they do so, it will search for packages with a dot in their name.
+     * This will give back a [Pointer] to the package, so if the package is not found,
+     * but created at a later point, it will be returned, but only if it is already
+     * created at the point of access of the [Pointer.value] property. Until creation
+     * the pointer will point to null.
+     *
+     * @param parts The parts of the package name.
+     * @return A pointer to the package.
+     */
+    fun getPackage(parts: Array<String>): Pointer<ShakePackage?>
+
+    /**
+     * Get a child class by its signature. This will give back a [Pointer] to the
+     * class, so if the class is not found, but created at a later point, it will
+     * be returned, but only if it is already created at the point of access of the
+     * [Pointer.value] property. Until creation the pointer will point to null.
+     * This will also search for classes with a dot in their name.
+     *
+     * @param signature The signature of the class.
+     * @return A pointer to the class.
+     */
+    fun getClassBySignature(signature: String): Pointer<ShakeClass?> = Pointer.task { classes.firstOrNull { it.signature == signature } }
+
+    /**
+     * Get a child function by its signature. This will give back a [Pointer] to the
+     * function, so if the function is not found, but created at a later point, it will
+     * be returned, but only if it is already created at the point of access of the
+     * [Pointer.value] property. Until creation the pointer will point to null.
+     *
+     * @param signature The signature of the function.
+     * @return A pointer to the function.
+     */
+    fun getFunctionBySignature(signature: String): Pointer<ShakeFunction?> = Pointer.task { functions.firstOrNull { it.signature == signature } }
 
 
+    /**
+     * Get a child field by its signature. This will give back a [Pointer] to the
+     * field, so if the field is not found, but created at a later point, it will
+     * be returned, but only if it is already created at the point of access of the
+     * [Pointer.value] property. Until creation the pointer will point to null.
+     *
+     * @param signature The signature of the field.
+     * @return A pointer to the field.
+     */
+    fun getFieldBySignature(signature: String): Pointer<ShakeField?> = Pointer.task { fields.firstOrNull { it.signature == signature } }
+
+    /**
+     * Get a child class by its name. This will give back a [Pointer] to the
+     * class, so if the class is not found, but created at a later point, it will
+     * be returned, but only if it is already created at the point of access of the
+     * [Pointer.value] property. Until creation the pointer will point to null.
+     *
+     * @param name The name of the class.
+     * @return A pointer to the class.
+     */
+    fun getClassByName(name: String): Pointer<ShakeClass?> = Pointer.task { classes.firstOrNull { it.name == name } }
+
+    /**
+     * Get a child functions by their name. This will give back a [Pointer] to the
+     * functions, so if no functions are found, but created at a later point, they will
+     * be included, but only if they are already created at the point of access of the
+     * [Pointer.value] property. Until creation the pointer will point to null.
+     *
+     * @param name The name of the functions
+     * @return A pointer to a list of [ShakeFunction].
+     */
+    fun getFunctionsByName(name: String): Pointer<List<ShakeFunction>> = Pointer.task { functions.filter { it.name == name } }
+
+
+    /**
+     * Returns a JSON map representation of this package. This is used to serialize
+     * the package to JSON.
+     */
     fun toJson(): Map<String, Any?>
 
     class Impl : ShakePackage {
-        override val baseProject: ShakeProject
+        override val project: ShakeProject
         override val name: String
         override val parent: ShakePackage?
 
@@ -63,7 +208,7 @@ interface ShakePackage {
             functions: List<ShakeFunction>,
             fields: List<ShakeField>
         ) {
-            this.baseProject = baseProject
+            this.project = baseProject
             this.name = name
             this.parent = parent
 
@@ -83,7 +228,7 @@ interface ShakePackage {
             parent: Impl?,
             it: ShakePackage
         ) {
-            this.baseProject = baseProject
+            this.project = baseProject
             this.name = it.name
             this.parent = parent
 
@@ -125,9 +270,9 @@ interface ShakePackage {
             return Pointer.task { subpackages.find { it.name == name } ?: throw Error("Package $name not found") }
         }
 
-        override fun getPackage(name: Array<String>): Pointer<ShakePackage?> {
-            if(name.isEmpty()) throw IllegalArgumentException("Cannot get package from empty name")
-            return getPackage(name.first()).chainAllowNull { it?.getPackage(name.drop(1).toTypedArray())  }
+        override fun getPackage(parts: Array<String>): Pointer<ShakePackage?> {
+            if(parts.isEmpty()) throw IllegalArgumentException("Cannot get package from empty name")
+            return getPackage(parts.first()).chainAllowNull { it?.getPackage(parts.drop(1).toTypedArray())  }
         }
 
         override fun toJson(): Map<String, Any?> {
@@ -142,6 +287,9 @@ interface ShakePackage {
     }
 
     companion object {
+        /**
+         * Clone a [ShakePackage]. This is used to create deep copies of [ShakeProject]s.
+         */
         fun from(project: ShakeProject.Impl, parent: Impl?, it: ShakePackage): ShakePackage = Impl(project, parent, it)
     }
 }

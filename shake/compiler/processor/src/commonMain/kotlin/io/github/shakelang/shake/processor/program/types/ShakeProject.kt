@@ -159,7 +159,7 @@ interface ShakeProject {
     fun getClassBySignature(signature: String): Pointer<ShakeClass?> {
         val parts = signature.split("#")
         val pkg = getPackage(parts[0])
-        return pkg.transform { it?.getClassBySignature(signature) }
+        return pkg.chainAllowNull { it?.getClassBySignature(signature) }
     }
 
     /**
@@ -175,7 +175,7 @@ interface ShakeProject {
     fun getFunctionBySignature(signature: String): Pointer<ShakeFunction?> {
         val parts = signature.split("#")
         val pkg = getPackage(parts[0])
-        return pkg.transform { it?.getFunctionBySignature(signature) }
+        return pkg.chainAllowNull { it?.getFunctionBySignature(signature) }
     }
 
     /**
@@ -191,7 +191,7 @@ interface ShakeProject {
     fun getFieldBySignature(signature: String): Pointer<ShakeField?> {
         val parts = signature.split("#")
         val pkg = getPackage(parts[0])
-        return pkg.transform { it?.getFieldBySignature(signature) }
+        return pkg.chainAllowNull { it?.getFieldBySignature(signature) }
     }
 
     /**

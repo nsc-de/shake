@@ -36,7 +36,7 @@ interface ShakeType {
     fun orType(other: ShakeType): ShakeType?
     fun notType(): ShakeType?
     fun childType(name: String): ShakeType?
-    fun childFunctions(name: String): List<ShakeFunction>?
+    fun childFunctions(name: String): List<`Pointer<ShakeFunction>`>?
     fun childInvokable(name: String): List<ShakeFunction>?
 
     val kind: Kind
