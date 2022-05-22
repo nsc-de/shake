@@ -5,18 +5,67 @@ import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 import io.github.shakelang.shake.processor.util.Pointer
 import io.github.shakelang.shake.processor.util.point
 
+/**
+ * Represents a field in the Shake programming language.
+ *
+ * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
+ */
 interface ShakeField : ShakeDeclaration, ShakeAssignable {
+
+    /**
+     * The project the field belongs to.
+     */
     val project: ShakeProject
+
+    /**
+     * The package the field belongs to (if any).
+     */
     val pkg: ShakePackage?
-    val parentScope: ShakeScope
+
+    /**
+     * The scope the field uses for initialization.
+     */
+    val scope: ShakeScope
+
+    /**
+     * Is the field a static field?
+     */
     val isStatic: Boolean
+
+    /**
+     * Is the field a final field?
+     */
     val isFinal: Boolean
+
+    /**
+     * Is the field abstract?
+     */
     val isAbstract: Boolean
+
+    /**
+     * Is the field private?
+     */
     val isPrivate: Boolean
+
+    /**
+     * Is the field protected?
+     */
     val isProtected: Boolean
+
+    /**
+     * Is the field public?
+     */
     val isPublic: Boolean
+
+    /**
+     * The initial value of the field (if any).
+     */
     val initialValue: ShakeValue?
 
+
+    /**
+     * The signature of the field.
+     */
     val signature: String
 
     class Impl : ShakeField {
@@ -25,7 +74,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
         override val name: String
         override val typePointer: Pointer<ShakeType>
         override val type: ShakeType get() = typePointer.value
-        override val parentScope: ShakeScope
+        override val scope: ShakeScope
         override val isStatic: Boolean
         override val isFinal: Boolean
         override val isAbstract: Boolean
@@ -54,7 +103,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
             this.pkg = pkg
             this.name = name
             this.typePointer = type.point()
-            this.parentScope = parentScope
+            this.scope = parentScope
             this.isStatic = isStatic
             this.isFinal = isFinal
             this.isAbstract = isAbstract
@@ -75,7 +124,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
             this.pkg = pkg
             this.name = it.name
             this.typePointer = ShakeType.from(project, it.type)
-            this.parentScope = parentScope
+            this.scope = parentScope
             this.isStatic = it.isStatic
             this.isFinal = it.isFinal
             this.isAbstract = it.isAbstract
@@ -148,6 +197,9 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable {
     }
 
     companion object {
-        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeField): ShakeField = Impl(project, pkg, it, it.parentScope)
+        /**
+         * Deep copies a [ShakeField].
+         */
+        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeField): ShakeField = Impl(project, pkg, it, it.scope)
     }
 }

@@ -16,7 +16,7 @@ interface ShakeClassField : ShakeField {
         override val type: ShakeType get() = typePointer.value
         override val project: ShakeProject
         override val pkg: ShakePackage?
-        override val parentScope: ShakeScope
+        override val scope: ShakeScope
         override val isStatic: Boolean
         override val isFinal: Boolean
         override val isAbstract: Boolean
@@ -50,7 +50,7 @@ interface ShakeClassField : ShakeField {
             this.typePointer = type.point()
             this.project = project
             this.pkg = pkg
-            this.parentScope = parentScope
+            this.scope = parentScope
             this.isStatic = isStatic
             this.isFinal = isFinal
             this.isAbstract = isAbstract
@@ -72,7 +72,7 @@ interface ShakeClassField : ShakeField {
             this.typePointer = ShakeType.from(clazz.prj, it.type)
             this.project = clazz.prj
             this.pkg = clazz.pkg
-            this.parentScope = parentScope
+            this.scope = parentScope
             this.isStatic = it.isStatic
             this.isFinal = it.isFinal
             this.isAbstract = it.isAbstract
