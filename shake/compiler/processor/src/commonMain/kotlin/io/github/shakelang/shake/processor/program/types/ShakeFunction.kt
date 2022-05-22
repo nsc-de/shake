@@ -5,28 +5,93 @@ import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.util.Pointer
 import io.github.shakelang.shake.processor.util.point
 
+/**
+ * Represents a function in the Shake language.
+ *
+ * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
+ */
 interface ShakeFunction : ShakeInvokable {
-    val prj: ShakeProject
-    val pkg: ShakePackage?
-    val parentScope: ShakeScope
+
+    /**
+     * The name of this function.
+     */
     val name: String
+
+    /**
+     * The [ShakeProject] that this function belongs to.
+     */
+    val project: ShakeProject
+
+    /**
+     * The [ShakePackage] that this function belongs to (if any).
+     */
+    val pkg: ShakePackage?
+
+    /**
+     * The parent [ShakeScope] of this function (normally the scope of it's [ShakeFile])
+     */
+    val parentScope: ShakeScope
+
+    /**
+     * Is this function static?
+     */
     val isStatic: Boolean
+
+    /**
+     * Is this function final?
+     */
     val isFinal: Boolean
+
+    /**
+     * Is this function abstract?
+     */
     val isAbstract: Boolean
+
+    /**
+     * Is this function synchronized?
+     */
     val isSynchronized: Boolean
+
+    /**
+     * Is this function strict?
+     */
     val isStrict: Boolean
+
+    /**
+     * Is this function private?
+     */
     val isPrivate: Boolean
+
+    /**
+     * Is this function protected?
+     */
     val isProtected: Boolean
+
+    /**
+     * Is this function public?
+     */
     val isPublic: Boolean
 
+
+    /**
+     * The qualified name of this function.
+     */
     override val qualifiedName: String
-    val scope : ShakeScope
+
+    /**
+     * The scope of this function.
+     */
+    val scope : ShakeScope.ShakeFunctionScope
+
+    /**
+     * The signature of this function.
+     */
     val signature: String
 
     override fun toJson(): Map<String, Any?>
 
     class Impl : ShakeFunction {
-        override val prj: ShakeProject
+        override val project: ShakeProject
         override val pkg: ShakePackage?
         override val parentScope: ShakeScope
         override val name: String
@@ -63,7 +128,7 @@ interface ShakeFunction : ShakeInvokable {
             parameters: List<ShakeParameter>,
             body: ShakeCode
         ) {
-            this.prj = prj
+            this.project = prj
             this.pkg = pkg
             this.parentScope = parentScope
             this.name = name
@@ -87,7 +152,7 @@ interface ShakeFunction : ShakeInvokable {
             parentScope: ShakeScope,
             it: ShakeFunction
         ) {
-            this.prj = prj
+            this.project = prj
             this.pkg = pkg
             this.parentScope = parentScope
             this.name = it.name
@@ -106,7 +171,7 @@ interface ShakeFunction : ShakeInvokable {
         }
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}$name"
-        override val scope: ShakeScope = ShakeScope.ShakeFunctionScope.from(this)
+        override val scope: ShakeScope.ShakeFunctionScope = ShakeScope.ShakeFunctionScope.from(this)
 
         override fun toJson(): Map<String, Any?> {
             return mapOf(

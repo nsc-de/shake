@@ -10,7 +10,7 @@ interface ShakeMethod : ShakeFunction {
 
     class Impl : ShakeMethod {
         override val clazz: ShakeClass
-        override val prj: ShakeProject
+        override val project: ShakeProject
         override val pkg: ShakePackage?
         override val parentScope: ShakeScope
         override val name: String
@@ -46,7 +46,7 @@ interface ShakeMethod : ShakeFunction {
             body: ShakeCode
         ) {
             this.clazz = clazz
-            this.prj = prj
+            this.project = prj
             this.pkg = pkg
             this.parentScope = parentScope
             this.name = name
@@ -70,7 +70,7 @@ interface ShakeMethod : ShakeFunction {
             it: ShakeMethod
         ) {
             this.clazz = clazz
-            this.prj = clazz.prj
+            this.project = clazz.prj
             this.pkg = clazz.pkg
             this.parentScope = scope
             this.name = it.name
@@ -82,7 +82,7 @@ interface ShakeMethod : ShakeFunction {
             this.isPrivate = it.isPrivate
             this.isProtected = it.isProtected
             this.isPublic = it.isPublic
-            this.returnTypePointer = ShakeType.from(prj, it.returnType)
+            this.returnTypePointer = ShakeType.from(project, it.returnType)
             this.parameters = it.parameters // TODO: copy parameters
             this.body = it.body // TODO copy body
             this.signature = "${clazz.signature}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
