@@ -5,6 +5,7 @@ import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeStatement
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
+import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeNew : ShakeValue, ShakeStatement {
 
@@ -18,8 +19,10 @@ interface ShakeNew : ShakeValue, ShakeStatement {
         override val arguments: List<ShakeValue>,
         override val parent: ShakeValue?,
         override val name: String,
-        override val type: ShakeType
+        override val typePointer: Pointer<ShakeType>
     ) : ShakeNew {
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "reference" to reference.toJson(),

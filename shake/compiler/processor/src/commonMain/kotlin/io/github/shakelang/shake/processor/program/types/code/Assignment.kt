@@ -5,18 +5,23 @@ import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeStatement
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
+import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeAssignmentType : ShakeValue, ShakeStatement {
+    val variablePointer: Pointer<ShakeAssignable>
     val variable: ShakeAssignable
     val value: ShakeValue
 }
 
 interface ShakeAssignment : ShakeAssignmentType {
     class Impl(
-        override val variable: ShakeAssignable,
+        override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
-        override val type: ShakeType,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakeAssignment {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "assignment",
@@ -36,10 +41,13 @@ interface ShakeAssignment : ShakeAssignmentType {
 
 interface ShakeAddAssignment : ShakeAssignmentType {
     class Impl(
-        override val variable: ShakeAssignable,
+        override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
-        override val type: ShakeType,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakeAddAssignment {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "add_assignment",
@@ -59,10 +67,13 @@ interface ShakeAddAssignment : ShakeAssignmentType {
 
 interface ShakeSubAssignment : ShakeAssignmentType {
     class Impl(
-        override val variable: ShakeAssignable,
+        override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
-        override val type: ShakeType,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakeSubAssignment {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "sub_assignment",
@@ -82,10 +93,13 @@ interface ShakeSubAssignment : ShakeAssignmentType {
 
 interface ShakeMulAssignment : ShakeAssignmentType {
     class Impl(
-        override val variable: ShakeAssignable,
+        override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
-        override val type: ShakeType,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakeMulAssignment {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "mul_assignment",
@@ -105,10 +119,13 @@ interface ShakeMulAssignment : ShakeAssignmentType {
 
 interface ShakeDivAssignment : ShakeAssignmentType {
     class Impl(
-        override val variable: ShakeAssignable,
+        override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
-        override val type: ShakeType,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakeDivAssignment {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "div_assignment",
@@ -128,10 +145,13 @@ interface ShakeDivAssignment : ShakeAssignmentType {
 
 interface ShakeModAssignment : ShakeAssignmentType {
     class Impl(
-        override val variable: ShakeAssignable,
+        override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
-        override val type: ShakeType,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakeModAssignment {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "mod_assignment",
@@ -151,10 +171,13 @@ interface ShakeModAssignment : ShakeAssignmentType {
 
 interface ShakePowAssignment : ShakeAssignmentType {
     class Impl(
-        override val variable: ShakeAssignable,
+        override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
-        override val type: ShakeType,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakePowAssignment {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "pow_assignment",
@@ -173,14 +196,18 @@ interface ShakePowAssignment : ShakeAssignmentType {
 }
 
 interface ShakeMutateType : ShakeValue, ShakeStatement {
+    val variablePointer: Pointer<ShakeAssignable>
     val variable: ShakeAssignable
 }
 
 interface ShakeIncrementBefore : ShakeMutateType {
     class Impl(
-        override val variable: ShakeAssignable,
-        override val type: ShakeType,
+        override val variablePointer: Pointer<ShakeAssignable>,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakeIncrementBefore {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "increment_before",
@@ -199,9 +226,12 @@ interface ShakeIncrementBefore : ShakeMutateType {
 
 interface ShakeIncrementAfter : ShakeMutateType {
     class Impl(
-        override val variable: ShakeAssignable,
-        override val type: ShakeType,
+        override val variablePointer: Pointer<ShakeAssignable>,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakeIncrementAfter {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "increment_after",
@@ -220,9 +250,12 @@ interface ShakeIncrementAfter : ShakeMutateType {
 
 interface ShakeDecrementBefore : ShakeMutateType {
     class Impl(
-        override val variable: ShakeAssignable,
-        override val type: ShakeType,
+        override val variablePointer: Pointer<ShakeAssignable>,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakeDecrementBefore {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "decrement_before",
@@ -241,9 +274,12 @@ interface ShakeDecrementBefore : ShakeMutateType {
 
 interface ShakeDecrementAfter : ShakeMutateType {
     class Impl(
-        override val variable: ShakeAssignable,
-        override val type: ShakeType,
+        override val variablePointer: Pointer<ShakeAssignable>,
+        override val typePointer: Pointer<ShakeType>,
     ) : ShakeDecrementAfter {
+        override val variable: ShakeAssignable get() = variablePointer.value
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "decrement_after",

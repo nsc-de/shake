@@ -3,6 +3,7 @@ package io.github.shakelang.shake.processor.program.types.code
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeStatement
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
+import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeInvocation: ShakeValue, ShakeStatement {
     val callable: ShakeInvokable
@@ -19,8 +20,10 @@ interface ShakeInvocation: ShakeValue, ShakeStatement {
         override val parent: ShakeValue?,
         override val name: String,
         override val isAnonymous: Boolean,
-        override val type: ShakeType
+        override val typePointer: Pointer<ShakeType>
     ): ShakeInvocation {
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> = mapOf(
             "callable" to callable.toJson(),
             "arguments" to arguments.map { it.toJson() },

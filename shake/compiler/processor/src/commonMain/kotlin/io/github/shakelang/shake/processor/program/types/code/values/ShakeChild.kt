@@ -3,6 +3,7 @@ package io.github.shakelang.shake.processor.program.types.code.values
 import io.github.shakelang.shake.processor.program.types.ShakeAssignable
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
+import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeChild : ShakeAssignable {
     val scope: ShakeScope
@@ -15,51 +16,53 @@ interface ShakeChild : ShakeAssignable {
         override val parent: ShakeValue,
         override val name: String,
         override val access: ShakeValue,
-        override val type: ShakeType
+        override val typePointer: Pointer<ShakeType>
     ) : ShakeChild {
+        override val type: ShakeType get() = typePointer.value
         override val qualifiedName: String get() = "${parent.type.name}.$name"
-        override fun assignType(other: ShakeType): ShakeType? {
-            TODO("Not yet implemented")
+
+        override fun assignType(other: ShakeType): ShakeType {
+            return this.type.assignType(other) ?: other
         }
 
         override fun additionAssignType(other: ShakeType): ShakeType? {
-            TODO("Not yet implemented")
+            return this.type.additionAssignType(other) ?: this.type.additionType(other)
         }
 
         override fun subtractionAssignType(other: ShakeType): ShakeType? {
-            TODO("Not yet implemented")
+            return this.type.subtractionAssignType(other) ?: this.type.subtractionType(other)
         }
 
         override fun multiplicationAssignType(other: ShakeType): ShakeType? {
-            TODO("Not yet implemented")
+            return this.type.multiplicationAssignType(other) ?: this.type.multiplicationType(other)
         }
 
         override fun divisionAssignType(other: ShakeType): ShakeType? {
-            TODO("Not yet implemented")
+            return this.type.divisionAssignType(other) ?: this.type.divisionType(other)
         }
 
         override fun modulusAssignType(other: ShakeType): ShakeType? {
-            TODO("Not yet implemented")
+            return this.type.modulusAssignType(other) ?: this.type.modulusType(other)
         }
 
         override fun powerAssignType(other: ShakeType): ShakeType? {
-            TODO("Not yet implemented")
+            return this.type.powerAssignType(other) ?: this.type.powerType(other)
         }
 
         override fun incrementBeforeType(): ShakeType? {
-            TODO("Not yet implemented")
+            return this.type.incrementBeforeType()
         }
 
         override fun incrementAfterType(): ShakeType? {
-            TODO("Not yet implemented")
+            return this.type.incrementAfterType()
         }
 
         override fun decrementBeforeType(): ShakeType? {
-            TODO("Not yet implemented")
+            return this.type.decrementBeforeType()
         }
 
         override fun decrementAfterType(): ShakeType? {
-            TODO("Not yet implemented")
+            return this.type.decrementAfterType()
         }
 
     }

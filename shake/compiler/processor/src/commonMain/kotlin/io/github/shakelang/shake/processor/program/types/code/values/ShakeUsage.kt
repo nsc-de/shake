@@ -5,6 +5,7 @@ import io.github.shakelang.shake.processor.program.types.ShakeDeclaration
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVariableDeclaration
+import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeUsage : ShakeValue {
     val scope: ShakeScope
@@ -22,8 +23,11 @@ interface ShakeClassFieldUsage : ShakeUsage {
         override val declaration: ShakeClassField,
         override val receiver: ShakeValue?,
         override val name: String,
-        override val type: ShakeType
+        override val typePointer: Pointer<ShakeType>
     ) : ShakeClassFieldUsage {
+        override val type: ShakeType
+            get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "declaration" to declaration.toJson(),
@@ -43,8 +47,11 @@ interface ShakeStaticClassFieldUsage : ShakeUsage {
         override val scope: ShakeScope,
         override val declaration: ShakeClassField,
         override val name: String,
-        override val type: ShakeType
+        override val typePointer: Pointer<ShakeType>
     ) : ShakeStaticClassFieldUsage {
+        override val type: ShakeType
+            get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "declaration" to declaration.toJson(),
@@ -63,8 +70,11 @@ interface ShakeFieldUsage : ShakeUsage {
         override val scope: ShakeScope,
         override val declaration: ShakeDeclaration,
         override val receiver: ShakeValue?,
-        override val type: ShakeType
+        override val typePointer: Pointer<ShakeType>
     ) : ShakeFieldUsage {
+        override val type: ShakeType
+            get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "declaration" to declaration.toJson(),
@@ -81,8 +91,11 @@ interface ShakeVariableUsage : ShakeUsage {
     class Impl(
         override val scope: ShakeScope,
         override val declaration: ShakeVariableDeclaration,
-        override val type: ShakeType
+        override val typePointer: Pointer<ShakeType>
     ) : ShakeVariableUsage {
+        override val type: ShakeType
+            get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "declaration" to declaration.toJson(),

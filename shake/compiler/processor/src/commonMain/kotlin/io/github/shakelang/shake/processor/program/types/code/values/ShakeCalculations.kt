@@ -2,6 +2,7 @@ package io.github.shakelang.shake.processor.program.types.code.values
 
 import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
+import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeConcatenation : ShakeValue {
     val left: ShakeValue
@@ -10,7 +11,10 @@ interface ShakeConcatenation : ShakeValue {
 
 interface ShakeCalculation : ShakeConcatenation
 interface ShakeAddition : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeAddition {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeAddition {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "addition",
@@ -26,13 +30,17 @@ interface ShakeAddition : ShakeCalculation {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeSubtraction : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeSubtraction {
+
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeSubtraction {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "subtraction",
@@ -48,13 +56,16 @@ interface ShakeSubtraction : ShakeCalculation {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeMultiplication : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeMultiplication {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeMultiplication {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "multiplication",
@@ -70,13 +81,16 @@ interface ShakeMultiplication : ShakeCalculation {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeDivision : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeDivision {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeDivision {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "division",
@@ -92,13 +106,16 @@ interface ShakeDivision : ShakeCalculation {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeModulus : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeModulus {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeModulus {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "modulus",
@@ -114,13 +131,16 @@ interface ShakeModulus : ShakeCalculation {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakePower : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakePower {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakePower {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "power",
@@ -136,7 +156,7 @@ interface ShakePower : ShakeCalculation {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
@@ -145,7 +165,10 @@ interface ShakePower : ShakeCalculation {
 interface ShakeComparison : ShakeConcatenation
 
 interface ShakeEquals : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeEquals {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeEquals {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "equals",
@@ -161,13 +184,16 @@ interface ShakeEquals : ShakeComparison {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeNotEquals : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeNotEquals {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeNotEquals {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "notEquals",
@@ -183,13 +209,16 @@ interface ShakeNotEquals : ShakeComparison {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeLessThan : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeLessThan {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeLessThan {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "lessThan",
@@ -205,13 +234,16 @@ interface ShakeLessThan : ShakeComparison {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeLessThanOrEqual : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeLessThanOrEqual {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeLessThanOrEqual {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "lessThanOrEqual",
@@ -227,13 +259,16 @@ interface ShakeLessThanOrEqual : ShakeComparison {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeGreaterThan : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeGreaterThan {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeGreaterThan {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "greaterThan",
@@ -249,13 +284,16 @@ interface ShakeGreaterThan : ShakeComparison {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeGreaterThanOrEqual : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeGreaterThanOrEqual {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeGreaterThanOrEqual {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "greaterThanOrEqual",
@@ -271,7 +309,7 @@ interface ShakeGreaterThanOrEqual : ShakeComparison {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
@@ -281,7 +319,10 @@ interface ShakeLogical : ShakeValue
 interface ShakeLogicalConcatenation : ShakeConcatenation, ShakeLogical
 
 interface ShakeAnd : ShakeLogicalConcatenation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeAnd {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeAnd {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "and",
@@ -297,13 +338,16 @@ interface ShakeAnd : ShakeLogicalConcatenation {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeOr : ShakeLogicalConcatenation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeOr {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeOr {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "or",
@@ -319,13 +363,16 @@ interface ShakeOr : ShakeLogicalConcatenation {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
 }
 interface ShakeXor : ShakeLogicalConcatenation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val type: ShakeType) : ShakeXor {
+    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeXor {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "xor",
@@ -341,7 +388,7 @@ interface ShakeXor : ShakeLogicalConcatenation {
             return Impl(
                 left = ShakeValue.from(prj, it.left),
                 right = ShakeValue.from(prj, it.right),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }
@@ -349,7 +396,10 @@ interface ShakeXor : ShakeLogicalConcatenation {
 interface ShakeNot : ShakeLogical {
     val value: ShakeValue
 
-    class Impl(override val value: ShakeValue, override val type: ShakeType) : ShakeNot {
+    class Impl(override val value: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeNot {
+
+        override val type: ShakeType get() = typePointer.value
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "not",
@@ -363,7 +413,7 @@ interface ShakeNot : ShakeLogical {
         fun from(prj: ShakeProject, it: ShakeNot): ShakeValue {
             return Impl(
                 value = ShakeValue.from(prj, it.value),
-                type = ShakeType.from(prj, it.type)
+                typePointer = ShakeType.from(prj, it.type)
             )
         }
     }

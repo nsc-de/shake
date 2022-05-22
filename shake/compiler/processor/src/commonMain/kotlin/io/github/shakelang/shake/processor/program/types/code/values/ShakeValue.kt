@@ -3,8 +3,10 @@ package io.github.shakelang.shake.processor.program.types.code.values
 import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.*
+import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeValue {
+    val typePointer: Pointer<ShakeType>
     val type: ShakeType
     fun toJson(): Map<String, Any?>
 
