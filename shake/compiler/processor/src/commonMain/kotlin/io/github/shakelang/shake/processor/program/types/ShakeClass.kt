@@ -1,7 +1,5 @@
 package io.github.shakelang.shake.processor.program.types
 
-import io.github.shakelang.parseutils.promiseCombine
-import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.util.*
 import kotlin.math.min
