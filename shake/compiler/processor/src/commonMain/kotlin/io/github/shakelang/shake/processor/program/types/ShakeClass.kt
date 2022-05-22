@@ -358,11 +358,11 @@ interface ShakeClass {
             this.superClassPointer = it.superClass?.qualifiedName?.let { it1 -> prj.getClass(it1) } ?: Pointer.of(null)
             this.interfacePointers = it.interfaces.map { it1 -> prj.getClass(it1.qualifiedName).transform { it ?: throw Error("Implemented class does not exist") } }
 
-            it.methods.zip(methodPointers).forEach { (method, pointer) -> pointer.init(ShakeMethod.from(this, method)) }
-            it.fields.zip(fieldPointers).forEach { (field, pointer) -> pointer.init(ShakeClassField.from(this, field)) }
+            it.methods.zip(methodPointers).forEach { (method, pointer) -> pointer.init(ShakeMethod.from(this, instanceScope, method)) }
+            it.fields.zip(fieldPointers).forEach { (field, pointer) -> pointer.init(ShakeClassField.from(this, instanceScope, field)) }
             it.classes.zip(classPointers).forEach { (clazz, pointer) -> pointer.init(from(prj, pkg, it)) }
-            it.staticMethods.zip(staticMethodPointers).forEach { (method, pointer) -> pointer.init(ShakeMethod.from(this, method)) }
-            it.staticFields.zip(staticFieldPointers).forEach { (field, pointer) -> pointer.init(ShakeClassField.from(this, field)) }
+            it.staticMethods.zip(staticMethodPointers).forEach { (method, pointer) -> pointer.init(ShakeMethod.from(this, staticScope, method)) }
+            it.staticFields.zip(staticFieldPointers).forEach { (field, pointer) -> pointer.init(ShakeClassField.from(this, staticScope, field)) }
             it.staticClasses.zip(staticClassPointers).forEach { (_, pointer) -> pointer.init(from(prj, pkg, it)) }
             it.constructors.zip(constructorPointers).forEach { (constructor, pointer) -> pointer.init(ShakeConstructor.from(this, constructor)) }
 

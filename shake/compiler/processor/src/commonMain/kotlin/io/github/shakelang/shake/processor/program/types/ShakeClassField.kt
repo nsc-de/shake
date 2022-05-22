@@ -144,6 +144,6 @@ interface ShakeClassField : ShakeField {
     }
 
     companion object {
-        fun from(clazz: ShakeClass, it: ShakeClassField): ShakeClassField = TODO()
+        fun from(clazz: ShakeClass, scope: ShakeScope, it: ShakeClassField): ShakeClassField = Impl(clazz, scope, it)
     }
 }

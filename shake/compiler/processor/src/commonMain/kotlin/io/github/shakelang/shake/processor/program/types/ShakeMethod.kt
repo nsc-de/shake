@@ -5,9 +5,17 @@ import io.github.shakelang.shake.processor.util.Pointer
 import io.github.shakelang.shake.processor.util.point
 
 
-interface ShakeMethod : ShakeFunction {
-    val clazz: ShakeClass
+/**
+ * Represents a method in the Shake language.
+ *
+ * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
+ */
+interface ShakeMethod : ShakeFunctionType {
 
+    /**
+     * The class that this method belongs to.
+     */
+    val clazz: ShakeClass
     class Impl : ShakeMethod {
         override val clazz: ShakeClass
         override val project: ShakeProject
@@ -89,7 +97,7 @@ interface ShakeMethod : ShakeFunction {
         }
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}$name"
-        override val scope: ShakeScope = ShakeScope.ShakeMethodScope.from(this)
+        override val scope: ShakeScope.ShakeMethodScope = ShakeScope.ShakeMethodScope.from(this)
         override val signature: String
 
         override fun toJson(): Map<String, Any?> {
@@ -110,6 +118,13 @@ interface ShakeMethod : ShakeFunction {
     }
 
     companion object {
-        fun from(clazz: ShakeClass, it: ShakeMethod): ShakeMethod = TODO()
+
+        /**
+         * Clones a [ShakeMethod].
+         *
+         * @param clazz The class that the method belongs to.
+         * @param it The method to clone.
+         */
+        fun from(clazz: ShakeClass, parentScope: ShakeScope, it: ShakeMethod): ShakeMethod = Impl(clazz, parentScope, it)
     }
 }

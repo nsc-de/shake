@@ -6,7 +6,7 @@ import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVa
 interface ShakeScope {
     val parent: ShakeScope?
     fun get(name: String): ShakeAssignable?
-    fun getFunctions(name: String): List<ShakeFunction>
+    fun getFunctions(name: String): List<ShakeFunctionType>
     fun getClass(name: String): ShakeClass?
     fun getInvokable(name: String): List<ShakeInvokable>
 
@@ -21,7 +21,7 @@ interface ShakeScope {
                 return it.fields.find { it.name == name } ?: parent.get(name)
             }
 
-            override fun getFunctions(name: String): List<ShakeFunction> {
+            override fun getFunctions(name: String): List<ShakeFunctionType> {
                 return it.methods.filter { it.name == name } + parent.getFunctions(name)
             }
 
@@ -50,7 +50,7 @@ interface ShakeScope {
                 return it.staticFields.find { it.name == name } ?: parent.get(name)
             }
 
-            override fun getFunctions(name: String): List<ShakeFunction> {
+            override fun getFunctions(name: String): List<ShakeFunctionType> {
                 return it.staticMethods.filter { it.name == name } + parent.getFunctions(name)
             }
 
@@ -71,7 +71,9 @@ interface ShakeScope {
         }
     }
 
-    interface ShakeFunctionScope : ShakeScope {
+    interface ShakeFunctionTypeScope : ShakeScope
+
+    interface ShakeFunctionScope : ShakeFunctionTypeScope {
         class Impl(val it: ShakeFunction) : ShakeFunctionScope {
             val variables = mutableListOf<ShakeVariableDeclaration>()
 
@@ -81,7 +83,7 @@ interface ShakeScope {
                 return variables.find { it.name == name } ?: it.parameters.find { it.name == name } ?: parent.get(name)
             }
 
-            override fun getFunctions(name: String): List<ShakeFunction> {
+            override fun getFunctions(name: String): List<ShakeFunctionType> {
                 return parent.getFunctions(name)
             }
 
@@ -102,7 +104,7 @@ interface ShakeScope {
         }
     }
 
-    interface ShakeMethodScope : ShakeScope {
+    interface ShakeMethodScope : ShakeFunctionTypeScope {
         class Impl(val it: ShakeMethod) : ShakeMethodScope {
             val variables = mutableListOf<ShakeVariableDeclaration>()
 
@@ -112,7 +114,7 @@ interface ShakeScope {
                 return variables.find { it.name == name } ?: it.parameters.find { it.name == name } ?: parent.get(name)
             }
 
-            override fun getFunctions(name: String): List<ShakeFunction> {
+            override fun getFunctions(name: String): List<ShakeFunctionType> {
                 return parent.getFunctions(name)
             }
 
@@ -143,7 +145,7 @@ interface ShakeScope {
                 return variables.find { it.name == name } ?: it.parameters.find { it.name == name } ?: parent.get(name)
             }
 
-            override fun getFunctions(name: String): List<ShakeFunction> {
+            override fun getFunctions(name: String): List<ShakeFunctionType> {
                 return parent.getFunctions(name)
             }
 
@@ -169,7 +171,7 @@ interface ShakeScope {
                 } ?: parent.get(name)
             }
 
-            override fun getFunctions(name: String): List<ShakeFunction> {
+            override fun getFunctions(name: String): List<ShakeFunctionType> {
                 return it.imports.flatMap { import ->
                     val last = import.it.last()
                     if(last == "*" && last == name) import.targetPackage.functions.filter { it.name == name } else emptyList()
