@@ -1,6 +1,5 @@
 package io.github.shakelang.shake.processor.program.types
 
-import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.util.Pointer
 import io.github.shakelang.shake.processor.util.PointingList
 import io.github.shakelang.shake.processor.util.latePoint

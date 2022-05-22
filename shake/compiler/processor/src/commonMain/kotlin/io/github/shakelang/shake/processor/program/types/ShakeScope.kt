@@ -1,6 +1,6 @@
-package io.github.shakelang.shake.processor.program.types.code
+package io.github.shakelang.shake.processor.program.types
 
-import io.github.shakelang.shake.processor.program.types.*
+import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVariableDeclaration
 
 interface ShakeScope {
@@ -15,14 +15,14 @@ interface ShakeScope {
     interface ShakeClassInstanceScope : ShakeScope {
         class Impl (val it: ShakeClass) : ShakeClassInstanceScope {
 
-            override val parent: ShakeScope get() = it.parentScope
+            override val parent: ShakeScope get() = it.staticScope
 
             override fun get(name: String): ShakeAssignable? {
-                return it.fields.find { it.name == name } ?: it.staticFields.find { it.name == name } ?: parent.get(name)
+                return it.fields.find { it.name == name } ?: parent.get(name)
             }
 
             override fun getFunctions(name: String): List<ShakeFunction> {
-                return it.methods.filter { it.name == name } + it.staticMethods.filter { it.name == name } + parent.getFunctions(name)
+                return it.methods.filter { it.name == name } + parent.getFunctions(name)
             }
 
             override fun getClass(name: String): ShakeClass? {
@@ -37,12 +37,12 @@ interface ShakeScope {
         }
 
         companion object {
-            fun from(clazz: ShakeClass): ShakeScope = Impl(clazz)
+            fun from(clazz: ShakeClass): ShakeClassInstanceScope = Impl(clazz)
         }
     }
 
     interface ShakeClassStaticScope : ShakeScope {
-        class Impl(val it: ShakeClass) : ShakeScope {
+        class Impl(val it: ShakeClass) : ShakeClassStaticScope {
 
             override val parent: ShakeScope get() = it.parentScope
 
@@ -67,7 +67,7 @@ interface ShakeScope {
         }
 
         companion object {
-            fun from(clazz: ShakeClass): ShakeScope = Impl(clazz)
+            fun from(clazz: ShakeClass): ShakeClassStaticScope = Impl(clazz)
         }
     }
 
@@ -103,7 +103,7 @@ interface ShakeScope {
     }
 
     interface ShakeMethodScope : ShakeScope {
-        class Impl(val it: ShakeMethod) : ShakeMethodScope{
+        class Impl(val it: ShakeMethod) : ShakeMethodScope {
             val variables = mutableListOf<ShakeVariableDeclaration>()
 
             override val parent: ShakeScope = it.parentScope

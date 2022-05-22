@@ -1,50 +1,247 @@
 package io.github.shakelang.shake.processor.program.types
 
-import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.util.*
 import kotlin.math.min
 
+/**
+ * Represents a class in the Shake language.
+ *
+ * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
+ */
 interface ShakeClass {
-    val staticScope: ShakeScope
-    val instanceScope: ShakeScope
-    val prj: ShakeProject
-    val pkg: ShakePackage?
-    val parentScope: ShakeScope
+
+    /**
+     * The name of the class.
+     */
     val name: String
 
-    val methodPointers: PointerList<ShakeMethod>
-    val fieldPointers: PointerList<ShakeField>
+    /**
+     * The [ShakeProject] this class belongs to.
+     */
+    val prj: ShakeProject
+
+    /**
+     * The [ShakePackage] this class belongs to (if any).
+     */
+    val pkg: ShakePackage?
+
+
+    /**
+     * The [ShakeScope] this class extends.
+     */
+    val parentScope: ShakeScope
+
+    /**
+     * The [ShakeScope] of this class in a static context. It extends the [parentScope] and contains all the static
+     * [fields] and [methods] and [classes] of this class.
+     */
+    val staticScope: ShakeScope.ShakeClassStaticScope
+
+    /**
+     * The [ShakeScope] of this class in an instance context. It extends the [staticScope] and contains all the
+     * non-static [fields] and [methods] and [classes] of this class.
+     */
+    val instanceScope: ShakeScope.ShakeClassInstanceScope
+
+
+    /**
+     * A list of pointers to the inner [ShakeClass]es of this class.
+     */
     val classPointers: PointerList<ShakeClass>
-    val staticFieldPointers: PointerList<ShakeField>
-    val staticMethodPointers: PointerList<ShakeMethod>
+
+    /**
+     * A list of pointers to the static [ShakeClass]es of this class.
+     */
     val staticClassPointers: PointerList<ShakeClass>
+
+    /**
+     * A list of pointers to the instance-[ShakeMethod]s of this class.
+     */
+    val methodPointers: PointerList<ShakeMethod>
+
+    /**
+     * A list of pointers to the static-[ShakeMethod]s of this class.
+     */
+    val staticMethodPointers: PointerList<ShakeMethod>
+
+    /**
+     * A list of pointers to the instance-[ShakeField]s of this class.
+     */
+    val fieldPointers: PointerList<ShakeField>
+
+    /**
+     * A list of pointers to the static-[ShakeField]s of this class.
+     */
+    val staticFieldPointers: PointerList<ShakeField>
+    /**
+     * A list of pointers to the [ShakeConstructor]s of this class.
+     */
     val constructorPointers: PointerList<ShakeConstructor>
 
-    val methods: List<ShakeMethod>
-    val fields: List<ShakeClassField>
+
+    /**
+     * A list of all inner [ShakeClass]es of this class.
+     */
     val classes: List<ShakeClass>
-    val staticMethods: List<ShakeMethod>
-    val staticFields: List<ShakeClassField>
+
+    /**
+     * A list of all static [ShakeClass]es of this class.
+     */
     val staticClasses: List<ShakeClass>
+
+    /**
+     * A list of all instance-[ShakeMethod]s of this class.
+     */
+    val methods: List<ShakeMethod>
+
+    /**
+     * A list of all static-[ShakeMethod]s of this class.
+     */
+    val staticMethods: List<ShakeMethod>
+
+    /**
+     * A list of all instance-[ShakeField]s of this class.
+     */
+    val fields: List<ShakeClassField>
+
+    /**
+     * A list of all static-[ShakeField]s of this class.
+     */
+    val staticFields: List<ShakeClassField>
+
+    /**
+     * A list of all [ShakeConstructor]s of this class.
+     */
     val constructors: List<ShakeConstructor>
 
+    /**
+     * The qualified name of this class.
+     */
     val qualifiedName: String
 
+    /**
+     * A [Pointer] to the super [ShakeClass] of this class.
+     */
     val superClassPointer: Pointer<ShakeClass?>
+
+    /**
+     * The super [ShakeClass] of this class.
+     */
     val superClass: ShakeClass?
 
+    /**
+     * A list of [Pointer]s to all interfaces this class implements.
+     */
     val interfacePointers: PointerList<ShakeClass>
+
+    /**
+     * A list of all interfaces this class implements.
+     */
     val interfaces: List<ShakeClass>
 
+    /**
+     * The signature of this class.
+     */
     val signature: String
 
+
+    /**
+     * Checks if this class is compatible to the given [ShakeClass]. This means that this class is either the same
+     * class or it extends or implements the given class.
+     *
+     * @param other The [ShakeClass] to check.
+     * @return `true` if this class is compatible to the given [ShakeClass].
+     */
     fun compatibleTo(other: ShakeClass): Boolean
+
+    /**
+     * Checks the compatibility distance between this class and the given [ShakeClass].
+     * A smaller value means a nearer compatibility. A value of `-1` means that this
+     * class is not compatible to the given [ShakeClass].
+     * This is used to determine the order
+     * of function to choose from.
+     *
+     * For example:
+     * ```kotlin
+     * class A
+     * class B : A
+     * class C : B
+     * class D
+     *
+     * A.compatibilityDistance(A) = 0
+     * A.compatibilityDistance(B) = 1
+     * A.compatibilityDistance(C) = 2
+     * A.compatibilityDistance(D) = -1
+     * ```
+     *
+     * @param other The [ShakeClass] to check.
+     * @return The compatibility distance between this class and the given [ShakeClass] or `-1` if the
+     *         classes are not compatible.
+     */
     fun compatibilityDistance(other: ShakeClass): Int
+
+    /**
+     * Creates a [ShakeType] for this class.
+     */
     fun asType(): ShakeType
 
-    fun getMethodBySignature(signature: String): ShakeMethod? = methods.find { it.signature == signature }
-    fun getFieldBySignature(signature: String): ShakeClassField? = fields.find { it.signature == signature }
+    /**
+     * Search for a [ShakeClass] with the given signature.
+     *
+     * @param signature The signature of the [ShakeClass] to search for.
+     * @return The [ShakeClass] with the given signature or `null` if no such class exists.
+     */
     fun getClassBySignature(signature: String): ShakeClass? = classes.find { it.signature == signature }
+
+    /**
+     * Search for a [ShakeMethod] with the given signature. A signature is unique, so there can only be one
+     * [ShakeMethod] with the given signature. A method is identified by its name and the parameters it takes
+     * and the return type.
+     *
+     * @param signature The signature of the [ShakeMethod] to search for.
+     * @return The [ShakeMethod] with the given signature or `null` if no such method exists.
+     */
+    fun getMethodBySignature(signature: String): ShakeMethod? = methods.find { it.signature == signature }
+
+    /**
+     * Search for a [ShakeField] with the given signature.
+     *
+     * @param signature The signature of the [ShakeField] to search for.
+     * @return The [ShakeField] with the given name or `null` if no such field exists.
+     */
+    fun getFieldBySignature(signature: String): ShakeClassField? = fields.find { it.signature == signature }
+
+    /**
+     * Search for a [ShakeConstructor] with the given signature.
+     *
+     * @param signature The signature of the [ShakeConstructor] to search for.
+     * @return The [ShakeConstructor] with the given signature or `null` if no such constructor exists.
+     */
+    fun getConstructorBySignature(signature: String): ShakeConstructor? = constructors.find { it.signature == signature }
+
+    /**
+     * Search for a [ShakeClass] with the given name.
+     *
+     * @param name The name of the [ShakeClass] to search for.
+     * @return The [ShakeClass] with the given name or `null` if no such class exists.
+     */
+    fun getClassByName(name: String): ShakeClass? = classes.find { it.name == name }
+
+    /**
+     * Search for a [ShakeMethod] with the given name.
+     *
+     * @param name The name of the [ShakeMethod] to search for.
+     * @return The [ShakeMethod] with the given name or `null` if no such method exists.
+     */
+    fun getMethodByName(name: String): ShakeMethod? = methods.find { it.name == name }
+
+    /**
+     * Search for a [ShakeField] with the given name.
+     *
+     * @param name The name of the [ShakeField] to search for.
+     * @return The [ShakeField] with the given name or `null` if no such field exists.
+     */
+    fun getFieldByName(name: String): ShakeClassField? = fields.find { it.name == name }
 
     fun toJson(): Map<String, Any?>
 
@@ -172,12 +369,8 @@ interface ShakeClass {
             this.signature = "${pkg ?: ""}#$name"
         }
 
-
-        override val instanceScope: ShakeScope
-            get() = ShakeScope.ShakeClassInstanceScope.from(this)
-
-        override val staticScope: ShakeScope
-            get() = ShakeScope.ShakeClassStaticScope.from(this)
+        override val staticScope: ShakeScope.ShakeClassStaticScope = ShakeScope.ShakeClassStaticScope.from(this)
+        override val instanceScope: ShakeScope.ShakeClassInstanceScope = ShakeScope.ShakeClassInstanceScope.from(this)
 
         override val qualifiedName: String
             get() = (pkg?.qualifiedName?.plus(".") ?: "") + name

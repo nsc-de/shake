@@ -3,7 +3,6 @@ package io.github.shakelang.shake.processor.program.types
 import io.github.shakelang.shake.parser.node.ShakeIdentifierNode
 import io.github.shakelang.shake.parser.node.ShakeValuedNode
 import io.github.shakelang.shake.parser.node.ShakeVariableType
-import io.github.shakelang.shake.processor.program.types.code.ShakeScope
 import io.github.shakelang.shake.processor.util.Pointer
 import io.github.shakelang.shake.processor.util.PointingList
 import io.github.shakelang.shake.processor.util.latePoint
