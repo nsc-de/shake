@@ -343,7 +343,7 @@ class ShakeJsGenerator {
     }
 
     fun visitProject(n: ShakeProject): JsProject {
-        return JsProject(this, n.subpackages.toTypedArray(), n.classes.toTypedArray(), n.functions.toTypedArray(), n.fields.toTypedArray())
+        return JsProject(this, n.packages.toTypedArray(), n.classes.toTypedArray(), n.functions.toTypedArray(), n.fields.toTypedArray())
     }
 
 }

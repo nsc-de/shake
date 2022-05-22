@@ -9,53 +9,217 @@ import io.github.shakelang.shake.processor.util.PointingList
 import io.github.shakelang.shake.processor.util.latePoint
 import io.github.shakelang.shason.json
 
+/**
+ * A Shake Project is a collection of packages and subpackages each containing a set of classes, functions, and fields.
+ * It is the root of a Shake program. There is only one Shake Project per program.
+ *
+ *
+ * @property packages The packages in the project.
+ * @property classes The classes in the root of the project.
+ * @property functions The functions in root of the project.
+ * @property fields The fields in root of the project.
+ * @property scope The scope of the project.
+ *
+ *
+ * @author Nicolas Schmidt (<[nsc-de](https://github.com/nsc-de)>)
+ */
 interface ShakeProject {
 
-    val subpackagePointers: List<Pointer<ShakePackage>>
+
+    /**
+     * List containing pointers to all root packages in the project.
+     */
+    val packagePointers: List<Pointer<ShakePackage>>
+
+    /**
+     * List containing pointers to all root classes in the project.
+     */
     val classPointers: List<Pointer<ShakeClass>>
+
+    /**
+     * List containing pointers to all root functions in the project.
+     */
     val functionPointers: List<Pointer<ShakeFunction>>
+
+    /**
+     * List containing pointers to all root fields in the project.
+     */
     val fieldPointers: List<Pointer<ShakeField>>
 
-    val subpackages: List<ShakePackage>
+
+    /**
+     * List containing all the root packages in the project.
+     */
+    val packages: List<ShakePackage>
+
+    /**
+     * List containing all the root classes in the project.
+     */
     val classes: List<ShakeClass>
+
+    /**
+     * List containing all the root functions in the project.
+     */
     val functions: List<ShakeFunction>
+
+    /**
+     * List containing all the root fields in the project.
+     */
     val fields: List<ShakeField>
 
-    val projectScope: ShakeScope
+    /**
+     * The scope of the project. It is comparable to a global scope because
+     * it is extended by all packages, subpackages, classes and functions.
+     */
+    val scope: ShakeScope
 
+    /**
+     * Get a package by its name. If the name contains a dot, it will be split and
+     * the package will be searched recursively in subpackages. This will give back
+     * a [Pointer] to the package, so if the package is not found, but created at a
+     * later point, it will be returned, but only if it is already created at the
+     * point of access of the [Pointer.value] property. Until creation the pointer
+     * will point to null.
+     *
+     * @param name The name of the package.
+     * @return A pointer to the package.
+     */
     fun getPackage(name: String): Pointer<ShakePackage?>
-    fun getPackage(name: Array<String>): Pointer<ShakePackage?>
+
+    /**
+     * Get a package by the parts of its name. The parts must not contain dots.
+     * If they do so, it will search for packages with a dot in their name.
+     * This will give back a [Pointer] to the package, so if the package is not found,
+     * but created at a later point, it will be returned, but only if it is already
+     * created at the point of access of the [Pointer.value] property. Until creation
+     * the pointer will point to null.
+     *
+     * @param parts The parts of the package name.
+     * @return A pointer to the package.
+     */
+    fun getPackage(parts: Array<String>): Pointer<ShakePackage?>
+
+    /**
+     * Get a class by its name. If the name contains a dot, it will be split and
+     * the class will be searched recursively in subpackages. This will give back
+     * a [Pointer] to the class, so if the class is not found, but created at a
+     * later point, it will be returned, but only if it is already created at the
+     * point of access of the [Pointer.value] property. Until creation the pointer
+     * will point to null.
+     *
+     * @param name The name of the class.
+     * @return A pointer to the class.
+     */
+    fun getClass(name: String): Pointer<ShakeClass?>
+
+    /**
+     * Get a class by the parts of its name and the name. The parts must not contain dots.
+     * If they do so, it will search for classes with a dot in their name.
+     * This will give back a [Pointer] to the class, so if the class is not found,
+     * but created at a later point, it will be returned, but only if it is already
+     * created at the point of access of the [Pointer.value] property. Until creation
+     * the pointer will point to null.
+     *
+     * @param pkg The parts of the class name.
+     * @param name The name of the class.
+     */
     fun getClass(pkg: Array<String>, name: String): Pointer<ShakeClass?>
-    fun getClass(clz: String): Pointer<ShakeClass?>
+
+    /**
+     * Translate the ShakeProject to a json map representation. This is used for
+     * debugging purposes.
+     *
+     * @return A json map representation of the project.
+     */
     fun toJson(): Map<String, Any?>
+
+    /**
+     * Translate the ShakeProject to a JSON code. This is used for
+     * debugging purposes.
+     *
+     * @return A JSON code representation of the project.
+     */
     fun toJsonString(format: Boolean = false): String
 
+    /**
+     * Create a [ShakeType] from a [ShakeVariableType].
+     */
     fun getType(type: ShakeVariableType): Pointer<ShakeType?>
 
-    fun getFunctionBySignature(signature: String): Pointer<ShakeFunction?> {
-        val parts = signature.split("#")
-        val pkg = getPackage(parts[0])
-        return pkg.transform { it?.getFunctionBySignature(signature) }
-    }
-
-    fun getFieldBySignature(signature: String): Pointer<ShakeField?> {
-        val parts = signature.split("#")
-        val pkg = getPackage(parts[0])
-        return pkg.transform { it?.getFieldBySignature(signature) }
-    }
-
+    /**
+     * Get a [ShakeClass] by its shake-signature.
+     * This will give back a [Pointer] to the [ShakeClass], so if the class is not found,
+     * but created at a later point, it will be returned, but only if it is already
+     * created at the point of access of the [Pointer.value] property. Until creation
+     * the pointer will point to null.
+     *
+     * @param signature The signature of the class.
+     * @return A pointer to the class.
+     */
     fun getClassBySignature(signature: String): Pointer<ShakeClass?> {
         val parts = signature.split("#")
         val pkg = getPackage(parts[0])
         return pkg.transform { it?.getClassBySignature(signature) }
     }
 
+    /**
+     * Get a [ShakeFunction] by its shake-signature.
+     * This will give back a [Pointer] to the [ShakeFunction], so if the function is not found,
+     * but created at a later point, it will be returned, but only if it is already
+     * created at the point of access of the [Pointer.value] property. Until creation
+     * the pointer will point to null.
+     *
+     * @param signature The signature of the function.
+     * @return A pointer to the function.
+     */
+    fun getFunctionBySignature(signature: String): Pointer<ShakeFunction?> {
+        val parts = signature.split("#")
+        val pkg = getPackage(parts[0])
+        return pkg.transform { it?.getFunctionBySignature(signature) }
+    }
+
+    /**
+     * Get a [ShakeField] by its shake-signature.
+     * This will give back a [Pointer] to the [ShakeField], so if the field is not found,
+     * but created at a later point, it will be returned, but only if it is already
+     * created at the point of access of the [Pointer.value] property. Until creation
+     * the pointer will point to null.
+     *
+     * @param signature The signature of the field.
+     * @return A pointer to the field.
+     */
+    fun getFieldBySignature(signature: String): Pointer<ShakeField?> {
+        val parts = signature.split("#")
+        val pkg = getPackage(parts[0])
+        return pkg.transform { it?.getFieldBySignature(signature) }
+    }
+
+    /**
+     * Get a [ShakeMethod] by its shake-signature.
+     * This will give back a [Pointer] to the [ShakeMethod], so if the function is not found,
+     * but created at a later point, it will be returned, but only if it is already
+     * created at the point of access of the [Pointer.value] property. Until creation
+     * the pointer will point to null.
+     *
+     * @param signature The signature of the function.
+     * @return A pointer to the [ShakeMethod].
+     */
     fun getMethodBySignature(signature: String): Pointer<ShakeMethod?> {
         val parts = signature.split("#")
         val clz = getClassBySignature("${parts[0]}#${parts[1]}")
         return clz.transform { it?.getMethodBySignature(signature) }
     }
 
+    /**
+     * Get a [ShakeClassField] by its shake-signature.
+     * This will give back a [Pointer] to the [ShakeClassField], so if the field is
+     * not found, but created at a later point, it will be returned, but only if it is
+     * already created at the point of access of the [Pointer.value] property. Until
+     * creation the pointer will point to null.
+     *
+     * @param signature The signature of the field.
+     * @return A pointer to the [ShakeClassField].
+     */
     fun getClassFieldBySignature(signature: String): Pointer<ShakeClassField?> {
         val parts = signature.split("#")
         val clz = getClassBySignature("${parts[0]}#${parts[1]}")
@@ -64,16 +228,16 @@ interface ShakeProject {
 
     class Impl: ShakeProject {
 
-        override val subpackagePointers: List<Pointer<ShakePackage>>
+        override val packagePointers: List<Pointer<ShakePackage>>
         override val classPointers: List<Pointer<ShakeClass>>
         override val functionPointers: List<Pointer<ShakeFunction>>
         override val fieldPointers: List<Pointer<ShakeField>>
 
-        override val subpackages: List<ShakePackage>
+        override val packages: List<ShakePackage>
         override val classes: List<ShakeClass>
         override val functions: List<ShakeFunction>
         override val fields: List<ShakeField>
-        override val projectScope: ShakeScope = ShakeScope.ShakeProjectScope.from(this)
+        override val scope: ShakeScope = ShakeScope.ShakeProjectScope.from(this)
 
         constructor(
             subpackages: List<ShakePackage>,
@@ -81,12 +245,12 @@ interface ShakeProject {
             functions: List<ShakeFunction>,
             fields: List<ShakeField>
         ) {
-            subpackagePointers = subpackages.map { Pointer.of(it) }
+            packagePointers = subpackages.map { Pointer.of(it) }
             classPointers = classes.map { Pointer.of(it) }
             functionPointers = functions.map { Pointer.of(it) }
             fieldPointers = fields.map { Pointer.of(it) }
 
-            this.subpackages = PointingList.from(subpackagePointers)
+            this.packages = PointingList.from(packagePointers)
             this.classes = PointingList.from(classPointers)
             this.functions = PointingList.from(functionPointers)
             this.fields = PointingList.from(fieldPointers)
@@ -95,22 +259,22 @@ interface ShakeProject {
         internal constructor(
             it: ShakeProject
         ) {
-            val subpackagePointers = it.subpackages.map { latePoint<ShakePackage>() }.toMutableList()
+            val subpackagePointers = it.packages.map { latePoint<ShakePackage>() }.toMutableList()
             val classPointers = it.classes.map { latePoint<ShakeClass>() }
             val functionPointers = it.functions.map { latePoint<ShakeFunction>() }
             val fieldPointers = it.fields.map { latePoint<ShakeField>() }
 
-            this.subpackagePointers = subpackagePointers
+            this.packagePointers = subpackagePointers
             this.classPointers = classPointers
             this.functionPointers = functionPointers
             this.fieldPointers = fieldPointers
 
-            this.subpackages = PointingList.from(subpackagePointers)
+            this.packages = PointingList.from(subpackagePointers)
             this.classes = PointingList.from(classPointers)
             this.functions = PointingList.from(functionPointers)
             this.fields = PointingList.from(fieldPointers)
 
-            it.subpackages.zip(subpackagePointers) { pkg, pointer ->
+            it.packages.zip(subpackagePointers) { pkg, pointer ->
                 pointer.init(ShakePackage.from(this, null, pkg))
             }
 
@@ -130,14 +294,14 @@ interface ShakeProject {
         override fun getPackage(name: String): Pointer<ShakePackage?> {
             if(name.contains(".")) return getPackage(name.split(".").toTypedArray())
             return Pointer.task {
-                subpackages.find { it.name == name }
+                packages.find { it.name == name }
             }
         }
 
-        override fun getPackage(name: Array<String>): Pointer<ShakePackage?> {
-            if(name.isEmpty()) throw IllegalArgumentException("Cannot get package from empty name")
+        override fun getPackage(parts: Array<String>): Pointer<ShakePackage?> {
+            if(parts.isEmpty()) throw IllegalArgumentException("Cannot get package from empty name")
             return Pointer.task {
-                getPackage(name.first()).value?.getPackage(name.drop(1).toTypedArray())?.value
+                getPackage(parts.first()).value?.getPackage(parts.drop(1).toTypedArray())?.value
             }
         }
 
@@ -146,8 +310,8 @@ interface ShakeProject {
             else Pointer.task { this.getPackage(pkg).value?.classes?.find { it.name == name } }
         }
 
-        override fun getClass(clz: String): Pointer<ShakeClass?> {
-            val parts = clz.split(".")
+        override fun getClass(name: String): Pointer<ShakeClass?> {
+            val parts = name.split(".")
             val name = parts.last()
             val pkg = parts.dropLast(1).toTypedArray()
             return getClass(pkg, name)
@@ -158,7 +322,7 @@ interface ShakeProject {
                 "classes" to classes.map { it.toJson() },
                 "functions" to functions.map { it.toJson() },
                 "fields" to fields.map { it.toJson() },
-                "subpackages" to subpackages.map { it.toJson() }
+                "subpackages" to packages.map { it.toJson() }
             )
         }
 
@@ -198,6 +362,12 @@ interface ShakeProject {
     }
 
     companion object {
+        /**
+         * Copies a [ShakeProject] into a new [ShakeProject]
+         *
+         * @param it The project to copy
+         * @return A new [ShakeProject]
+         */
         fun from(it: ShakeProject): ShakeProject = Impl(it)
     }
 }

@@ -228,7 +228,7 @@ interface ShakeScope {
 
     interface ShakePackageScope : ShakeScope {
         class Impl(val it: ShakePackage) : ShakePackageScope {
-            override val parent: ShakeScope get() = it.baseProject.projectScope
+            override val parent: ShakeScope get() = it.baseProject.scope
 
             override fun get(name: String): ShakeAssignable? {
                 return it.fields.find { it.name == name }
