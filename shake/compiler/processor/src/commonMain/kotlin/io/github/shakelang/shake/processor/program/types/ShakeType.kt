@@ -1,52 +1,339 @@
 package io.github.shakelang.shake.processor.program.types
 
+import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.util.Pointer
 import io.github.shakelang.shake.processor.util.point
 
 interface ShakeType {
 
+    /**
+     * The name of the type.
+     */
     val name: String
+
+    /**
+     * The signature of the type.
+     */
     val signature: String
 
-    fun assignType(other: ShakeType): ShakeType?
-    fun additionAssignType(other: ShakeType): ShakeType?
-    fun subtractionAssignType(other: ShakeType): ShakeType?
-    fun multiplicationAssignType(other: ShakeType): ShakeType?
-    fun divisionAssignType(other: ShakeType): ShakeType?
-    fun modulusAssignType(other: ShakeType): ShakeType?
-    fun powerAssignType(other: ShakeType): ShakeType?
-    fun incrementBeforeType(): ShakeType?
-    fun incrementAfterType(): ShakeType?
-    fun decrementBeforeType(): ShakeType?
-    fun decrementAfterType(): ShakeType?
-
-    fun additionType(other: ShakeType): ShakeType?
-    fun subtractionType(other: ShakeType): ShakeType?
-    fun multiplicationType(other: ShakeType): ShakeType?
-    fun divisionType(other: ShakeType): ShakeType?
-    fun modulusType(other: ShakeType): ShakeType?
-    fun powerType(other: ShakeType): ShakeType?
-    fun equalsType(other: ShakeType): ShakeType?
-    fun notEqualsType(other: ShakeType): ShakeType?
-    fun greaterThanType(other: ShakeType): ShakeType?
-    fun greaterThanOrEqualType(other: ShakeType): ShakeType?
-    fun lessThanType(other: ShakeType): ShakeType?
-    fun lessThanOrEqualType(other: ShakeType): ShakeType?
-    fun andType(other: ShakeType): ShakeType?
-    fun orType(other: ShakeType): ShakeType?
-    fun notType(): ShakeType?
-    fun childType(name: String): ShakeType?
-    fun childFunctions(name: String): List<`Pointer<ShakeFunction>`>?
-    fun childInvokable(name: String): List<ShakeFunction>?
-
+    /**
+     * The kind of this type. [ShakeType.Kind]
+     */
     val kind: Kind
 
+
+    /**
+     * When the assign operator is overloaded, this will return the
+     * type returned by the assign operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @param other the right-hand side of the assign operator
+     * @return the type returned by the assign operator
+     */
+    fun assignType(other: ShakeType): ShakeType?
+
+    /**
+     * When the add-assign operator is overloaded, this will return the
+     * type returned by the add-assign operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @param other the right-hand side of the assign operator
+     * @return the type returned by the assign operator
+     */
+    fun additionAssignType(other: ShakeType): ShakeType?
+
+    /**
+     * When the subtract-assign operator is overloaded, this will return the
+     * type returned by the subtract-assign operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @param other the right-hand side of the assign operator
+     * @return the type returned by the assign operator
+     */
+    fun subtractionAssignType(other: ShakeType): ShakeType?
+
+    /**
+     * When the multiply-assign operator is overloaded, this will return the
+     * type returned by the multiply-assign operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @param other the right-hand side of the assign operator
+     * @return the type returned by the assign operator
+     */
+    fun multiplicationAssignType(other: ShakeType): ShakeType?
+
+    /**
+     * When the divide-assign operator is overloaded, this will return the
+     * type returned by the divide-assign operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @param other the right-hand side of the assign operator
+     * @return the type returned by the assign operator
+     */
+    fun divisionAssignType(other: ShakeType): ShakeType?
+
+    /**
+     * When the modulo-assign operator is overloaded, this will return the
+     * type returned by the modulo-assign operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @param other the right-hand side of the assign operator
+     * @return the type returned by the assign operator
+     */
+    fun modulusAssignType(other: ShakeType): ShakeType?
+
+    /**
+     * When the power-assign operator is overloaded, this will return the
+     * type returned by the power-assign operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @param other the right-hand side of the assign operator
+     * @return the type returned by the assign operator
+     */
+    fun powerAssignType(other: ShakeType): ShakeType?
+
+    /**
+     * When the increment operator is overloaded, this will return the
+     * type returned by the increment operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @return the type returned by the assign operator
+     */
+    fun incrementBeforeType(): ShakeType?
+
+    /**
+     * When the increment operator is overloaded, this will return the
+     * type returned by the increment operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @return the type returned by the assign operator
+     */
+    fun incrementAfterType(): ShakeType?
+
+    /**
+     * When the decrement operator is overloaded, this will return the
+     * type returned by the decrement operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @return the type returned by the assign operator
+     */
+    fun decrementBeforeType(): ShakeType?
+
+    /**
+     * When the decrement operator is overloaded, this will return the
+     * type returned by the decrement operator. Otherwise, it will return
+     * null.
+     * This is only important for operator overloading. You normally can't
+     * use the assign operator on a variables value.
+     *
+     * @return the type returned by the assign operator
+     */
+    fun decrementAfterType(): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the plus operator.
+     *
+     * @param other the right-hand side of the plus operator
+     * @return the type returned by the plus operator
+     */
+    fun additionType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the minus operator.
+     *
+     * @param other the right-hand side of the minus operator
+     * @return the type returned by the minus operator
+     */
+    fun subtractionType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the multiply operator.
+     *
+     * @param other the right-hand side of the multiply operator
+     * @return the type returned by the multiply operator
+     */
+    fun multiplicationType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the divide operator.
+     *
+     * @param other the right-hand side of the divide operator
+     * @return the type returned by the divide operator
+     */
+    fun divisionType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the modulo operator.
+     *
+     * @param other the right-hand side of the modulo operator
+     * @return the type returned by the modulo operator
+     */
+    fun modulusType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the power operator.
+     *
+     * @param other the right-hand side of the power operator
+     * @return the type returned by the power operator
+     */
+    fun powerType(other: ShakeType): ShakeType?
+
+
+    /**
+     * This returns the type of the value returned by the equality operator.
+     *
+     * @param other the right-hand side of the equality operator
+     * @return the type returned by the equality operator
+     */
+    fun equalsType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the not-equality operator.
+     *
+     * @param other the right-hand side of the not-equality operator
+     * @return the type returned by the not-equality operator
+     */
+    fun notEqualsType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the greater-than operator.
+     *
+     * @param other the right-hand side of the greater-than operator
+     * @return the type returned by the greater-than operator
+     */
+    fun greaterThanType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the greater-than-or-equal operator.
+     *
+     * @param other the right-hand side of the greater-than-or-equal operator
+     * @return the type returned by the greater-than-or-equal operator
+     */
+    fun greaterThanOrEqualType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the less-than operator.
+     *
+     * @param other the right-hand side of the less-than operator
+     * @return the type returned by the less-than operator
+     */
+    fun lessThanType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the less-than-or-equal operator.
+     *
+     * @param other the right-hand side of the less-than-or-equal operator
+     * @return the type returned by the less-than-or-equal operator
+     */
+    fun lessThanOrEqualType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the logical-and operator.
+     *
+     * @param other the right-hand side of the logical-and operator
+     * @return the type returned by the logical-and operator
+     */
+    fun andType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the logical-or operator.
+     *
+     * @param other the right-hand side of the logical-or operator
+     * @return the type returned by the logical-or operator
+     */
+    fun orType(other: ShakeType): ShakeType?
+
+    /**
+     * This returns the type of the value returned not operator.
+     *
+     * @return the type returned by the not operator
+     */
+    fun notType(): ShakeType?
+
+    /**
+     * This returns the type of the value returned by the get-child operator.
+     *
+     * @param name the child to get
+     * @return the type returned by the get-child operator
+     */
+    fun childType(name: String): ShakeType?
+
+    /**
+     * This returns a list of functions with a given name.
+     *
+     * @param name the name of the function
+     * @return a list of functions with the given name
+     */
+    fun childFunctions(name: String): List<ShakeFunctionType>?
+
+    /**
+     * This returns a list of invokable functions with a given name.
+     *
+     * @param name the name of the function
+     * @return a list of invokable functions with the given name
+     */
+    fun childInvokable(name: String): List<ShakeInvokable>?
+
+
+    /**
+     * Is this type castable to the given type?
+     *
+     * @param other the type to cast to
+     * @return true if this type is castable to the given type
+     */
     fun castableTo(other: ShakeType): Boolean
+
+    /**
+     * Is this type compatible with the given type?
+     * For example an integer is compatible with a long, float or double.
+     *
+     * @param other the type to check compatibility with
+     * @return true if this type is compatible with the given type
+     */
     fun compatibleTo(other: ShakeType): Boolean
+
+    /**
+     * This returns the compatibility distance between this type and the given type.
+     * If the types are not compatible, this will return -1.
+     * For example an integer is compatible with a long, float or double.
+     * The distance to an integer is 0, the distance to a long is 1,
+     * the distance to a float is 2 and the distance to a double is 3.
+     * This is used to determine which function to call when multiple functions
+     * with the same name are compatible.
+     *
+     * @param other the type to check compatibility with
+     * @return the distance between the two types, or -1 if the types are not compatible
+     */
     fun compatibilityDistance(other: ShakeType): Int
 
+    /**
+     * This returns a json representation of this type.
+     */
     fun toJson(): Map<String, Any?>
 
+    /**
+     * The different kinds of type.
+     */
     enum class Kind {
         PRIMITIVE,
         OBJECT,
@@ -54,8 +341,10 @@ interface ShakeType {
         LAMBDA,
     }
 
+    /**
+     * The different kinds of primitive types.
+     */
     enum class PrimitiveType(val signature: String) {
-
         BOOLEAN("b"),
         BYTE("B"),
         CHAR("C"),
@@ -71,6 +360,9 @@ interface ShakeType {
         VOID("V");
     }
 
+    /**
+     * A primitive type.
+     */
     interface Primitive : ShakeType {
 
         val type: PrimitiveType
@@ -109,77 +401,186 @@ interface ShakeType {
                             || other.type == PrimitiveType.UNSIGNED_LONG
                             || other.type == PrimitiveType.CHAR)
 
+        /**
+         * This returns a pointer pointing towards this type.
+         */
         fun pointer(): Pointer<Primitive>
 
         companion object {
 
+            /**
+             * This returns the primitive boolean type.
+             * @return the primitive boolean type
+             */
             private fun bool(): Primitive {
                 return BOOLEAN
             }
 
+            /**
+             * This returns the primitive byte type.
+             * @return the primitive byte type
+             */
             private fun byte(): Primitive {
                 return BYTE
             }
 
+            /**
+             * This returns the primitive char type.
+             * @return the primitive char type
+             */
             private fun short(): Primitive {
                 return SHORT
             }
 
+            /**
+             * This returns the primitive int type.
+             * @return the primitive int type
+             */
             private fun int(): Primitive {
                 return INT
             }
 
+            /**
+             * This returns the primitive long type.
+             * @return the primitive long type
+             */
             private fun long(): Primitive {
                 return LONG
             }
 
+            /**
+             * This returns the primitive float type.
+             * @return the primitive float type
+             */
             private fun float(): Primitive {
                 return FLOAT
             }
 
+            /**
+             * This returns the primitive double type.
+             * @return the primitive double type
+             */
             private fun double(): Primitive {
                 return DOUBLE
             }
 
+            /**
+             * This returns the primitive unsigned byte type.
+             * @return the primitive unsigned byte type
+             */
             private fun unsignedByte(): Primitive {
                 return UNSIGNED_BYTE
             }
 
+            /**
+             * This returns the primitive unsigned short type.
+             * @return the primitive unsigned short type
+             */
             private fun unsignedShort(): Primitive {
                 return UNSIGNED_SHORT
             }
 
+            /**
+             * This returns the primitive unsigned int type.
+             * @return the primitive unsigned int type
+             */
             private fun unsignedInt(): Primitive {
                 return UNSIGNED_INT
             }
 
+            /**
+             * This returns the primitive unsigned long type.
+             * @return the primitive unsigned long type
+             */
             private fun unsignedLong(): Primitive {
                 return UNSIGNED_LONG
             }
 
+            /**
+             * This returns the primitive void type.
+             * @return the primitive void type
+             */
             private fun char(): Primitive {
                 return CHAR
             }
 
+            /**
+             * This returns the primitive void type.
+             * @return the primitive void type
+             */
             private fun void(): Primitive {
                 return VOID
             }
 
+            /**
+             * A pointer pointing towards the primitive boolean type.
+             */
             val booleanPointer = point(bool())
+
+            /**
+             * A pointer pointing towards the primitive byte type.
+             */
             val bytePointer = point(byte())
+
+            /**
+             * A pointer pointing towards the primitive char type.
+             */
             val shortPointer = point(short())
+
+            /**
+             * A pointer pointing towards the primitive int type.
+             */
             val intPointer = point(int())
+
+            /**
+             * A pointer pointing towards the primitive long type.
+             */
             val longPointer = point(long())
+
+            /**
+             * A pointer pointing towards the primitive float type.
+             */
             val floatPointer = point(float())
+
+            /**
+             * A pointer pointing towards the primitive double type.
+             */
             val doublePointer = point(double())
+
+            /**
+             * A pointer pointing towards the primitive unsigned byte type.
+             */
             val unsignedBytePointer = point(unsignedByte())
+
+            /**
+             * A pointer pointing towards the primitive unsigned short type.
+             */
             val unsignedShortPointer = point(unsignedShort())
+
+            /**
+             * A pointer pointing towards the primitive unsigned int type.
+             */
             val unsignedIntPointer = point(unsignedInt())
+
+            /**
+             * A pointer pointing towards the primitive unsigned long type.
+             */
             val unsignedLongPointer = point(unsignedLong())
+
+            /**
+             * A pointer pointing towards the primitive char type.
+             */
             val charPointer = point(char())
+
+            /**
+             * A pointer pointing towards the primitive void type.
+             */
             val voidPointer = point(void())
 
 
+            /**
+             * The primitive boolean type.
+             */
             val BOOLEAN: Primitive = object : Primitive {
                 override val name: String get() = "boolean"
                 override val type: PrimitiveType get() = PrimitiveType.BOOLEAN
@@ -211,6 +612,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive byte type.
+             */
             val BYTE: Primitive = object : Primitive {
 
                 override val name: String get() = "byte"
@@ -268,6 +672,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive short type.
+             */
             val SHORT: Primitive = object : Primitive {
 
                 override val name: String get() = "short"
@@ -324,6 +731,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive int type.
+             */
             val INT: Primitive = object : Primitive {
 
                 override val name: String get() = "int"
@@ -379,6 +789,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive long type.
+             */
             val LONG: Primitive = object : Primitive {
 
                 override val name: String get() = "long"
@@ -433,6 +846,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive float type.
+             */
             val FLOAT: Primitive = object : Primitive {
 
                 override val name: String get() = "float"
@@ -534,6 +950,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive unsigned byte type.
+             */
             val UNSIGNED_BYTE: Primitive = object : Primitive {
 
                 override val name: String get() = "unsigned_byte"
@@ -594,6 +1013,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive unsigned short type.
+             */
             val UNSIGNED_SHORT: Primitive = object : Primitive {
 
                 override val name: String get() = "unsigned_short"
@@ -654,6 +1076,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive unsigned int type.
+             */
             val UNSIGNED_INT: Primitive = object : Primitive {
 
                 override val name: String get() = "unsigned_int"
@@ -713,6 +1138,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive unsigned long type.
+             */
             val UNSIGNED_LONG: Primitive = object : Primitive {
 
                 override val name: String get() = "unsigned_long"
@@ -771,6 +1199,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive char type.
+             */
             val CHAR = object : Primitive {
 
                 override val name: String get() = "char"
@@ -831,6 +1262,9 @@ interface ShakeType {
                 }
             }
 
+            /**
+             * The primitive void type.
+             */
             val VOID = object : Primitive {
 
                 override val name: String get() = "void"
@@ -866,11 +1300,27 @@ interface ShakeType {
         }
     }
 
+    /**
+     * The object type.
+     * This type points towards an object.
+     */
     interface Object : ShakeType {
+
+        /**
+         * A pointer towards the class of the referenced object
+         */
         val classPointer: Pointer<ShakeClass>
+
+        /**
+         * The class of the referenced object
+         */
         val clazz: ShakeClass
-        override val kind: Kind
-            get() = Kind.OBJECT
+
+        override val kind: Kind get() = Kind.OBJECT
+
+        /**
+         * The qualified name of the class of the referenced object
+         */
         val qualifiedName: String
 
         class Impl : Object {
@@ -916,10 +1366,10 @@ interface ShakeType {
             override fun orType(other: ShakeType): ShakeType? = null
             override fun notType(): ShakeType? = null
             override fun childType(name: String): ShakeType? = clazz.fields.find { it.name == name }?.type
-            override fun childFunctions(name: String): List<ShakeFunction>
+            override fun childFunctions(name: String): List<ShakeFunctionType>
                 = clazz.methods.filter { it.name == name }
 
-            override fun childInvokable(name: String): List<ShakeFunction>? = childFunctions(name)
+            override fun childInvokable(name: String): List<ShakeFunctionType>? = childFunctions(name)
 
             override fun castableTo(other: ShakeType): Boolean
                 = other is Object && other.clazz.compatibleTo(clazz)
