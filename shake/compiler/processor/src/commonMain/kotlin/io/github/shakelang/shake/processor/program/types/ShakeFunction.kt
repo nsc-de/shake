@@ -11,8 +11,6 @@ import io.github.shakelang.shake.processor.util.point
  */
 interface ShakeFunction : ShakeFunctionType {
 
-    override fun toJson(): Map<String, Any?>
-
     class Impl : ShakeFunction {
         override val project: ShakeProject
         override val pkg: ShakePackage?

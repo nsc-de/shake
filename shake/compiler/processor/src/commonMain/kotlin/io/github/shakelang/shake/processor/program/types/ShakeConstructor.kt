@@ -3,19 +3,65 @@ package io.github.shakelang.shake.processor.program.types
 import io.github.shakelang.shake.processor.program.types.code.ShakeCode
 
 interface ShakeConstructor {
+
+    /**
+     * The class that this constructor belongs to.
+     */
     val clazz: ShakeClass
-    val body: ShakeCode
-    val isStrict: Boolean
-    val isPrivate: Boolean
-    val isProtected: Boolean
-    val isPublic: Boolean
+
+    /**
+     * The name of the constructor (if any).
+     */
     val name: String?
+
+    /**
+     * The code that this constructor executes.
+     */
+    val body: ShakeCode
+
+    /**
+     * Is this constructor strict?
+     */
+    val isStrict: Boolean
+
+    /**
+     * Is this constructor private?
+     */
+    val isPrivate: Boolean
+
+    /**
+     * Is this constructor protected?
+     */
+    val isProtected: Boolean
+
+    /**
+     * Is this constructor public?
+     */
+    val isPublic: Boolean
+
+    /**
+     * The parameters of this constructor.
+     */
     val parameters: List<ShakeParameter>
+
+    /**
+     * The parent scope of this constructor.
+     */
     val parentScope: ShakeScope
+
+    /**
+     * The scope of this constructor.
+     */
     val scope: ShakeScope
 
+    /**
+     * The signature of this constructor.
+     */
     val signature: String
 
+    /**
+     * Convert the constructor to json map representation.
+     */
     fun toJson(): Map<String, Any?>
 
     class Impl : ShakeConstructor {
