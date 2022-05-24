@@ -4,7 +4,7 @@ import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 import io.github.shakelang.shake.processor.util.Pointer
 import io.github.shakelang.shake.processor.util.point
 
-interface ShakeClassField : ShakeField {
+interface ShakeClassField : ShakeFieldType {
     val clazz: ShakeClass
     override val qualifiedName: String
 

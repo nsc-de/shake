@@ -1,0 +1,20 @@
+package io.github.shakelang.shake.processor.program.mutable.code
+
+import io.github.shakelang.shake.processor.program.mutable.code.statements.MutableShakeStatement
+import io.github.shakelang.shake.processor.program.mutable.code.values.MutableShakeValue
+import io.github.shakelang.shake.processor.program.types.code.*
+
+interface MutableShakeAssignmentType : MutableShakeValue, MutableShakeStatement
+interface MutableShakeAssignment : ShakeAssignment, MutableShakeAssignmentType
+interface MutableShakeAddAssignment : ShakeAddAssignment, MutableShakeAssignmentType
+interface MutableShakeSubAssignment : ShakeSubAssignment, MutableShakeAssignmentType
+interface MutableShakeMulAssignment : ShakeMulAssignment, MutableShakeAssignmentType
+interface MutableShakeDivAssignment : ShakeDivAssignment, MutableShakeAssignmentType
+interface MutableShakeModAssignment : ShakeModAssignment, MutableShakeAssignmentType
+interface MutableShakePowAssignment : ShakePowAssignment, MutableShakeAssignmentType
+
+interface MutableShakeMutateType : MutableShakeValue, MutableShakeStatement, ShakeMutateType
+interface MutableShakeIncrementBefore : ShakeIncrementBefore, MutableShakeMutateType
+interface MutableShakeIncrementAfter : ShakeIncrementAfter, MutableShakeMutateType
+interface MutableShakeDecrementBefore : ShakeDecrementBefore, MutableShakeMutateType
+interface MutableShakeDecrementAfter : ShakeDecrementAfter, MutableShakeMutateType
