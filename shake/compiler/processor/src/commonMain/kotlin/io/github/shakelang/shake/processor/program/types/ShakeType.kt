@@ -1443,8 +1443,8 @@ interface ShakeType {
                 TODO("Not yet implemented")
             }
 
-            override val kind: ShakeType.Kind
-                get() = ShakeType.Kind.ARRAY
+            override val kind: Kind
+                get() = Kind.ARRAY
 
             override fun castableTo(other: ShakeType): Boolean {
                 return other is Array && other.elementType.castableTo(elementType)

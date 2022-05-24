@@ -24,7 +24,6 @@ import io.github.shakelang.shason.json
  */
 interface ShakeProject {
 
-
     /**
      * List containing pointers to all root packages in the project.
      */
@@ -225,6 +224,18 @@ interface ShakeProject {
         return clz.transform { it?.getFieldBySignature(signature) }
     }
 
+    /**
+     * Get a [ShakeScope] by its shake-signature.
+     * This will give back a [Pointer] to the [ShakeScope], so if the scope is not found,
+     * but created at a later point, it will be returned, but only if it is already
+     * created at the point of access of the [Pointer.value] property. Until creation
+     * the pointer will point to null.
+     *
+     * @param signature The signature of the scope.
+     * @return A pointer to the [ShakeScope].
+     */
+    fun getScopeBySignature(signature: String): Pointer<ShakeScope?>
+
     class Impl: ShakeProject {
 
         override val packagePointers: List<Pointer<ShakePackage>>
@@ -237,6 +248,9 @@ interface ShakeProject {
         override val functions: List<ShakeFunction>
         override val fields: List<ShakeField>
         override val scope: ShakeScope = ShakeScope.ShakeProjectScope.from(this)
+
+        private val scopeList: MutableList<ShakeScope> = mutableListOf()
+        val scopes: List<ShakeScope> get() = scopeList
 
         constructor(
             subpackages: List<ShakePackage>,
@@ -356,8 +370,11 @@ interface ShakeProject {
             }
         }
 
-        private class ClassRequirement(val name: String, val then: (ShakeClass) -> Unit)
-        private class PackageRequirement(val name: String, val then: (ShakePackage) -> Unit)
+        override fun getScopeBySignature(signature: String): Pointer<ShakeScope?> {
+            return Pointer.task { scopes.find { it.signature == signature } }
+        }
+
+        internal fun registerScope(scope: ShakeScope) = scopeList.add(scope)
     }
 
     companion object {

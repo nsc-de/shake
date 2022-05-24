@@ -2,6 +2,7 @@ package io.github.shakelang.shake.processor.program.types
 
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVariableDeclaration
+import io.github.shakelang.shake.processor.util.Pointer
 
 /**
  * Represents a scope in the Shake program.
@@ -67,6 +68,8 @@ interface ShakeScope {
 
             override val parent: ShakeScope get() = it.staticScope
 
+            init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
+
             override fun get(name: String): ShakeAssignable? {
                 return it.fields.find { it.name == name } ?: parent.get(name)
             }
@@ -103,6 +106,8 @@ interface ShakeScope {
         class Impl(val it: ShakeClass) : ShakeClassStaticScope {
 
             override val parent: ShakeScope get() = it.parentScope
+
+            init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
 
             override fun get(name: String): ShakeAssignable? {
                 return it.staticFields.find { it.name == name } ?: parent.get(name)
@@ -148,6 +153,8 @@ interface ShakeScope {
 
             override val parent: ShakeScope get() = it.parentScope
 
+            init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
+
             override fun get(name: String): ShakeAssignable? {
                 return variables.find { it.name == name } ?: it.parameters.find { it.name == name } ?: parent.get(name)
             }
@@ -181,6 +188,8 @@ interface ShakeScope {
     interface ShakeMethodScope : ShakeFunctionTypeScope {
         class Impl(val it: ShakeMethod) : ShakeMethodScope {
             val variables = mutableListOf<ShakeVariableDeclaration>()
+
+            init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
 
             override val parent: ShakeScope = it.parentScope
 
@@ -217,7 +226,10 @@ interface ShakeScope {
      */
     interface ShakeConstructorScope : ShakeScope {
         class Impl(val it: ShakeConstructor) : ShakeConstructorScope {
+
             val variables = mutableListOf<ShakeVariableDeclaration>()
+
+            init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
 
             override val parent: ShakeScope = it.scope
 
@@ -250,6 +262,9 @@ interface ShakeScope {
      */
     interface ShakeFileScope : ShakeScope {
         class Impl(val it: ShakeFile, override val parent: ShakeScope) : ShakeFileScope {
+
+            init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
+
             override fun get(name: String): ShakeAssignable? {
                 return it.imports.firstNotNullOfOrNull { import ->
                     val last = import.it.last()
@@ -294,6 +309,8 @@ interface ShakeScope {
         class Impl(val it: ShakePackage) : ShakePackageScope {
             override val parent: ShakeScope get() = it.project.scope
 
+            init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
+
             override fun get(name: String): ShakeAssignable? {
                 return it.fields.find { it.name == name }
             }
@@ -326,7 +343,10 @@ interface ShakeScope {
      */
     interface ShakeProjectScope : ShakeScope {
         class Impl(val it: ShakeProject) : ShakeProjectScope {
+
             override val parent: ShakeScope? = null
+
+            init { if (it is ShakeProject.Impl) it.registerScope(this) }
 
             override fun get(name: String): ShakeAssignable? {
                 return it.fields.find { it.name == name }
@@ -350,6 +370,12 @@ interface ShakeScope {
 
         companion object {
             fun from(it: ShakeProject): ShakeProjectScope = Impl(it)
+        }
+    }
+
+    companion object {
+        fun from(prj: ShakeProject, scope: ShakeScope): Pointer<ShakeScope?> {
+            return prj.getScopeBySignature(scope.signature)
         }
     }
 }

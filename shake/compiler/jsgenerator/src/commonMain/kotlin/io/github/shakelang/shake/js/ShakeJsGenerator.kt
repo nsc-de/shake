@@ -309,7 +309,7 @@ class ShakeJsGenerator {
 
     fun visitInvocation(n: ShakeInvocation): JsFunctionCall {
 
-        val callable = n.callable
+        val callable = n.invokable
 
         when(callable) {
             is ShakeMethod -> {

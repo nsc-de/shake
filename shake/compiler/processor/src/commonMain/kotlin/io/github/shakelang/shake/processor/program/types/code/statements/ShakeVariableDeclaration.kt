@@ -6,6 +6,8 @@ import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
+import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.point
 
 interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeStatement {
     val scope: ShakeScope
@@ -16,17 +18,63 @@ interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeSta
 
     fun valueCompatible(value: ShakeValue): Boolean
 
-    class Impl(
-        override val scope: ShakeScope,
-        override val name: String,
-        override val initialValue: ShakeValue?,
-        override val isFinal: Boolean,
-        override val type: ShakeType,
-        override val latestValue: ShakeValue?,
-        override val latestType: ShakeType
-    ) : ShakeVariableDeclaration {
+    class Impl : ShakeVariableDeclaration {
 
+        override val scope: ShakeScope
+        override val name: String
+        override val initialValue: ShakeValue?
+        override val isFinal: Boolean
+        override val latestValue: ShakeValue?
+        override val latestType: ShakeType
+        override val typePointer: Pointer<ShakeType>
+
+        override val type: ShakeType get() = typePointer.value
         override val qualifiedName: String get() = "local $name"
+
+        constructor(
+            scope: ShakeScope,
+            name: String,
+            initialValue: ShakeValue?,
+            isFinal: Boolean,
+            type: ShakeType
+        ) {
+            this.scope = scope
+            this.name = name
+            this.initialValue = initialValue
+            this.isFinal = isFinal
+            this.latestValue = initialValue
+            this.latestType = type
+            this.typePointer = type.point()
+        }
+
+        constructor(
+            scope: ShakeScope,
+            name: String,
+            initialValue: ShakeValue?,
+            isFinal: Boolean,
+            typePointer: Pointer<ShakeType>
+        ) {
+            this.scope = scope
+            this.name = name
+            this.initialValue = initialValue
+            this.isFinal = isFinal
+            this.latestValue = initialValue
+            this.latestType = typePointer.value
+            this.typePointer = typePointer
+        }
+
+        constructor(
+            prj: ShakeProject,
+            it: ShakeVariableDeclaration
+        ) {
+            this.scope = ShakeScope.from(prj, it.scope).value ?: throw IllegalStateException("Scope not found")
+            this.name = it.name
+            this.initialValue = it.initialValue?.let { it1 -> ShakeValue.from(prj, it1) }
+            this.isFinal = it.isFinal
+            this.latestValue = it.latestValue
+            this.latestType = it.latestType
+            this.typePointer = ShakeType.from(prj, it.type)
+        }
 
         override fun valueCompatible(value: ShakeValue): Boolean {
             return value.type.compatibleTo(this.type)
@@ -90,7 +138,7 @@ interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeSta
 
     companion object {
         fun from(prj: ShakeProject, it: ShakeVariableDeclaration): ShakeVariableDeclaration {
-            return Impl(it.scope, it.name, it.initialValue, it.isFinal, it.type, it.latestValue, it.latestType)
+            return Impl(prj, it)
         }
     }
 }

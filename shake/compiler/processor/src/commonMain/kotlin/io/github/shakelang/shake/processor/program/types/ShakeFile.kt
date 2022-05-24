@@ -4,7 +4,7 @@ import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeFile {
     val signature: String
-    val prj: ShakeProject
+    val project: ShakeProject
     val pkg: ShakePackage
     val name: String
     val scope: ShakeScope
@@ -15,7 +15,7 @@ interface ShakeFile {
     val imports: List<ShakeImport>
 
     class Impl : ShakeFile {
-        override val prj: ShakeProject
+        override val project: ShakeProject
         override val pkg: ShakePackage
         override val name: String
         override val scope: ShakeScope
@@ -36,7 +36,7 @@ interface ShakeFile {
             classes: List<ShakeClass>,
             imports: List<ShakeImport>
         ) {
-            this.prj = prj
+            this.project = prj
             this.pkg = pkg
             this.name = name
             this.scope = scope
@@ -51,7 +51,7 @@ interface ShakeFile {
             pkg: ShakePackage,
             it: ShakeFile
         ) {
-            this.prj = prj
+            this.project = prj
             this.pkg = pkg
             this.name = it.name
             this.scope = ShakeScope.ShakeFileScope.from(this, it.scope)

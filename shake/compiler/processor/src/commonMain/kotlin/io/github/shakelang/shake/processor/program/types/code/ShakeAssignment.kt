@@ -11,6 +11,26 @@ interface ShakeAssignmentType : ShakeValue, ShakeStatement {
     val variablePointer: Pointer<ShakeAssignable>
     val variable: ShakeAssignable
     val value: ShakeValue
+
+    companion object {
+        fun from(
+            prj: ShakeProject,
+            assignment: ShakeAssignmentType,
+        ): ShakeAssignmentType {
+            return when (assignment) {
+                is ShakeAssignment -> ShakeAssignment.from(prj, assignment)
+                is ShakeAddAssignment -> ShakeAddAssignment.from(prj, assignment)
+                is ShakeSubAssignment -> ShakeSubAssignment.from(prj, assignment)
+                is ShakeMulAssignment -> ShakeMulAssignment.from(prj, assignment)
+                is ShakeDivAssignment -> ShakeDivAssignment.from(prj, assignment)
+                is ShakeModAssignment -> ShakeModAssignment.from(prj, assignment)
+                is ShakePowAssignment -> ShakePowAssignment.from(prj, assignment)
+                else -> {
+                    throw IllegalArgumentException("Unknown assignment type: ${assignment::class.simpleName}")
+                }
+            }
+        }
+    }
 }
 
 interface ShakeAssignment : ShakeAssignmentType {
@@ -198,6 +218,18 @@ interface ShakePowAssignment : ShakeAssignmentType {
 interface ShakeMutateType : ShakeValue, ShakeStatement {
     val variablePointer: Pointer<ShakeAssignable>
     val variable: ShakeAssignable
+
+    companion object {
+        fun from(prj: ShakeProject, mutate: ShakeMutateType): ShakeMutateType {
+            return when (mutate) {
+                is ShakeIncrementBefore -> ShakeIncrementBefore.from(prj, mutate)
+                is ShakeIncrementAfter -> ShakeIncrementAfter.from(prj, mutate)
+                is ShakeDecrementBefore -> ShakeDecrementBefore.from(prj, mutate)
+                is ShakeDecrementAfter -> ShakeDecrementAfter.from(prj, mutate)
+                else -> throw IllegalArgumentException("Unknown mutate type: ${mutate::class.simpleName}")
+            }
+        }
+    }
 }
 
 interface ShakeIncrementBefore : ShakeMutateType {

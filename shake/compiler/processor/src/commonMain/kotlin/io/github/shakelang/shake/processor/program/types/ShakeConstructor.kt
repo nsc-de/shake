@@ -5,6 +5,11 @@ import io.github.shakelang.shake.processor.program.types.code.ShakeCode
 interface ShakeConstructor {
 
     /**
+     * The project that this constructor belongs to.
+     */
+    val project: ShakeProject
+
+    /**
      * The class that this constructor belongs to.
      */
     val clazz: ShakeClass
@@ -77,6 +82,9 @@ interface ShakeConstructor {
         override val parentScope: ShakeScope
         override val scope: ShakeScope
 
+        override val project: ShakeProject
+            get() = clazz.project
+
         constructor(
             clazz: ShakeClass,
             body: ShakeCode,
@@ -112,7 +120,7 @@ interface ShakeConstructor {
             this.isProtected = it.isProtected
             this.isPublic = it.isPublic
             this.name = it.name
-            this.parameters = it.parameters.map { ShakeParameter.from(clazz.prj, it) }
+            this.parameters = it.parameters.map { ShakeParameter.from(clazz.project, it) }
             this.parentScope = it.parentScope
             this.scope = it.scope
         }

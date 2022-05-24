@@ -17,10 +17,7 @@ import io.github.shakelang.shake.parser.node.loops.ShakeForNode
 import io.github.shakelang.shake.parser.node.loops.ShakeWhileNode
 import io.github.shakelang.shake.parser.node.objects.ShakeClassConstructionNode
 import io.github.shakelang.shake.parser.node.variables.*
-import io.github.shakelang.shake.processor.program.creation.*
-import io.github.shakelang.shake.processor.program.creation.code.*
-import io.github.shakelang.shake.processor.program.creation.code.statements.*
-import io.github.shakelang.shake.processor.program.creation.code.values.*
+import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 
 class ShakeProcessorOptions {
@@ -53,11 +50,11 @@ abstract class ShakeProcessor <T> {
 
 
 }
-open class ShakePackageBasedProcessor : ShakeProcessor<CreationShakeProject>() {
+open class ShakePackageBasedProcessor : ShakeProcessor<ShakeProject>() {
 
     val codeProcessor = ShakeCodeProcessor()
-    open val project = CreationShakeProject(codeProcessor)
-    override val src: CreationShakeProject
+    open val project = ShakeProject(codeProcessor)
+    override val src: ShakeProject
         get() = project
 
     open fun loadSynthetic(src: String, contents: ShakeFile) {
@@ -73,7 +70,7 @@ open class ShakePackageBasedProcessor : ShakeProcessor<CreationShakeProject>() {
 
     }
 
-    fun finish() : CreationShakeProject {
+    fun finish() : ShakeProject {
         project.finish()
         return project
     }
@@ -81,7 +78,7 @@ open class ShakePackageBasedProcessor : ShakeProcessor<CreationShakeProject>() {
 
 open class ShakeCodeProcessor {
 
-    fun visitValue(scope: CreationShakeScope, value: ShakeValuedNode): CreationShakeValue {
+    fun visitValue(scope: ShakeScope, value: ShakeValuedNode): ShakeValue {
         return when(value) {
             is ShakeIntegerNode -> visitIntegerNode(scope, value)
             is ShakeDoubleNode -> visitDoubleNode(scope, value)
@@ -118,7 +115,7 @@ open class ShakeCodeProcessor {
         }
     }
 
-    fun visitStatement(scope: CreationShakeScope, statement: ShakeStatementNode): CreationShakeStatement {
+    fun visitStatement(scope: ShakeScope, statement: ShakeStatementNode): ShakeStatement {
         return when(statement) {
             is ShakeIfNode -> visitIfNode(scope, statement)
             is ShakeWhileNode -> visitWhileNode(scope, statement)
@@ -141,13 +138,13 @@ open class ShakeCodeProcessor {
         }
     }
 
-    fun visitTree(scope: CreationShakeScope, t: ShakeTree): CreationShakeCode {
-        return CreationShakeCode(t.children.map {
+    fun visitTree(scope: ShakeScope, t: ShakeTree): ShakeCode {
+        return ShakeCode(t.children.map {
             visitStatement(scope, it)
         })
     }
 
-    fun visitType(scope: CreationShakeScope, t: ShakeVariableType): ShakeType? {
+    fun visitType(scope: ShakeScope, t: ShakeVariableType): ShakeType? {
         return when(t.type) {
             ShakeVariableType.Type.DYNAMIC -> null
             ShakeVariableType.Type.BYTE -> CreationShakeType.Primitives.BYTE

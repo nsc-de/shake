@@ -18,7 +18,7 @@ interface ShakeClass {
     /**
      * The [ShakeProject] this class belongs to.
      */
-    val prj: ShakeProject
+    val project: ShakeProject
 
     /**
      * The [ShakePackage] this class belongs to (if any).
@@ -246,7 +246,7 @@ interface ShakeClass {
     fun toJson(): Map<String, Any?>
 
     class Impl : ShakeClass {
-        override val prj: ShakeProject
+        override val project: ShakeProject
         override val pkg: ShakePackage?
         override val parentScope: ShakeScope
         override val name: String
@@ -291,7 +291,7 @@ interface ShakeClass {
             superClass: ShakeClass?,
             interfaces: List<ShakeClass>
         ) {
-            this.prj = prj
+            this.project = prj
             this.pkg = pkg
             this.parentScope = parentScope
             this.name = name
@@ -326,7 +326,7 @@ interface ShakeClass {
             parentScope: ShakeScope,
             it: ShakeClass
         ) {
-            this.prj = prj
+            this.project = prj
             this.pkg = pkg
             this.parentScope = parentScope
             this.name = it.name

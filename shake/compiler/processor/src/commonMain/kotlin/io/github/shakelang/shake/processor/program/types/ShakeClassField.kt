@@ -68,8 +68,8 @@ interface ShakeClassField : ShakeField {
         ) {
             this.clazz = clazz
             this.name = it.name
-            this.typePointer = ShakeType.from(clazz.prj, it.type)
-            this.project = clazz.prj
+            this.typePointer = ShakeType.from(clazz.project, it.type)
+            this.project = clazz.project
             this.pkg = clazz.pkg
             this.scope = parentScope
             this.isStatic = it.isStatic

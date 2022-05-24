@@ -78,7 +78,7 @@ interface ShakeMethod : ShakeFunctionType {
             it: ShakeMethod
         ) {
             this.clazz = clazz
-            this.project = clazz.prj
+            this.project = clazz.project
             this.pkg = clazz.pkg
             this.parentScope = scope
             this.name = it.name
