@@ -80,7 +80,7 @@ interface ShakePackage {
      * use this scope as their parent and code executed statically to
      * initialize [ShakeField] values directly use this scope.
      */
-    val scope: ShakeScope
+    val scope: ShakeScope.ShakePackageScope
 
     /**
      * The signature of this package. The package signature is used to
@@ -195,7 +195,7 @@ interface ShakePackage {
         override val fields: List<ShakeField>
 
         override val qualifiedName: String get() = if (parent == null) name else "${parent.qualifiedName}.$name"
-        override val scope: ShakeScope = ShakeScope.ShakePackageScope.from(this)
+        override val scope: ShakeScope.ShakePackageScope = ShakeScope.ShakePackageScope.from(this)
         override val signature: String get() = qualifiedName
 
         constructor(

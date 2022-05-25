@@ -69,7 +69,7 @@ interface ShakeProject {
      * The scope of the project. It is comparable to a global scope because
      * it is extended by all packages, subpackages, classes and functions.
      */
-    val scope: ShakeScope
+    val scope: ShakeScope.ShakeProjectScope
 
     /**
      * Get a package by its name. If the name contains a dot, it will be split and
@@ -247,7 +247,7 @@ interface ShakeProject {
         override val classes: List<ShakeClass>
         override val functions: List<ShakeFunction>
         override val fields: List<ShakeField>
-        override val scope: ShakeScope = ShakeScope.ShakeProjectScope.from(this)
+        override val scope: ShakeScope.ShakeProjectScope = ShakeScope.ShakeProjectScope.from(this)
 
         private val scopeList: MutableList<ShakeScope> = mutableListOf()
         val scopes: List<ShakeScope> get() = scopeList

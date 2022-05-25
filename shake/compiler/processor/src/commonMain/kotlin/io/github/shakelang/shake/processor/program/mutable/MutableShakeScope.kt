@@ -10,6 +10,6 @@ interface MutableShakeScope : ShakeScope {
     interface MutableShakeMethodScope : MutableShakeScope, ShakeScope.ShakeMethodScope
     interface MutableShakeConstructorScope : MutableShakeScope, ShakeScope.ShakeConstructorScope
     interface MutableShakeFileScope : MutableShakeScope, ShakeScope.ShakeFileScope
-    interface ShakePackageScope : MutableShakeScope, ShakeScope.ShakePackageScope
-    interface ShakeProjectScope : MutableShakeScope, ShakeScope.ShakeProjectScope
+    interface MutableShakePackageScope : MutableShakeScope, ShakeScope.ShakePackageScope
+    interface MutableShakeProjectScope : MutableShakeScope, ShakeScope.ShakeProjectScope
 }
