@@ -67,12 +67,12 @@ interface ShakeClass {
     /**
      * A list of pointers to the instance-[ShakeField]s of this class.
      */
-    val fieldPointers: PointerList<ShakeField>
+    val fieldPointers: PointerList<ShakeClassField>
 
     /**
      * A list of pointers to the static-[ShakeField]s of this class.
      */
-    val staticFieldPointers: PointerList<ShakeField>
+    val staticFieldPointers: PointerList<ShakeClassField>
     /**
      * A list of pointers to the [ShakeConstructor]s of this class.
      */
@@ -252,9 +252,9 @@ interface ShakeClass {
         override val name: String
 
         override val methodPointers: PointerList<ShakeMethod>
-        override val fieldPointers: PointerList<ShakeField>
+        override val fieldPointers: PointerList<ShakeClassField>
         override val classPointers: PointerList<ShakeClass>
-        override val staticFieldPointers: PointerList<ShakeField>
+        override val staticFieldPointers: PointerList<ShakeClassField>
         override val staticMethodPointers: PointerList<ShakeMethod>
         override val staticClassPointers: PointerList<ShakeClass>
         override val constructorPointers: PointerList<ShakeConstructor>
