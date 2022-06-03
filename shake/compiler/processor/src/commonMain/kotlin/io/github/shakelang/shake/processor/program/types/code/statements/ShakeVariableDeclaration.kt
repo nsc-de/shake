@@ -2,7 +2,6 @@ package io.github.shakelang.shake.processor.program.types.code.statements
 
 import io.github.shakelang.shake.processor.program.types.ShakeAssignable
 import io.github.shakelang.shake.processor.program.types.ShakeDeclaration
-import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
@@ -64,16 +63,16 @@ interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeSta
         }
 
         constructor(
-            prj: ShakeProject,
+            scope: ShakeScope,
             it: ShakeVariableDeclaration
         ) {
-            this.scope = ShakeScope.from(prj, it.scope).value ?: throw IllegalStateException("Scope not found")
+            this.scope = ShakeScope.from(scope, it.scope).value ?: throw IllegalStateException("Scope not found")
             this.name = it.name
-            this.initialValue = it.initialValue?.let { it1 -> ShakeValue.from(prj, it1) }
+            this.initialValue = it.initialValue?.let { it1 -> ShakeValue.from(scope, it1) }
             this.isFinal = it.isFinal
             this.latestValue = it.latestValue
             this.latestType = it.latestType
-            this.typePointer = ShakeType.from(prj, it.type)
+            this.typePointer = ShakeType.from(scope, it.type)
         }
 
         override fun valueCompatible(value: ShakeValue): Boolean {
@@ -137,8 +136,8 @@ interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeSta
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeVariableDeclaration): ShakeVariableDeclaration {
-            return Impl(prj, it)
+        fun from(scope: ShakeScope, it: ShakeVariableDeclaration): ShakeVariableDeclaration {
+            return Impl(scope, it)
         }
     }
 }

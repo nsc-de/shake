@@ -8,7 +8,6 @@ import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVa
 import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeUsage : ShakeValue {
-    val scope: ShakeScope
     val declaration: ShakeDeclaration
 }
 

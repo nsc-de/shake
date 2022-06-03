@@ -1497,5 +1497,9 @@ interface ShakeType {
                 else -> throw IllegalStateException("Unknown type ${type.name}")
             }
         }
+
+        fun from(scope: ShakeScope, type: ShakeType) : Pointer<ShakeType> {
+            return from(scope.project, type)
+        }
     }
 }

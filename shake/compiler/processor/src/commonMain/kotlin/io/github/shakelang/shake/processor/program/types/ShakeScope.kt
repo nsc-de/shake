@@ -1,5 +1,6 @@
 package io.github.shakelang.shake.processor.program.types
 
+import io.github.shakelang.shake.processor.program.types.code.ShakeCode
 import io.github.shakelang.shake.processor.program.types.code.ShakeInvokable
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeVariableDeclaration
 import io.github.shakelang.shake.processor.util.Pointer
@@ -15,6 +16,8 @@ interface ShakeScope {
      * Returns the parent scope of this scope.
      */
     val parent: ShakeScope?
+
+    val project: ShakeProject get() = parent?.project ?: throw IllegalStateException("No project found")
 
     /**
      * Returns the variable with the given name in this scope or null if it doesn't exist.
@@ -373,9 +376,35 @@ interface ShakeScope {
         }
     }
 
+    /**
+     * Scope for code. This scope is used to store everything that is defined in a code block
+     */
+    interface ShakeCodeScope : ShakeScope {
+        class Impl(val it: ShakeCode) : ShakeCodeScope {
+            override val parent: ShakeScope get() = it.parentScope
+
+            override fun get(name: String): ShakeAssignable? = it.scope.get(name) ?: parent.get(name)
+            override fun getFunctions(name: String): List<ShakeFunctionType> = parent.getFunctions(name)
+            override fun getClass(name: String): ShakeClass? = parent.getClass(name)
+            override fun getInvokable(name: String): List<ShakeInvokable> = parent.getInvokable(name)
+
+            override val signature: String
+                get() = "CD" // TODO
+        }
+
+        companion object {
+            fun from(impl: ShakeCode): ShakeCodeScope {
+                return Impl(impl)
+            }
+        }
+    }
+
     companion object {
-        fun from(prj: ShakeProject, scope: ShakeScope): Pointer<ShakeScope?> {
-            return prj.getScopeBySignature(scope.signature)
+        fun from(prj: ShakeProject, it: ShakeScope): Pointer<ShakeScope?> {
+            return prj.getScopeBySignature(it.signature)
+        }
+        fun from(scope: ShakeScope, it: ShakeScope): Pointer<ShakeScope?> {
+            return scope.project.getScopeBySignature(it.signature)
         }
     }
 }

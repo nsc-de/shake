@@ -1,7 +1,7 @@
 package io.github.shakelang.shake.processor.program.types.code
 
 import io.github.shakelang.shake.processor.program.types.ShakeAssignable
-import io.github.shakelang.shake.processor.program.types.ShakeProject
+import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeStatement
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
@@ -14,17 +14,17 @@ interface ShakeAssignmentType : ShakeValue, ShakeStatement {
 
     companion object {
         fun from(
-            prj: ShakeProject,
+            scope: ShakeScope,
             assignment: ShakeAssignmentType,
         ): ShakeAssignmentType {
             return when (assignment) {
-                is ShakeAssignment -> ShakeAssignment.from(prj, assignment)
-                is ShakeAddAssignment -> ShakeAddAssignment.from(prj, assignment)
-                is ShakeSubAssignment -> ShakeSubAssignment.from(prj, assignment)
-                is ShakeMulAssignment -> ShakeMulAssignment.from(prj, assignment)
-                is ShakeDivAssignment -> ShakeDivAssignment.from(prj, assignment)
-                is ShakeModAssignment -> ShakeModAssignment.from(prj, assignment)
-                is ShakePowAssignment -> ShakePowAssignment.from(prj, assignment)
+                is ShakeAssignment -> ShakeAssignment.from(scope, assignment)
+                is ShakeAddAssignment -> ShakeAddAssignment.from(scope, assignment)
+                is ShakeSubAssignment -> ShakeSubAssignment.from(scope, assignment)
+                is ShakeMulAssignment -> ShakeMulAssignment.from(scope, assignment)
+                is ShakeDivAssignment -> ShakeDivAssignment.from(scope, assignment)
+                is ShakeModAssignment -> ShakeModAssignment.from(scope, assignment)
+                is ShakePowAssignment -> ShakePowAssignment.from(scope, assignment)
                 else -> {
                     throw IllegalArgumentException("Unknown assignment type: ${assignment::class.simpleName}")
                 }
@@ -35,6 +35,7 @@ interface ShakeAssignmentType : ShakeValue, ShakeStatement {
 
 interface ShakeAssignment : ShakeAssignmentType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
         override val typePointer: Pointer<ShakeType>,
@@ -53,14 +54,15 @@ interface ShakeAssignment : ShakeAssignmentType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, assignment: ShakeAssignment): ShakeAssignment {
-            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        fun from(scope: ShakeScope, assignment: ShakeAssignment): ShakeAssignment {
+            return Impl(scope, ShakeAssignable.from(scope, assignment.variable), ShakeValue.from(scope, assignment.value), ShakeType.from(scope.project, assignment.type))
         }
     }
 }
 
 interface ShakeAddAssignment : ShakeAssignmentType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
         override val typePointer: Pointer<ShakeType>,
@@ -79,14 +81,15 @@ interface ShakeAddAssignment : ShakeAssignmentType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, assignment: ShakeAddAssignment): ShakeAddAssignment {
-            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        fun from(scope: ShakeScope, assignment: ShakeAddAssignment): ShakeAddAssignment {
+            return Impl(scope, ShakeAssignable.from(scope, assignment.variable), ShakeValue.from(scope, assignment.value), ShakeType.from(scope.project, assignment.type))
         }
     }
 }
 
 interface ShakeSubAssignment : ShakeAssignmentType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
         override val typePointer: Pointer<ShakeType>,
@@ -105,14 +108,15 @@ interface ShakeSubAssignment : ShakeAssignmentType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, assignment: ShakeSubAssignment): ShakeSubAssignment {
-            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        fun from(scope: ShakeScope, assignment: ShakeSubAssignment): ShakeSubAssignment {
+            return Impl(scope, ShakeAssignable.from(scope, assignment.variable), ShakeValue.from(scope, assignment.value), ShakeType.from(scope.project, assignment.type))
         }
     }
 }
 
 interface ShakeMulAssignment : ShakeAssignmentType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
         override val typePointer: Pointer<ShakeType>,
@@ -131,14 +135,15 @@ interface ShakeMulAssignment : ShakeAssignmentType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, assignment: ShakeMulAssignment): ShakeMulAssignment {
-            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        fun from(scope: ShakeScope, assignment: ShakeMulAssignment): ShakeMulAssignment {
+            return Impl(scope, ShakeAssignable.from(scope, assignment.variable), ShakeValue.from(scope, assignment.value), ShakeType.from(scope.project, assignment.type))
         }
     }
 }
 
 interface ShakeDivAssignment : ShakeAssignmentType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
         override val typePointer: Pointer<ShakeType>,
@@ -157,14 +162,15 @@ interface ShakeDivAssignment : ShakeAssignmentType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, assignment: ShakeDivAssignment): ShakeDivAssignment {
-            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        fun from(scope: ShakeScope, assignment: ShakeDivAssignment): ShakeDivAssignment {
+            return Impl(scope, ShakeAssignable.from(scope, assignment.variable), ShakeValue.from(scope, assignment.value), ShakeType.from(scope.project, assignment.type))
         }
     }
 }
 
 interface ShakeModAssignment : ShakeAssignmentType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
         override val typePointer: Pointer<ShakeType>,
@@ -183,14 +189,15 @@ interface ShakeModAssignment : ShakeAssignmentType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, assignment: ShakeModAssignment): ShakeModAssignment {
-            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        fun from(scope: ShakeScope, assignment: ShakeModAssignment): ShakeModAssignment {
+            return Impl(scope, ShakeAssignable.from(scope, assignment.variable), ShakeValue.from(scope, assignment.value), ShakeType.from(scope.project, assignment.type))
         }
     }
 }
 
 interface ShakePowAssignment : ShakeAssignmentType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val value: ShakeValue,
         override val typePointer: Pointer<ShakeType>,
@@ -209,8 +216,8 @@ interface ShakePowAssignment : ShakeAssignmentType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, assignment: ShakePowAssignment): ShakePowAssignment {
-            return Impl(ShakeAssignable.from(prj, assignment.variable), ShakeValue.from(prj, assignment.value), ShakeType.from(prj, assignment.type))
+        fun from(scope: ShakeScope, assignment: ShakePowAssignment): ShakePowAssignment {
+            return Impl(scope, ShakeAssignable.from(scope, assignment.variable), ShakeValue.from(scope, assignment.value), ShakeType.from(scope.project, assignment.type))
         }
     }
 }
@@ -220,20 +227,22 @@ interface ShakeMutateType : ShakeValue, ShakeStatement {
     val variable: ShakeAssignable
 
     companion object {
-        fun from(prj: ShakeProject, mutate: ShakeMutateType): ShakeMutateType {
+        fun from(scope: ShakeScope, mutate: ShakeMutateType): ShakeMutateType {
             return when (mutate) {
-                is ShakeIncrementBefore -> ShakeIncrementBefore.from(prj, mutate)
-                is ShakeIncrementAfter -> ShakeIncrementAfter.from(prj, mutate)
-                is ShakeDecrementBefore -> ShakeDecrementBefore.from(prj, mutate)
-                is ShakeDecrementAfter -> ShakeDecrementAfter.from(prj, mutate)
+                is ShakeIncrementBefore -> ShakeIncrementBefore.from(scope, mutate)
+                is ShakeIncrementAfter -> ShakeIncrementAfter.from(scope, mutate)
+                is ShakeDecrementBefore -> ShakeDecrementBefore.from(scope, mutate)
+                is ShakeDecrementAfter -> ShakeDecrementAfter.from(scope, mutate)
                 else -> throw IllegalArgumentException("Unknown mutate type: ${mutate::class.simpleName}")
             }
         }
+
     }
 }
 
 interface ShakeIncrementBefore : ShakeMutateType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val typePointer: Pointer<ShakeType>,
     ) : ShakeIncrementBefore {
@@ -250,14 +259,15 @@ interface ShakeIncrementBefore : ShakeMutateType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, increment: ShakeIncrementBefore): ShakeIncrementBefore {
-            return Impl(ShakeAssignable.from(prj, increment.variable), ShakeType.from(prj, increment.type))
+        fun from(scope: ShakeScope, mutate: ShakeIncrementBefore): ShakeIncrementBefore {
+            return Impl(scope, ShakeAssignable.from(scope, mutate.variable), ShakeType.from(scope.project, mutate.type))
         }
     }
 }
 
 interface ShakeIncrementAfter : ShakeMutateType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val typePointer: Pointer<ShakeType>,
     ) : ShakeIncrementAfter {
@@ -274,14 +284,15 @@ interface ShakeIncrementAfter : ShakeMutateType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, increment: ShakeIncrementAfter): ShakeIncrementAfter {
-            return Impl(ShakeAssignable.from(prj, increment.variable), ShakeType.from(prj, increment.type))
+        fun from(scope: ShakeScope, mutate: ShakeIncrementAfter): ShakeIncrementAfter {
+            return Impl(scope, ShakeAssignable.from(scope, mutate.variable), ShakeType.from(scope.project, mutate.type))
         }
     }
 }
 
 interface ShakeDecrementBefore : ShakeMutateType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val typePointer: Pointer<ShakeType>,
     ) : ShakeDecrementBefore {
@@ -298,14 +309,15 @@ interface ShakeDecrementBefore : ShakeMutateType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, decrement: ShakeDecrementBefore): ShakeDecrementBefore {
-            return Impl(ShakeAssignable.from(prj, decrement.variable), ShakeType.from(prj, decrement.type))
+        fun from(scope: ShakeScope, mutate: ShakeDecrementBefore): ShakeDecrementBefore {
+            return Impl(scope, ShakeAssignable.from(scope, mutate.variable), ShakeType.from(scope.project, mutate.type))
         }
     }
 }
 
 interface ShakeDecrementAfter : ShakeMutateType {
     class Impl(
+        override val scope: ShakeScope,
         override val variablePointer: Pointer<ShakeAssignable>,
         override val typePointer: Pointer<ShakeType>,
     ) : ShakeDecrementAfter {
@@ -322,8 +334,8 @@ interface ShakeDecrementAfter : ShakeMutateType {
     }
 
     companion object {
-        fun from(prj: ShakeProject, decrement: ShakeDecrementAfter): ShakeDecrementAfter {
-            return Impl(ShakeAssignable.from(prj, decrement.variable), ShakeType.from(prj, decrement.type))
+        fun from(scope: ShakeScope, mutate: ShakeDecrementAfter): ShakeDecrementAfter {
+            return Impl(scope, ShakeAssignable.from(scope, mutate.variable), ShakeType.from(scope.project, mutate.type))
         }
     }
 }

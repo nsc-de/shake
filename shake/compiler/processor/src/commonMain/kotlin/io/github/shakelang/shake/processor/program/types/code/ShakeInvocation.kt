@@ -1,6 +1,6 @@
 package io.github.shakelang.shake.processor.program.types.code
 
-import io.github.shakelang.shake.processor.program.types.ShakeProject
+import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeStatement
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
@@ -18,6 +18,7 @@ interface ShakeInvocation: ShakeValue, ShakeStatement {
     override fun toJson(): Map<String, Any?>
 
     class Impl: ShakeInvocation {
+        override val scope: ShakeScope
         override val invokablePointer: Pointer<ShakeInvokable>
         override val invokable: ShakeInvokable get() = invokablePointer.value
         override val arguments: List<ShakeValue>
@@ -28,6 +29,7 @@ interface ShakeInvocation: ShakeValue, ShakeStatement {
         override val type: ShakeType get() = typePointer.value
 
         constructor(
+            scope: ShakeScope,
             callable: ShakeInvokable,
             arguments: List<ShakeValue>,
             parent: ShakeValue?,
@@ -35,6 +37,7 @@ interface ShakeInvocation: ShakeValue, ShakeStatement {
             isAnonymous: Boolean,
             typePointer: Pointer<ShakeType>
         ) {
+            this.scope = scope
             this.invokablePointer = callable.point()
             this.arguments = arguments
             this.parent = parent
@@ -44,12 +47,13 @@ interface ShakeInvocation: ShakeValue, ShakeStatement {
         }
 
         constructor(
-            prj: ShakeProject,
+            scope: ShakeScope,
             it: ShakeInvocation,
         ) {
-            this.invokablePointer = ShakeInvokable.from(prj, it.invokable)
-            this.arguments = it.arguments.map { ShakeValue.from(prj, it) }
-            this.parent = it.parent?.let { ShakeValue.from(prj, it) }
+            this.scope = scope
+            this.invokablePointer = ShakeInvokable.from(scope.project, it.invokable)
+            this.arguments = it.arguments.map { ShakeValue.from(scope, it) }
+            this.parent = it.parent?.let { ShakeValue.from(scope, it) }
             this.name = it.name
             this.isAnonymous = it.isAnonymous
             this.typePointer = it.typePointer
@@ -66,8 +70,8 @@ interface ShakeInvocation: ShakeValue, ShakeStatement {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeInvocation): ShakeInvocation {
-            return Impl(prj, it)
+        fun from(scope: ShakeScope, it: ShakeInvocation): ShakeInvocation {
+            return Impl(scope, it)
         }
     }
 }

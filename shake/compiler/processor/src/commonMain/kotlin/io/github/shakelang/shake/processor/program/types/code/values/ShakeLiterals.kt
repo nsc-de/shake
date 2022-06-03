@@ -1,13 +1,18 @@
 package io.github.shakelang.shake.processor.program.types.code.values
 
 import io.github.shakelang.shake.processor.program.types.ShakeProject
+import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeDoubleLiteral : ShakeValue {
     val value: Double
 
-    class Impl(override val value: Double) : ShakeDoubleLiteral {
+    class Impl(
+        override val scope: ShakeScope,
+        override val value: Double
+    ) : ShakeDoubleLiteral {
+
         override val type: ShakeType get() = ShakeType.Primitive.DOUBLE
         override val typePointer: Pointer<ShakeType> get() = ShakeType.Primitive.DOUBLE.pointer()
 
@@ -20,8 +25,8 @@ interface ShakeDoubleLiteral : ShakeValue {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeDoubleLiteral): ShakeDoubleLiteral {
-            return it
+        fun from(scope: ShakeScope, it: ShakeDoubleLiteral): ShakeDoubleLiteral {
+            return Impl(scope, it.value)
         }
     }
 }
@@ -29,7 +34,10 @@ interface ShakeDoubleLiteral : ShakeValue {
 interface ShakeIntLiteral : ShakeValue {
     val value: Int
 
-    class Impl(override val value: Int) : ShakeIntLiteral {
+    class Impl(
+        override val scope: ShakeScope,
+        override val value: Int
+    ) : ShakeIntLiteral {
         override val type: ShakeType get() = ShakeType.Primitive.INT
         override val typePointer: Pointer<ShakeType> get() = ShakeType.Primitive.INT.pointer()
         override fun toJson(): Map<String, Any?> {
@@ -41,8 +49,8 @@ interface ShakeIntLiteral : ShakeValue {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeIntLiteral): ShakeIntLiteral {
-            return it
+        fun from(scope: ShakeScope, it: ShakeIntLiteral): ShakeIntLiteral {
+            return Impl(scope, it.value)
         }
     }
 }
@@ -50,7 +58,10 @@ interface ShakeIntLiteral : ShakeValue {
 interface ShakeBooleanLiteral : ShakeValue {
     val value: Boolean
 
-    class Impl(override val value: Boolean) : ShakeBooleanLiteral {
+    class Impl(
+        override val scope: ShakeScope,
+        override val value: Boolean
+    ) : ShakeBooleanLiteral {
         override val type: ShakeType get() = ShakeType.Primitive.BOOLEAN
         override val typePointer: Pointer<ShakeType> get() = ShakeType.Primitive.BOOLEAN.pointer()
         override fun toJson(): Map<String, Any?> {
@@ -62,8 +73,8 @@ interface ShakeBooleanLiteral : ShakeValue {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeBooleanLiteral): ShakeBooleanLiteral {
-            return it
+        fun from(scope: ShakeScope, it: ShakeBooleanLiteral): ShakeBooleanLiteral {
+            return Impl(scope, it.value)
         }
     }
 }
@@ -71,7 +82,10 @@ interface ShakeBooleanLiteral : ShakeValue {
 interface ShakeCharacterLiteral : ShakeValue {
     val value: Char
 
-    class Impl(override val value: Char) : ShakeCharacterLiteral {
+    class Impl(
+        override val scope: ShakeScope,
+        override val value: Char
+    ) : ShakeCharacterLiteral {
         override val type: ShakeType get() = ShakeType.Primitive.CHAR
         override val typePointer: Pointer<ShakeType> get() = ShakeType.Primitive.CHAR.pointer()
         override fun toJson(): Map<String, Any?> {
@@ -83,8 +97,8 @@ interface ShakeCharacterLiteral : ShakeValue {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeCharacterLiteral): ShakeCharacterLiteral {
-            return it
+        fun from(scope: ShakeScope, it: ShakeCharacterLiteral): ShakeCharacterLiteral {
+            return Impl(scope, it.value)
         }
     }
 }

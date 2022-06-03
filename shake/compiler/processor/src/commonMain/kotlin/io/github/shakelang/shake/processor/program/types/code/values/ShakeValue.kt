@@ -1,53 +1,56 @@
 package io.github.shakelang.shake.processor.program.types.code.values
 
 import io.github.shakelang.shake.processor.program.types.ShakeProject
+import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.*
 import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeValue {
+    val scope: ShakeScope
+    val project: ShakeProject get() = scope.project
     val typePointer: Pointer<ShakeType>
     val type: ShakeType
     fun toJson(): Map<String, Any?>
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeValue): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeValue): ShakeValue {
             return when (it) {
-                is ShakeDoubleLiteral -> ShakeDoubleLiteral.from(prj, it)
-                is ShakeIntLiteral -> ShakeIntLiteral.from(prj, it)
-                is ShakeBooleanLiteral -> ShakeBooleanLiteral.from(prj, it)
-                is ShakeCharacterLiteral -> ShakeCharacterLiteral.from(prj, it)
-                is ShakeAddition -> ShakeAddition.from(prj, it)
-                is ShakeSubtraction -> ShakeSubtraction.from(prj, it)
-                is ShakeMultiplication -> ShakeMultiplication.from(prj, it)
-                is ShakeDivision -> ShakeDivision.from(prj, it)
-                is ShakeModulus -> ShakeModulus.from(prj, it)
-                is ShakePower -> ShakePower.from(prj, it)
-                is ShakeEquals -> ShakeEquals.from(prj, it)
-                is ShakeNotEquals -> ShakeNotEquals.from(prj, it)
-                is ShakeLessThan -> ShakeLessThan.from(prj, it)
-                is ShakeLessThanOrEqual -> ShakeLessThanOrEqual.from(prj, it)
-                is ShakeGreaterThan -> ShakeGreaterThan.from(prj, it)
-                is ShakeGreaterThanOrEqual -> ShakeGreaterThanOrEqual.from(prj, it)
-                is ShakeAnd -> ShakeAnd.from(prj, it)
-                is ShakeOr -> ShakeOr.from(prj, it)
-                is ShakeNot -> ShakeNot.from(prj, it)
-                is ShakeAssignment -> ShakeAssignment.from(prj, it)
-                is ShakeAddAssignment -> ShakeAddAssignment.from(prj, it)
-                is ShakeSubAssignment -> ShakeSubAssignment.from(prj, it)
-                is ShakeMulAssignment -> ShakeMulAssignment.from(prj, it)
-                is ShakeDivAssignment -> ShakeDivAssignment.from(prj, it)
-                is ShakeModAssignment -> ShakeModAssignment.from(prj, it)
-                is ShakePowAssignment -> ShakePowAssignment.from(prj, it)
-                is ShakeIncrementBefore -> ShakeIncrementBefore.from(prj, it)
-                is ShakeIncrementAfter -> ShakeIncrementAfter.from(prj, it)
-                is ShakeDecrementBefore -> ShakeDecrementBefore.from(prj, it)
-                is ShakeDecrementAfter -> ShakeDecrementAfter.from(prj, it)
+                is ShakeDoubleLiteral -> ShakeDoubleLiteral.from(scope, it)
+                is ShakeIntLiteral -> ShakeIntLiteral.from(scope, it)
+                is ShakeBooleanLiteral -> ShakeBooleanLiteral.from(scope, it)
+                is ShakeCharacterLiteral -> ShakeCharacterLiteral.from(scope, it)
+                is ShakeAddition -> ShakeAddition.from(scope, it)
+                is ShakeSubtraction -> ShakeSubtraction.from(scope, it)
+                is ShakeMultiplication -> ShakeMultiplication.from(scope, it)
+                is ShakeDivision -> ShakeDivision.from(scope, it)
+                is ShakeModulus -> ShakeModulus.from(scope, it)
+                is ShakePower -> ShakePower.from(scope, it)
+                is ShakeEquals -> ShakeEquals.from(scope, it)
+                is ShakeNotEquals -> ShakeNotEquals.from(scope, it)
+                is ShakeLessThan -> ShakeLessThan.from(scope, it)
+                is ShakeLessThanOrEqual -> ShakeLessThanOrEqual.from(scope, it)
+                is ShakeGreaterThan -> ShakeGreaterThan.from(scope, it)
+                is ShakeGreaterThanOrEqual -> ShakeGreaterThanOrEqual.from(scope, it)
+                is ShakeAnd -> ShakeAnd.from(scope, it)
+                is ShakeOr -> ShakeOr.from(scope, it)
+                is ShakeNot -> ShakeNot.from(scope, it)
+                is ShakeAssignment -> ShakeAssignment.from(scope, it)
+                is ShakeAddAssignment -> ShakeAddAssignment.from(scope, it)
+                is ShakeSubAssignment -> ShakeSubAssignment.from(scope, it)
+                is ShakeMulAssignment -> ShakeMulAssignment.from(scope, it)
+                is ShakeDivAssignment -> ShakeDivAssignment.from(scope, it)
+                is ShakeModAssignment -> ShakeModAssignment.from(scope, it)
+                is ShakePowAssignment -> ShakePowAssignment.from(scope, it)
+                is ShakeIncrementBefore -> ShakeIncrementBefore.from(scope, it)
+                is ShakeIncrementAfter -> ShakeIncrementAfter.from(scope, it)
+                is ShakeDecrementBefore -> ShakeDecrementBefore.from(scope, it)
+                is ShakeDecrementAfter -> ShakeDecrementAfter.from(scope, it)
                 else -> {
-                    throw IllegalArgumentException("Unknown value type: ${it::class.simpleName}")
+                    TODO("Unsupported value type: ${it::class.simpleName}")
+                    //throw IllegalArgumentException("Unknown value type: ${it::class.simpleName}")
                 }
             }
-            TODO()
         }
     }
 }

@@ -24,11 +24,11 @@ interface ShakeAssignable {
     fun decrementAfterType(): ShakeType?
 
     companion object {
-        fun from(prj: ShakeProject, variable: ShakeAssignable): Pointer<ShakeAssignable> {
+        fun from(scope: ShakeScope, variable: ShakeAssignable): Pointer<ShakeAssignable> {
             return when (variable) {
                 is ShakeVariableDeclaration -> TODO("Implement ShakeVariableDeclaration")
-                is ShakeField -> prj.getFieldBySignature(variable.signature).transform { it ?: throw IllegalStateException("Field not found: ${variable.signature}")  }
-                is ShakeClassField -> prj.getClassFieldBySignature(variable.signature).transform { throw IllegalStateException("ClassField not found: ${variable.signature}") }
+                is ShakeField -> scope.project.getFieldBySignature(variable.signature).transform { it ?: throw IllegalStateException("Field not found: ${variable.signature}")  }
+                is ShakeClassField -> scope.project.getClassFieldBySignature(variable.signature).transform { throw IllegalStateException("ClassField not found: ${variable.signature}") }
                 else -> {
                     throw IllegalStateException("Unknown assignable: $variable")
                 }

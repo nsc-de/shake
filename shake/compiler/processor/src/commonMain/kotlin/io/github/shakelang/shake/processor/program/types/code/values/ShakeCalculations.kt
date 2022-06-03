@@ -1,17 +1,45 @@
 package io.github.shakelang.shake.processor.program.types.code.values
 
-import io.github.shakelang.shake.processor.program.types.ShakeProject
+import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeConcatenation : ShakeValue {
     val left: ShakeValue
     val right: ShakeValue
+    companion object {
+        fun from(scope: ShakeScope, it: ShakeConcatenation): ShakeConcatenation {
+            return when (it) {
+                is ShakeCalculation -> ShakeCalculation.from(scope, it)
+                is ShakeLogicalConcatenation -> ShakeLogicalConcatenation.from(scope, it)
+                else -> throw IllegalArgumentException("Unknown concatenation type")
+            }
+        }
+    }
 }
 
-interface ShakeCalculation : ShakeConcatenation
+interface ShakeCalculation : ShakeConcatenation {
+    companion object {
+        fun from(scope: ShakeScope, it: ShakeCalculation): ShakeCalculation {
+            return when(it) {
+                is ShakeAddition -> ShakeAddition.from(scope, it)
+                is ShakeSubtraction -> ShakeSubtraction.from(scope, it)
+                is ShakeMultiplication -> ShakeMultiplication.from(scope, it)
+                is ShakeDivision -> ShakeDivision.from(scope, it)
+                is ShakeModulus -> ShakeModulus.from(scope, it)
+                is ShakePower -> ShakePower.from(scope, it)
+                else -> throw IllegalArgumentException("Unknown calculation type")
+            }
+        }
+    }
+}
 interface ShakeAddition : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeAddition {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeAddition {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -26,18 +54,24 @@ interface ShakeAddition : ShakeCalculation {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeAddition): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeAddition): ShakeAddition {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeSubtraction : ShakeCalculation {
 
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeSubtraction {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeSubtraction {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -52,17 +86,23 @@ interface ShakeSubtraction : ShakeCalculation {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeSubtraction): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeSubtraction): ShakeSubtraction {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeMultiplication : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeMultiplication {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeMultiplication {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -77,17 +117,23 @@ interface ShakeMultiplication : ShakeCalculation {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeMultiplication): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeMultiplication): ShakeMultiplication {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeDivision : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeDivision {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeDivision {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -102,17 +148,23 @@ interface ShakeDivision : ShakeCalculation {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeDivision): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeDivision): ShakeDivision {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeModulus : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeModulus {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeModulus {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -127,17 +179,23 @@ interface ShakeModulus : ShakeCalculation {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeModulus): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeModulus): ShakeModulus {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakePower : ShakeCalculation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakePower {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakePower {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -152,11 +210,12 @@ interface ShakePower : ShakeCalculation {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakePower): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakePower): ShakePower {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
@@ -165,7 +224,12 @@ interface ShakePower : ShakeCalculation {
 interface ShakeComparison : ShakeConcatenation
 
 interface ShakeEquals : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeEquals {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeEquals {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -180,17 +244,23 @@ interface ShakeEquals : ShakeComparison {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeEquals): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeEquals): ShakeEquals {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeNotEquals : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeNotEquals {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeNotEquals {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -205,17 +275,23 @@ interface ShakeNotEquals : ShakeComparison {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeNotEquals): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeNotEquals): ShakeNotEquals {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeLessThan : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeLessThan {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeLessThan {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -230,17 +306,23 @@ interface ShakeLessThan : ShakeComparison {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeLessThan): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeLessThan): ShakeLessThan {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeLessThanOrEqual : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeLessThanOrEqual {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeLessThanOrEqual {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -255,17 +337,23 @@ interface ShakeLessThanOrEqual : ShakeComparison {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeLessThanOrEqual): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeLessThanOrEqual): ShakeLessThanOrEqual {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeGreaterThan : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeGreaterThan {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeGreaterThan {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -280,17 +368,23 @@ interface ShakeGreaterThan : ShakeComparison {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeGreaterThan): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeGreaterThan): ShakeGreaterThan {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeGreaterThanOrEqual : ShakeComparison {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeGreaterThanOrEqual {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeGreaterThanOrEqual {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -305,21 +399,49 @@ interface ShakeGreaterThanOrEqual : ShakeComparison {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeGreaterThanOrEqual): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeGreaterThanOrEqual): ShakeGreaterThanOrEqual {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 
-interface ShakeLogical : ShakeValue
-interface ShakeLogicalConcatenation : ShakeConcatenation, ShakeLogical
+interface ShakeLogical : ShakeValue {
+    companion object {
+        fun from(scope: ShakeScope, it: ShakeLogical): ShakeLogical {
+            return when (it) {
+                is ShakeLogicalConcatenation -> ShakeLogicalConcatenation.from(scope, it)
+                is ShakeNot -> ShakeNot.from(scope, it)
+                else -> throw IllegalArgumentException("Unsupported logical type: ${it::class.simpleName}")
+            }
+        }
+    }
+}
+
+interface ShakeLogicalConcatenation : ShakeConcatenation, ShakeLogical {
+    companion object {
+        fun from(scope: ShakeScope, it: ShakeLogicalConcatenation): ShakeLogicalConcatenation {
+            return when (it) {
+                is ShakeAnd -> ShakeAnd.from(scope, it)
+                is ShakeOr -> ShakeOr.from(scope, it)
+                is ShakeXor -> ShakeXor.from(scope, it)
+                else -> throw IllegalArgumentException("Unsupported type: ${it::class.simpleName}")
+            }
+        }
+    }
+}
 
 interface ShakeAnd : ShakeLogicalConcatenation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeAnd {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeAnd {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -334,17 +456,23 @@ interface ShakeAnd : ShakeLogicalConcatenation {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeAnd): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeAnd): ShakeAnd {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeOr : ShakeLogicalConcatenation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeOr {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeOr {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -359,17 +487,23 @@ interface ShakeOr : ShakeLogicalConcatenation {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeOr): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeOr): ShakeOr {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
 }
 interface ShakeXor : ShakeLogicalConcatenation {
-    class Impl(override val left: ShakeValue, override val right: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeXor {
+    class Impl(
+        override val scope: ShakeScope,
+        override val left: ShakeValue,
+        override val right: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeXor {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -384,11 +518,12 @@ interface ShakeXor : ShakeLogicalConcatenation {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeXor): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeXor): ShakeXor {
             return Impl(
-                left = ShakeValue.from(prj, it.left),
-                right = ShakeValue.from(prj, it.right),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                left = ShakeValue.from(scope, it.left),
+                right = ShakeValue.from(scope, it.right),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }
@@ -396,7 +531,11 @@ interface ShakeXor : ShakeLogicalConcatenation {
 interface ShakeNot : ShakeLogical {
     val value: ShakeValue
 
-    class Impl(override val value: ShakeValue, override val typePointer: Pointer<ShakeType>) : ShakeNot {
+    class Impl(
+        override val scope: ShakeScope,
+        override val value: ShakeValue,
+        override val typePointer: Pointer<ShakeType>
+    ) : ShakeNot {
 
         override val type: ShakeType get() = typePointer.value
 
@@ -410,10 +549,11 @@ interface ShakeNot : ShakeLogical {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeNot): ShakeValue {
+        fun from(scope: ShakeScope, it: ShakeNot): ShakeNot {
             return Impl(
-                value = ShakeValue.from(prj, it.value),
-                typePointer = ShakeType.from(prj, it.type)
+                scope,
+                value = ShakeValue.from(scope, it.value),
+                typePointer = ShakeType.from(scope, it.type)
             )
         }
     }

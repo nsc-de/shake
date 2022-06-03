@@ -1,6 +1,6 @@
 package io.github.shakelang.shake.processor.program.types.code.values
 
-import io.github.shakelang.shake.processor.program.types.ShakeProject
+import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.util.Pointer
 
@@ -9,7 +9,11 @@ interface ShakeCast : ShakeValue {
     val castTarget: ShakeType
     val value: ShakeValue
 
-    class Impl(override val value: ShakeValue, override val castTargetPointer: Pointer<ShakeType>) : ShakeCast {
+    class Impl(
+        override val scope: ShakeScope,
+        override val value: ShakeValue,
+        override val castTargetPointer: Pointer<ShakeType>
+    ) : ShakeCast {
 
         override val castTarget: ShakeType
             get() = castTargetPointer.value
@@ -28,8 +32,8 @@ interface ShakeCast : ShakeValue {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeCast): ShakeCast {
-            return Impl(ShakeValue.from(prj, it.value), ShakeType.from(prj, it.castTarget))
+        fun from(scope: ShakeScope, it: ShakeCast): ShakeCast {
+            return Impl(scope, ShakeValue.from(scope, it.value), ShakeType.from(scope, it.castTarget))
         }
     }
 }

@@ -2,6 +2,7 @@ package io.github.shakelang.shake.processor.program.types.code
 
 import io.github.shakelang.shake.processor.program.types.ShakeConstructor
 import io.github.shakelang.shake.processor.program.types.ShakeProject
+import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.code.statements.ShakeStatement
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
@@ -15,6 +16,7 @@ interface ShakeNew : ShakeValue, ShakeStatement {
     val name: String
 
     class Impl(
+        override val scope: ShakeScope,
         override val reference: ShakeConstructor,
         override val arguments: List<ShakeValue>,
         override val parent: ShakeValue?,
@@ -35,7 +37,7 @@ interface ShakeNew : ShakeValue, ShakeStatement {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeNew): ShakeNew {TODO()/*
+        fun from(scope: ShakeScope, it: ShakeNew): ShakeNew {TODO()/*
             return Impl(
                 reference =
                 arguments = it.arguments.map { ShakeValue.from(prj, it) },

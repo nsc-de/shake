@@ -1,6 +1,6 @@
 package io.github.shakelang.shake.processor.program.types.code.statements
 
-import io.github.shakelang.shake.processor.program.types.ShakeProject
+import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.code.ShakeCode
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 
@@ -19,10 +19,10 @@ interface ShakeWhile : ShakeStatement {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeWhile): ShakeWhile {
+        fun from(scope: ShakeScope, it: ShakeWhile): ShakeWhile {
             return Impl(
-                ShakeValue.from(prj, it.condition),
-                ShakeCode.from(prj, it.body),
+                ShakeValue.from(scope, it.condition),
+                ShakeCode.from(scope, it.body),
             )
         }
     }
@@ -43,10 +43,10 @@ interface ShakeDoWhile : ShakeStatement {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeDoWhile): ShakeDoWhile {
+        fun from(scope: ShakeScope, it: ShakeDoWhile): ShakeDoWhile {
             return Impl(
-                ShakeValue.from(prj, it.condition),
-                ShakeCode.from(prj, it.body),
+                ShakeValue.from(scope, it.condition),
+                ShakeCode.from(scope, it.body),
             )
         }
     }
@@ -76,12 +76,12 @@ interface ShakeFor : ShakeStatement {
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeFor): ShakeFor {
+        fun from(scope: ShakeScope, it: ShakeFor): ShakeFor {
             return Impl(
-                ShakeStatement.from(prj, it.init),
-                ShakeValue.from(prj, it.condition),
-                ShakeStatement.from(prj, it.update),
-                ShakeCode.from(prj, it.body),
+                ShakeStatement.from(scope, it.init),
+                ShakeValue.from(scope, it.condition),
+                ShakeStatement.from(scope, it.update),
+                ShakeCode.from(scope, it.body),
             )
         }
     }
