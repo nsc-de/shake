@@ -1,8 +1,6 @@
 package io.github.shakelang.shake.processor.program.types
 
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
-import io.github.shakelang.shake.processor.util.Pointer
-import io.github.shakelang.shake.processor.util.point
 
 /**
  * Represents a field in the Shake programming language.
@@ -66,4 +64,6 @@ interface ShakeFieldType : ShakeDeclaration, ShakeAssignable {
      * The signature of the field.
      */
     val signature: String
+
+    override val declaration: ShakeDeclaration get() = this
 }

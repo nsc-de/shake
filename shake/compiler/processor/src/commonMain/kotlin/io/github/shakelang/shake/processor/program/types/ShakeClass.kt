@@ -246,26 +246,26 @@ interface ShakeClass {
     fun toJson(): Map<String, Any?>
 
     class Impl : ShakeClass {
-        override val project: ShakeProject
-        override val pkg: ShakePackage?
-        override val parentScope: ShakeScope
+        override val project: ShakeProject.Impl
+        override val pkg: ShakePackage.Impl?
+        override val parentScope: ShakeScope.ShakeScopeImpl
         override val name: String
 
-        override val methodPointers: PointerList<ShakeMethod>
-        override val fieldPointers: PointerList<ShakeClassField>
-        override val classPointers: PointerList<ShakeClass>
-        override val staticFieldPointers: PointerList<ShakeClassField>
-        override val staticMethodPointers: PointerList<ShakeMethod>
-        override val staticClassPointers: PointerList<ShakeClass>
-        override val constructorPointers: PointerList<ShakeConstructor>
+        override val methodPointers: PointerList<ShakeMethod.Impl>
+        override val fieldPointers: PointerList<ShakeClassField.Impl>
+        override val classPointers: PointerList<Impl>
+        override val staticFieldPointers: PointerList<ShakeClassField.Impl>
+        override val staticMethodPointers: PointerList<ShakeMethod.Impl>
+        override val staticClassPointers: PointerList<Impl>
+        override val constructorPointers: PointerList<ShakeConstructor.Impl>
 
-        override val methods: List<ShakeMethod>
-        override val fields: List<ShakeClassField>
-        override val classes: List<ShakeClass>
-        override val staticMethods: List<ShakeMethod>
-        override val staticFields: List<ShakeClassField>
-        override val staticClasses: List<ShakeClass>
-        override val constructors: List<ShakeConstructor>
+        override val methods: List<ShakeMethod.Impl>
+        override val fields: List<ShakeClassField.Impl>
+        override val classes: List<Impl>
+        override val staticMethods: List<ShakeMethod.Impl>
+        override val staticFields: List<ShakeClassField.Impl>
+        override val staticClasses: List<Impl>
+        override val constructors: List<ShakeConstructor.Impl>
 
         override val superClassPointer: Pointer<ShakeClass?>
         override val interfacePointers: PointerList<ShakeClass>
@@ -277,22 +277,20 @@ interface ShakeClass {
         override val signature: String
 
         constructor(
-            prj: ShakeProject,
-            pkg: ShakePackage?,
-            parentScope: ShakeScope,
+            parentScope: ShakeScope.ShakeScopeImpl,
             name: String,
-            methods: List<ShakeMethod>,
-            fields: List<ShakeClassField>,
-            classes: List<ShakeClass>,
-            staticMethods: List<ShakeMethod>,
-            staticFields: List<ShakeClassField>,
-            staticClasses: List<ShakeClass>,
-            constructors: List<ShakeConstructor>,
+            methods: List<ShakeMethod.Impl>,
+            fields: List<ShakeClassField.Impl>,
+            classes: List<Impl>,
+            staticMethods: List<ShakeMethod.Impl>,
+            staticFields: List<ShakeClassField.Impl>,
+            staticClasses: List<Impl>,
+            constructors: List<ShakeConstructor.Impl>,
             superClass: ShakeClass?,
-            interfaces: List<ShakeClass>
+            interfaces: List<Impl>
         ) {
-            this.project = prj
-            this.pkg = pkg
+            this.project = parentScope.project
+            this.pkg = parentScope.pkg
             this.parentScope = parentScope
             this.name = name
 
@@ -321,23 +319,21 @@ interface ShakeClass {
         }
 
         constructor(
-            prj: ShakeProject.Impl,
-            pkg: ShakePackage.Impl?,
-            parentScope: ShakeScope,
+            parentScope: ShakeScope.ShakeScopeImpl,
             it: ShakeClass
         ) {
-            this.project = prj
-            this.pkg = pkg
+            this.project = parentScope.project
+            this.pkg = parentScope.pkg
             this.parentScope = parentScope
             this.name = it.name
 
-            val methodPointers = it.methods.map { Pointer.late<ShakeMethod>() }
-            val fieldPointers = it.fields.map { Pointer.late<ShakeClassField>() }
-            val classPointers = it.classes.map { Pointer.late<ShakeClass>() }
-            val staticMethodPointers = it.staticMethods.map { Pointer.late<ShakeMethod>() }
-            val staticFieldPointers = it.staticFields.map { Pointer.late<ShakeClassField>() }
-            val staticClassPointers = it.staticClasses.map { Pointer.late<ShakeClass>() }
-            val constructorPointers = it.constructors.map { Pointer.late<ShakeConstructor>() }
+            val methodPointers = it.methods.map { Pointer.late<ShakeMethod.Impl>() }
+            val fieldPointers = it.fields.map { Pointer.late<ShakeClassField.Impl>() }
+            val classPointers = it.classes.map { Pointer.late<Impl>() }
+            val staticMethodPointers = it.staticMethods.map { Pointer.late<ShakeMethod.Impl>() }
+            val staticFieldPointers = it.staticFields.map { Pointer.late<ShakeClassField.Impl>() }
+            val staticClassPointers = it.staticClasses.map { Pointer.late<Impl>() }
+            val constructorPointers = it.constructors.map { Pointer.late<ShakeConstructor.Impl>() }
 
             this.methodPointers = methodPointers
             this.fieldPointers = fieldPointers
@@ -355,22 +351,61 @@ interface ShakeClass {
             this.staticClasses = staticClassPointers.map { it.value }
             this.constructors = constructorPointers.map { it.value }
 
-            this.superClassPointer = it.superClass?.qualifiedName?.let { it1 -> prj.getClass(it1) } ?: Pointer.of(null)
-            this.interfacePointers = it.interfaces.map { it1 -> prj.getClass(it1.qualifiedName).transform { it ?: throw Error("Implemented class does not exist") } }
+            this.superClassPointer = it.superClass?.qualifiedName?.let { it1 -> project.getClass(it1) } ?: Pointer.of(null)
+            this.interfacePointers = it.interfaces.map { it1 -> project.getClass(it1.qualifiedName).transform { it ?: throw Error("Implemented class does not exist") } }
 
             it.methods.zip(methodPointers).forEach { (method, pointer) -> pointer.init(ShakeMethod.from(this, instanceScope, method)) }
             it.fields.zip(fieldPointers).forEach { (field, pointer) -> pointer.init(ShakeClassField.from(this, instanceScope, field)) }
-            it.classes.zip(classPointers).forEach { (clazz, pointer) -> pointer.init(from(prj, pkg, it)) }
+            it.classes.zip(classPointers).forEach { (clazz, pointer) -> pointer.init(from(instanceScope, it)) }
             it.staticMethods.zip(staticMethodPointers).forEach { (method, pointer) -> pointer.init(ShakeMethod.from(this, staticScope, method)) }
             it.staticFields.zip(staticFieldPointers).forEach { (field, pointer) -> pointer.init(ShakeClassField.from(this, staticScope, field)) }
-            it.staticClasses.zip(staticClassPointers).forEach { (_, pointer) -> pointer.init(from(prj, pkg, it)) }
+            it.staticClasses.zip(staticClassPointers).forEach { (_, pointer) -> pointer.init(from(staticScope, it)) }
             it.constructors.zip(constructorPointers).forEach { (constructor, pointer) -> pointer.init(ShakeConstructor.from(this, constructor)) }
 
             this.signature = "${pkg ?: ""}#$name"
         }
 
-        override val staticScope: ShakeScope.ShakeClassStaticScope = ShakeScope.ShakeClassStaticScope.from(this)
-        override val instanceScope: ShakeScope.ShakeClassInstanceScope = ShakeScope.ShakeClassInstanceScope.from(this)
+        constructor(
+            parentScope: ShakeScope.ShakeScopeImpl,
+            name: String,
+            methods: (Impl) -> List<ShakeMethod.Impl>,
+            fields: (Impl) -> List<ShakeClassField.Impl>,
+            classes: (Impl) -> List<Impl>,
+            staticMethods: (Impl) -> List<ShakeMethod.Impl>,
+            staticFields: (Impl) -> List<ShakeClassField.Impl>,
+            staticClasses: (Impl) -> List<Impl>,
+            constructors: (Impl) -> List<ShakeConstructor.Impl>,
+            superClassPointer: Pointer<ShakeClass?>,
+            interfacePointers: PointerList<ShakeClass>
+        ) {
+            this.project = parentScope.project
+            this.pkg = parentScope.pkg
+            this.parentScope = parentScope
+            this.name = name
+            this.methodPointers = methods(this).points()
+            this.fieldPointers = fields(this).points()
+            this.classPointers = classes(this).points()
+            this.staticMethodPointers = staticMethods(this).points()
+            this.staticFieldPointers = staticFields(this).points()
+            this.staticClassPointers = staticClasses(this).points()
+            this.constructorPointers = constructors(this).points()
+            this.superClassPointer = superClassPointer
+            this.interfacePointers = interfacePointers
+
+            this.methods = methodPointers.values()
+            this.fields = fieldPointers.values()
+            this.classes = classPointers.values()
+            this.staticMethods = staticMethodPointers.values()
+            this.staticFields = staticFieldPointers.values()
+            this.staticClasses = staticClassPointers.values()
+            this.constructors = constructorPointers.values()
+            this.interfaces = interfacePointers.values()
+
+            this.signature = "${pkg ?: ""}#$name"
+        }
+
+        override val staticScope: ShakeScope.ShakeClassStaticScope.Impl = ShakeScope.ShakeClassStaticScope.from(this)
+        override val instanceScope: ShakeScope.ShakeClassInstanceScope.Impl = ShakeScope.ShakeClassInstanceScope.from(this)
 
         override val qualifiedName: String
             get() = (pkg?.qualifiedName?.plus(".") ?: "") + name
@@ -411,6 +446,32 @@ interface ShakeClass {
     }
 
     companion object {
-        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeClass): ShakeClass = TODO()
+        fun from(scope: ShakeScope.ShakeScopeImpl, it: ShakeClass): Impl = Impl(scope, it)
+
+        fun create(
+            parentScope: ShakeScope.ShakeScopeImpl,
+            name: String,
+            methods: (Impl) -> List<ShakeMethod.Impl>,
+            fields: (Impl) -> List<ShakeClassField.Impl>,
+            classes: (Impl) -> List<Impl>,
+            staticMethods: (Impl) -> List<ShakeMethod.Impl>,
+            staticFields: (Impl) -> List<ShakeClassField.Impl>,
+            staticClasses: (Impl) -> List<Impl>,
+            constructors: (Impl) -> List<ShakeConstructor.Impl>,
+            superClassPointer: Pointer<ShakeClass?>,
+            interfacePointers: PointerList<ShakeClass>
+        ) = Impl(
+            parentScope,
+            name,
+            methods,
+            fields,
+            classes,
+            staticMethods,
+            staticFields,
+            staticClasses,
+            constructors,
+            superClassPointer,
+            interfacePointers
+        )
     }
 }

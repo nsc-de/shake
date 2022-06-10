@@ -18,9 +18,9 @@ interface ShakeMethod : ShakeFunctionType {
     val clazz: ShakeClass
     class Impl : ShakeMethod {
         override val clazz: ShakeClass
-        override val project: ShakeProject
-        override val pkg: ShakePackage?
-        override val parentScope: ShakeScope
+        override val project: ShakeProject.Impl
+        override val pkg: ShakePackage.Impl?
+        override val parentScope: ShakeScope.ShakeScopeImpl
         override val name: String
         override val isStatic: Boolean
         override val isFinal: Boolean
@@ -33,13 +33,12 @@ interface ShakeMethod : ShakeFunctionType {
         override val returnTypePointer: Pointer<ShakeType>
         override val returnType: ShakeType get() = returnTypePointer.value
         override val parameters: List<ShakeParameter>
-        override val body: ShakeCode
+        override val bodyPointer: Pointer<ShakeCode>
+        override val body: ShakeCode get() = bodyPointer.value
 
         constructor(
-            clazz: ShakeClass,
-            prj: ShakeProject,
-            pkg: ShakePackage?,
-            parentScope: ShakeScope,
+            clazz: ShakeClass.Impl,
+            parentScope: ShakeScope.ShakeScopeImpl,
             name: String,
             isStatic: Boolean,
             isFinal: Boolean,
@@ -49,13 +48,13 @@ interface ShakeMethod : ShakeFunctionType {
             isPrivate: Boolean,
             isProtected: Boolean,
             isPublic: Boolean,
-            returnType: ShakeType,
+            returnType: Pointer<ShakeType>,
             parameters: List<ShakeParameter>,
             body: ShakeCode
         ) {
             this.clazz = clazz
-            this.project = prj
-            this.pkg = pkg
+            this.project = clazz.project
+            this.pkg = clazz.pkg
             this.parentScope = parentScope
             this.name = name
             this.isStatic = isStatic
@@ -66,15 +65,48 @@ interface ShakeMethod : ShakeFunctionType {
             this.isPrivate = isPrivate
             this.isProtected = isProtected
             this.isPublic = isPublic
-            this.returnTypePointer = returnType.point()
+            this.returnTypePointer = returnType
             this.parameters = parameters
-            this.body = body
-            this.signature = "${clazz.signature}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
+            this.bodyPointer = body.point()
         }
 
         constructor(
-            clazz: ShakeClass,
-            scope: ShakeScope,
+            clazz: ShakeClass.Impl,
+            parentScope: ShakeScope.ShakeScopeImpl,
+            name: String,
+            isStatic: Boolean,
+            isFinal: Boolean,
+            isAbstract: Boolean,
+            isSynchronized: Boolean,
+            isStrict: Boolean,
+            isPrivate: Boolean,
+            isProtected: Boolean,
+            isPublic: Boolean,
+            returnType: Pointer<ShakeType>,
+            parameters: List<ShakeParameter>,
+            body: (Impl) -> Pointer<ShakeCode>
+        ) {
+            this.clazz = clazz
+            this.project = clazz.project
+            this.pkg = clazz.pkg
+            this.parentScope = parentScope
+            this.name = name
+            this.isStatic = isStatic
+            this.isFinal = isFinal
+            this.isAbstract = isAbstract
+            this.isSynchronized = isSynchronized
+            this.isStrict = isStrict
+            this.isPrivate = isPrivate
+            this.isProtected = isProtected
+            this.isPublic = isPublic
+            this.returnTypePointer = returnType
+            this.parameters = parameters
+            this.bodyPointer = body(this)
+        }
+
+        constructor(
+            clazz: ShakeClass.Impl,
+            scope: ShakeScope.ShakeScopeImpl,
             it: ShakeMethod
         ) {
             this.clazz = clazz
@@ -92,13 +124,12 @@ interface ShakeMethod : ShakeFunctionType {
             this.isPublic = it.isPublic
             this.returnTypePointer = ShakeType.from(project, it.returnType)
             this.parameters = it.parameters // TODO: copy parameters
-            this.body = it.body // TODO copy body
-            this.signature = "${clazz.signature}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
+            this.bodyPointer = ShakeCode.from(this.scope, it.body).point()
         }
 
         override val qualifiedName: String get() = "${pkg?.qualifiedName?.plus(".") ?: ""}$name"
-        override val scope: ShakeScope.ShakeMethodScope = ShakeScope.ShakeMethodScope.from(this)
-        override val signature: String
+        override val scope: ShakeScope.ShakeMethodScope.Impl = ShakeScope.ShakeMethodScope.from(this)
+        override val signature: String get() = "${clazz.signature}#$name(${parameters.joinToString(",") { it.type.signature }})${returnType.signature}"
 
         override fun toJson(): Map<String, Any?> {
             return mapOf(
@@ -125,6 +156,38 @@ interface ShakeMethod : ShakeFunctionType {
          * @param clazz The class that the method belongs to.
          * @param it The method to clone.
          */
-        fun from(clazz: ShakeClass, parentScope: ShakeScope, it: ShakeMethod): ShakeMethod = Impl(clazz, parentScope, it)
+        fun from(clazz: ShakeClass.Impl, parentScope: ShakeScope.ShakeScopeImpl, it: ShakeMethod): Impl = Impl(clazz, parentScope, it)
+
+        fun create(
+            clazz: ShakeClass.Impl,
+            parentScope: ShakeScope.ShakeScopeImpl,
+            name: String,
+            isStatic: Boolean,
+            isFinal: Boolean,
+            isAbstract: Boolean,
+            isSynchronized: Boolean,
+            isStrict: Boolean,
+            isPrivate: Boolean,
+            isProtected: Boolean,
+            isPublic: Boolean,
+            returnType: Pointer<ShakeType>,
+            parameters: List<ShakeParameter>,
+            body: (Impl) -> Pointer<ShakeCode>
+        ): Impl = Impl(
+            clazz,
+            parentScope,
+            name,
+            isStatic,
+            isFinal,
+            isAbstract,
+            isSynchronized,
+            isStrict,
+            isPrivate,
+            isProtected,
+            isPublic,
+            returnType,
+            parameters,
+            body
+        )
     }
 }

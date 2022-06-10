@@ -4,6 +4,7 @@ import io.github.shakelang.shake.processor.program.types.*
 import io.github.shakelang.shake.processor.util.Pointer
 
 interface ShakeInvokable {
+    val bodyPointer: Pointer<ShakeCode>
     val body: ShakeCode
     val qualifiedName: String
     val parameters: List<ShakeParameter>

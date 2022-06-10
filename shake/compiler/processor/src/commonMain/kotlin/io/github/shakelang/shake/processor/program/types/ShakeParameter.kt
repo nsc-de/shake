@@ -1,11 +1,16 @@
 package io.github.shakelang.shake.processor.program.types
 
+import io.github.shakelang.shake.processor.program.types.code.values.ShakeUsage
+import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 import io.github.shakelang.shake.processor.util.Pointer
 import io.github.shakelang.shake.processor.util.point
 
-interface ShakeParameter : ShakeAssignable {
-    val name: String
-    fun toJson(): Map<String, Any?>
+interface ShakeParameter : ShakeAssignable, ShakeDeclaration {
+
+    override val name: String
+    override fun toJson(): Map<String, Any?>
+
+    override val declaration: ShakeDeclaration get() = this
 
     class Impl : ShakeParameter {
 
@@ -14,11 +19,16 @@ interface ShakeParameter : ShakeAssignable {
 
         constructor(
             name: String,
-            type: ShakeType
+            type: Pointer<ShakeType>
         ) {
             this.name = name
-            this.typePointer = type.point()
+            this.typePointer = type
         }
+
+        constructor(
+            name: String,
+            type: ShakeType
+        ) : this(name, type.point())
 
         internal constructor(
             prj: ShakeProject,
@@ -43,9 +53,16 @@ interface ShakeParameter : ShakeAssignable {
         override fun incrementAfterType(): ShakeType? = type.incrementAfterType()
         override fun decrementBeforeType(): ShakeType? = type.decrementBeforeType()
         override fun decrementAfterType(): ShakeType? = type.decrementAfterType()
+
+        override fun access(scope: ShakeScope, receiver: ShakeValue?): ShakeValue {
+            if(receiver != null) throw IllegalArgumentException("Parameter $name cannot be accessed with a receiver")
+            return ShakeUsage.create(scope, this)
+        }
     }
 
     companion object {
-        fun from(prj: ShakeProject, it: ShakeParameter): ShakeParameter = Impl(prj, it)
+        fun from(prj: ShakeProject, it: ShakeParameter) = Impl(prj, it)
+
+        fun create(name: String, type: Pointer<ShakeType>) = Impl(name, type)
     }
 }

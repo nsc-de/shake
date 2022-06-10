@@ -1,13 +1,15 @@
 package io.github.shakelang.shake.processor.program.types
 
 import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.notNull
 
 interface ShakeFile {
     val signature: String
     val project: ShakeProject
-    val pkg: ShakePackage
+    val pkg: ShakePackage?
     val name: String
     val scope: ShakeScope
+    val parentScope: ShakeScope
 
     val fields: List<ShakeField>
     val functions: List<ShakeFunction>
@@ -15,29 +17,30 @@ interface ShakeFile {
     val imports: List<ShakeImport>
 
     class Impl : ShakeFile {
-        override val project: ShakeProject
-        override val pkg: ShakePackage
+        override val project: ShakeProject.Impl
+        override val pkg: ShakePackage.Impl?
         override val name: String
-        override val scope: ShakeScope
-        override val fields: List<ShakeField>
-        override val functions: List<ShakeFunction>
-        override val classes: List<ShakeClass>
-        override val imports: List<ShakeImport>
+        override val scope: ShakeScope.ShakeFileScope.Impl
+        override val parentScope: ShakeScope.ShakeScopeImpl
+        override val fields: List<ShakeField.Impl>
+        override val functions: List<ShakeFunction.Impl>
+        override val classes: List<ShakeClass.Impl>
+        override val imports: List<ShakeImport.Impl>
 
-        override val signature: String get() = "${pkg.name}.$name"
+        override val signature: String get() = "${pkg?.name?.plus(".") ?: ""}$name"
 
         constructor(
-            prj: ShakeProject,
-            pkg: ShakePackage,
+            parentScope: ShakeScope.ShakeFileScope.Impl,
             name: String,
-            scope: ShakeScope,
-            fields: List<ShakeField>,
-            functions: List<ShakeFunction>,
-            classes: List<ShakeClass>,
-            imports: List<ShakeImport>
+            scope: ShakeScope.ShakeFileScope.Impl,
+            fields: List<ShakeField.Impl>,
+            functions: List<ShakeFunction.Impl>,
+            classes: List<ShakeClass.Impl>,
+            imports: List<ShakeImport.Impl>
         ) {
-            this.project = prj
-            this.pkg = pkg
+            this.project = parentScope.project
+            this.pkg = parentScope.pkg
+            this.parentScope = parentScope
             this.name = name
             this.scope = scope
             this.fields = fields
@@ -47,18 +50,54 @@ interface ShakeFile {
         }
 
         constructor(
-            prj: ShakeProject,
-            pkg: ShakePackage,
+            parentScope: ShakeScope.ShakeScopeImpl,
             it: ShakeFile
         ) {
-            this.project = prj
-            this.pkg = pkg
+            this.project = parentScope.project
+            this.pkg = parentScope.pkg
+            this.parentScope = parentScope
             this.name = it.name
-            this.scope = ShakeScope.ShakeFileScope.from(this, it.scope)
-            this.fields = it.fields.map { ShakeField.from(prj, pkg, it) }
-            this.functions = it.functions.map { ShakeFunction.from(prj, pkg, it) }
-            this.classes = it.classes.map { ShakeClass.from(prj, pkg, it) }
-            this.imports = it.imports.map { ShakeImport.from(prj, this, it) }
+            this.scope = ShakeScope.ShakeFileScope.from(this)
+            this.fields = it.fields.map { ShakeField.from(project, pkg, it) }
+            this.functions = it.functions.map { ShakeFunction.from(scope, it) }
+            this.classes = it.classes.map { ShakeClass.from(scope, it) }
+            this.imports = it.imports.map { ShakeImport.from(this, it) }
+        }
+
+        constructor(
+            name: String,
+            parentScope: ShakeScope.ShakeScopeImpl,
+            createImports: (Impl) -> List<ShakeImport.Impl>,
+            createFields: (Impl) -> List<ShakeField.Impl>,
+            createFunctions: (Impl) -> List<ShakeFunction.Impl>,
+            createClasses: (Impl) -> List<ShakeClass.Impl>
+        ) {
+            this.project = parentScope.project
+            this.pkg = parentScope.pkg
+            this.parentScope = parentScope
+            this.name = name
+            this.scope = ShakeScope.ShakeFileScope.from(this)
+            this.imports = createImports(this)
+            this.fields = createFields(this)
+            this.functions = createFunctions(this)
+            this.classes = createClasses(this)
+        }
+    }
+
+    companion object {
+        fun from(scope: ShakeScope.ShakeScopeImpl, file: ShakeFile): Impl {
+            return Impl(scope, file)
+        }
+
+        fun create(
+            name: String,
+            parentScope: ShakeScope.ShakeScopeImpl,
+            createImports: (Impl) -> List<ShakeImport.Impl>,
+            createFields: (Impl) -> List<ShakeField.Impl>,
+            createFunctions: (Impl) -> List<ShakeFunction.Impl>,
+            createClasses: (Impl) -> List<ShakeClass.Impl>
+        ): Impl {
+            return Impl(name, parentScope, createImports, createFields, createFunctions, createClasses)
         }
     }
 }
@@ -66,6 +105,7 @@ interface ShakeFile {
 interface ShakeImport {
     val it: Array<String>
     val file: ShakeFile
+    val project: ShakeProject
     val name: String get() = it.joinToString(".")
     val targetPackage: ShakePackage
     val targetPackagePointer: Pointer<ShakePackage>
@@ -73,19 +113,28 @@ interface ShakeImport {
     class Impl(
         override val it: Array<String>,
         override val file: ShakeFile,
-        override val targetPackagePointer: Pointer<ShakePackage>
     ) : ShakeImport {
+        override val project: ShakeProject get() = file.project
         override val targetPackage: ShakePackage get() = targetPackagePointer.value
+        override val targetPackagePointer: Pointer<ShakePackage> = project.getPackage(it).notNull()
     }
 
     companion object {
-        fun from(prj: ShakeProject, file: ShakeFile, it: ShakeImport): ShakeImport {
-            val name = it.targetPackage.qualifiedName
+        fun from(file: ShakeFile, it: ShakeImport): Impl {
             return Impl(
                 it.it,
                 file,
-                prj.getPackage(name).transform { it ?: throw IllegalStateException("Package not found: $name") }
             )
         }
+        fun create(
+            file: ShakeFile,
+            it: Array<String>
+        ): Impl {
+            return Impl(
+                it,
+                file,
+            )
+        }
+
     }
 }

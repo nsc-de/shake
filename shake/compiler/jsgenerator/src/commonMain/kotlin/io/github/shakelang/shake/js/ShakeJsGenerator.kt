@@ -194,14 +194,24 @@ class ShakeJsGenerator {
     }
 
     fun visitUsage(n: ShakeUsage): JsField {
-        if(n is ShakeVariableUsage) return JsField(n.name)
-        if(n is ShakeClassFieldUsage) {
-            if(n.receiver != null) return JsField(n.name, parent = visitValue(n.receiver!!))
-            if(n.declaration.isStatic) return JsField(n.name, parent = JsField(n.declaration.clazz.name))
-            return JsField(n.name, parent = JsField("this"))
+
+        val declaration = n.declaration
+
+        if(declaration is ShakeVariableDeclaration) return JsField(declaration.name)
+        if(n is ShakeClassField) {
+            if(n.isStatic)  {
+                if(n.receiver != null) throw IllegalStateException("Static field access cannot have a receiver")
+                return JsField(n.name, parent = JsField(n.clazz.name))
+            }
+            if(n.receiver == null) throw IllegalStateException("Instance field must have a receiver")
+            return JsField(n.name, parent = visitValue(n.receiver!!))
         }
-        if(n is ShakeFieldUsage) {
+        if(n is ShakeField) {
+            if(n.receiver != null) throw IllegalStateException("Field access must not have a receiver")
             return JsField(n.name)
+        }
+        if(n is ShakeVariableDeclaration) {
+            throw IllegalStateException("Variable declaration access should not be used as a usage")
         }
         throw IllegalStateException("Unknown usage: $n")
     }
@@ -282,7 +292,7 @@ class ShakeJsGenerator {
         return JsFunctionDeclaration(name, parameters, body)
     }
 
-    fun visitFieldDeclaration(n: ShakeField): JsDeclaration {
+    fun visitFieldDeclaration(n: ShakeFieldType): JsDeclaration {
         if(n.isFinal) {
             if(n.initialValue == null) throw IllegalStateException("Final field must have initial value")
             return JsConstantDeclaration(n.name, visitValue(n.initialValue!!))

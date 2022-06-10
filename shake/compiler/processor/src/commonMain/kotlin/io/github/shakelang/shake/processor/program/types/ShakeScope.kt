@@ -12,10 +12,17 @@ import io.github.shakelang.shake.processor.util.Pointer
  */
 interface ShakeScope {
 
+    interface ShakeScopeImpl : ShakeScope {
+        override val parent: ShakeScopeImpl?
+        override val pkg: ShakePackage.Impl?
+        override val project: ShakeProject.Impl get() = parent?.project ?: pkg?.project ?: error("No project found")
+    }
+
     /**
      * Returns the parent scope of this scope.
      */
     val parent: ShakeScope?
+    val pkg: ShakePackage?
 
     val project: ShakeProject get() = parent?.project ?: throw IllegalStateException("No project found")
 
@@ -67,11 +74,14 @@ interface ShakeScope {
      * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
      */
     interface ShakeClassInstanceScope : ShakeScope {
-        class Impl (val it: ShakeClass) : ShakeClassInstanceScope {
+        class Impl (val it: ShakeClass.Impl) : ShakeClassInstanceScope, ShakeScopeImpl{
 
-            override val parent: ShakeScope get() = it.staticScope
+            override val parent get() = it.staticScope
+            override val pkg get() = it.pkg
 
-            init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
+            init {
+                it.project.registerScope(this)
+            }
 
             override fun get(name: String): ShakeAssignable? {
                 return it.fields.find { it.name == name } ?: parent.get(name)
@@ -93,7 +103,7 @@ interface ShakeScope {
         }
 
         companion object {
-            fun from(clazz: ShakeClass): ShakeClassInstanceScope = Impl(clazz)
+            fun from(clazz: ShakeClass.Impl) = Impl(clazz)
         }
     }
 
@@ -106,9 +116,10 @@ interface ShakeScope {
      * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
      */
     interface ShakeClassStaticScope : ShakeScope {
-        class Impl(val it: ShakeClass) : ShakeClassStaticScope {
+        class Impl(val it: ShakeClass.Impl) : ShakeClassStaticScope, ShakeScopeImpl {
 
-            override val parent: ShakeScope get() = it.parentScope
+            override val parent get() = it.parentScope
+            override val pkg get() = it.pkg
 
             init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
 
@@ -133,7 +144,7 @@ interface ShakeScope {
         }
 
         companion object {
-            fun from(clazz: ShakeClass): ShakeClassStaticScope = Impl(clazz)
+            fun from(clazz: ShakeClass.Impl) = Impl(clazz)
         }
     }
 
@@ -151,10 +162,11 @@ interface ShakeScope {
      * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
      */
     interface ShakeFunctionScope : ShakeFunctionTypeScope {
-        class Impl(val it: ShakeFunction) : ShakeFunctionScope {
+        class Impl(val it: ShakeFunction.Impl) : ShakeFunctionScope, ShakeScopeImpl {
             val variables = mutableListOf<ShakeVariableDeclaration>()
 
-            override val parent: ShakeScope get() = it.parentScope
+            override val parent get() = it.parentScope
+            override val pkg get() = it.pkg
 
             init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
 
@@ -179,7 +191,7 @@ interface ShakeScope {
         }
 
         companion object {
-            fun from(it: ShakeFunction): ShakeFunctionScope = Impl(it)
+            fun from(it: ShakeFunction.Impl) = Impl(it)
         }
     }
 
@@ -189,12 +201,13 @@ interface ShakeScope {
      * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
      */
     interface ShakeMethodScope : ShakeFunctionTypeScope {
-        class Impl(val it: ShakeMethod) : ShakeMethodScope {
+        class Impl(val it: ShakeMethod.Impl) : ShakeMethodScope, ShakeScopeImpl {
             val variables = mutableListOf<ShakeVariableDeclaration>()
 
             init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
 
-            override val parent: ShakeScope = it.parentScope
+            override val parent = it.parentScope
+            override val pkg get() = it.pkg
 
             override fun get(name: String): ShakeAssignable? {
                 return variables.find { it.name == name } ?: it.parameters.find { it.name == name } ?: parent.get(name)
@@ -217,7 +230,7 @@ interface ShakeScope {
         }
 
         companion object {
-            fun from(it: ShakeMethod): ShakeMethodScope = Impl(it)
+            fun from(it: ShakeMethod.Impl) = Impl(it)
         }
     }
 
@@ -228,13 +241,14 @@ interface ShakeScope {
      * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
      */
     interface ShakeConstructorScope : ShakeScope {
-        class Impl(val it: ShakeConstructor) : ShakeConstructorScope {
+        class Impl(val it: ShakeConstructor.Impl) : ShakeConstructorScope, ShakeScopeImpl {
 
             val variables = mutableListOf<ShakeVariableDeclaration>()
 
             init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
 
-            override val parent: ShakeScope = it.scope
+            override val parent = it.scope
+            override val pkg get() = it.clazz.pkg
 
             override fun get(name: String): ShakeAssignable? {
                 return variables.find { it.name == name } ?: it.parameters.find { it.name == name } ?: parent.get(name)
@@ -255,6 +269,10 @@ interface ShakeScope {
             override val signature: String
                 get() = "CM${it.signature}"
         }
+
+        companion object {
+            fun from(it: ShakeConstructor.Impl) = Impl(it)
+        }
     }
 
     /**
@@ -264,7 +282,10 @@ interface ShakeScope {
      * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
      */
     interface ShakeFileScope : ShakeScope {
-        class Impl(val it: ShakeFile, override val parent: ShakeScope) : ShakeFileScope {
+        class Impl(val it: ShakeFile.Impl) : ShakeFileScope, ShakeScopeImpl {
+
+            override val pkg get() = it.pkg
+            override val parent get() = it.parentScope
 
             init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
 
@@ -299,7 +320,7 @@ interface ShakeScope {
         }
 
         companion object {
-            fun from(it: ShakeFile, parent: ShakeScope): ShakeFileScope = Impl(it, parent)
+            fun from(it: ShakeFile.Impl) = Impl(it)
         }
     }
 
@@ -309,10 +330,13 @@ interface ShakeScope {
      * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
      */
     interface ShakePackageScope : ShakeScope {
-        class Impl(val it: ShakePackage) : ShakePackageScope {
-            override val parent: ShakeScope get() = it.project.scope
+        class Impl(val it: ShakePackage.Impl) : ShakePackageScope, ShakeScopeImpl {
+            override val parent get() = it.project.scope
+            override val pkg get() = it
 
-            init { if (it.project is ShakeProject.Impl) (it.project as ShakeProject.Impl).registerScope(this) }
+            init {
+                it.project.registerScope(this)
+            }
 
             override fun get(name: String): ShakeAssignable? {
                 return it.fields.find { it.name == name }
@@ -335,7 +359,7 @@ interface ShakeScope {
         }
 
         companion object {
-            fun from(it: ShakePackage): ShakePackageScope = Impl(it)
+            fun from(it: ShakePackage.Impl) = Impl(it)
         }
     }
 
@@ -345,9 +369,10 @@ interface ShakeScope {
      * @author Nicolas Schmidt ([nsc-de](https://github.com/nsc-de))
      */
     interface ShakeProjectScope : ShakeScope {
-        class Impl(val it: ShakeProject) : ShakeProjectScope {
+        class Impl(val it: ShakeProject) : ShakeProjectScope, ShakeScopeImpl {
 
-            override val parent: ShakeScope? = null
+            override val parent = null
+            override val pkg get() = null
 
             init { if (it is ShakeProject.Impl) it.registerScope(this) }
 
@@ -372,7 +397,7 @@ interface ShakeScope {
         }
 
         companion object {
-            fun from(it: ShakeProject): ShakeProjectScope = Impl(it)
+            fun from(it: ShakeProject) = Impl(it)
         }
     }
 
@@ -380,8 +405,21 @@ interface ShakeScope {
      * Scope for code. This scope is used to store everything that is defined in a code block
      */
     interface ShakeCodeScope : ShakeScope {
-        class Impl(val it: ShakeCode) : ShakeCodeScope {
-            override val parent: ShakeScope get() = it.parentScope
+
+        val variables: List<ShakeVariableDeclaration>
+
+        fun addVariable(value: ShakeVariableDeclaration)
+
+        class Impl(val it: ShakeCode.Impl) : ShakeCodeScope, ShakeScopeImpl {
+
+            override val variables: MutableList<ShakeVariableDeclaration> = mutableListOf()
+            override val pkg get() = parent.pkg
+
+            override fun addVariable(value: ShakeVariableDeclaration) {
+                this.variables.add(value)
+            }
+
+            override val parent get() = it.parentScope
 
             override fun get(name: String): ShakeAssignable? = it.scope.get(name) ?: parent.get(name)
             override fun getFunctions(name: String): List<ShakeFunctionType> = parent.getFunctions(name)
@@ -393,9 +431,7 @@ interface ShakeScope {
         }
 
         companion object {
-            fun from(impl: ShakeCode): ShakeCodeScope {
-                return Impl(impl)
-            }
+            fun from(impl: ShakeCode.Impl) = Impl(impl)
         }
     }
 

@@ -1,6 +1,8 @@
 package io.github.shakelang.shake.processor.program.types
 
 import io.github.shakelang.shake.processor.program.types.code.ShakeCode
+import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.point
 
 interface ShakeConstructor {
 
@@ -18,6 +20,11 @@ interface ShakeConstructor {
      * The name of the constructor (if any).
      */
     val name: String?
+
+    /**
+     * The pointer to the code the constructor executes.
+     */
+    val bodyPointer: Pointer<ShakeCode>
 
     /**
      * The code that this constructor executes.
@@ -71,34 +78,34 @@ interface ShakeConstructor {
 
     class Impl : ShakeConstructor {
 
-        override val clazz: ShakeClass
-        override val body: ShakeCode
+        override val clazz: ShakeClass.Impl
+        override val bodyPointer: Pointer<ShakeCode>
+        override val body: ShakeCode get() = bodyPointer.value
         override val isStrict: Boolean
         override val isPrivate: Boolean
         override val isProtected: Boolean
         override val isPublic: Boolean
         override val name: String?
-        override val parameters: List<ShakeParameter>
+        override val parameters: List<ShakeParameter.Impl>
         override val parentScope: ShakeScope
-        override val scope: ShakeScope
+        override val scope: ShakeScope.ShakeScopeImpl
 
         override val project: ShakeProject
             get() = clazz.project
 
         constructor(
-            clazz: ShakeClass,
-            body: ShakeCode,
+            clazz: ShakeClass.Impl,
+            body: ShakeCode.Impl,
             isStrict: Boolean,
             isPrivate: Boolean,
             isProtected: Boolean,
             isPublic: Boolean,
             name: String?,
-            parameters: List<ShakeParameter>,
+            parameters: List<ShakeParameter.Impl>,
             parentScope: ShakeScope,
-            scope: ShakeScope
         ) {
             this.clazz = clazz
-            this.body = body
+            this.bodyPointer = body.point()
             this.isStrict = isStrict
             this.isPrivate = isPrivate
             this.isProtected = isProtected
@@ -106,15 +113,37 @@ interface ShakeConstructor {
             this.name = name
             this.parameters = parameters
             this.parentScope = parentScope
-            this.scope = scope
+            this.scope = ShakeScope.ShakeConstructorScope.from(this)
         }
 
         constructor(
-            clazz: ShakeClass,
+            clazz: ShakeClass.Impl,
+            body: (Impl) -> Pointer<ShakeCode.Impl>,
+            isStrict: Boolean,
+            isPrivate: Boolean,
+            isProtected: Boolean,
+            isPublic: Boolean,
+            name: String?,
+            parameters: List<ShakeParameter.Impl>,
+            parentScope: ShakeScope,
+        ) {
+            this.clazz = clazz
+            this.isStrict = isStrict
+            this.isPrivate = isPrivate
+            this.isProtected = isProtected
+            this.isPublic = isPublic
+            this.name = name
+            this.parameters = parameters
+            this.parentScope = parentScope
+            this.scope = ShakeScope.ShakeConstructorScope.from(this)
+            this.bodyPointer = body(this)
+        }
+
+        constructor(
+            clazz: ShakeClass.Impl,
             it: ShakeConstructor
         ) {
             this.clazz = clazz
-            this.body = it.body // TODO: copy
             this.isStrict = it.isStrict
             this.isPrivate = it.isPrivate
             this.isProtected = it.isProtected
@@ -122,7 +151,8 @@ interface ShakeConstructor {
             this.name = it.name
             this.parameters = it.parameters.map { ShakeParameter.from(clazz.project, it) }
             this.parentScope = it.parentScope
-            this.scope = it.scope
+            this.scope = ShakeScope.ShakeConstructorScope.from(this)
+            this.bodyPointer = ShakeCode.from(this.scope, it.body).point()
         }
 
         override val signature: String get() = "${clazz.signature}#${name?.let { "#$it" } ?: ""}(${parameters.joinToString(",") { it.type.signature }})"
@@ -140,7 +170,18 @@ interface ShakeConstructor {
     }
 
     companion object {
-        fun from(clazz: ShakeClass, it: ShakeConstructor): ShakeConstructor = Impl(clazz, it)
+        fun from(clazz: ShakeClass.Impl, it: ShakeConstructor) = Impl(clazz, it)
+        fun create(
+            clazz: ShakeClass.Impl,
+            scope: ShakeScope.ShakeScopeImpl,
+            name: String?,
+            isStrict: Boolean,
+            isPrivate: Boolean,
+            isProtected: Boolean,
+            isPublic: Boolean,
+            parameters: List<ShakeParameter.Impl>,
+            body: (Impl) -> Pointer<ShakeCode.Impl>
+        ) = Impl(clazz, body, isStrict, isPrivate, isProtected, isPublic, name, parameters, scope)
     }
 
 }

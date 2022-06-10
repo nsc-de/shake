@@ -1,9 +1,6 @@
 package io.github.shakelang.shake.processor.program.types
 
-import io.github.shakelang.shake.processor.util.Pointer
-import io.github.shakelang.shake.processor.util.PointingList
-import io.github.shakelang.shake.processor.util.latePoint
-import io.github.shakelang.shake.processor.util.point
+import io.github.shakelang.shake.processor.util.*
 
 /**
  * Represents a package in the Shake language.
@@ -33,6 +30,11 @@ interface ShakePackage {
     val subpackagePointers: List<Pointer<ShakePackage>>
 
     /**
+     * A list of pointers to all files in this package.
+     */
+    val filePointers: PointerList<ShakeFile>
+
+    /**
      * A list of pointers to all the [ShakeClass]es in this package.
      */
     val classPointers: List<Pointer<ShakeClass>>
@@ -47,10 +49,16 @@ interface ShakePackage {
      */
     val fieldPointers: List<Pointer<ShakeField>>
 
+
     /**
      * The subpackages of this package.
      */
     val subpackages: List<ShakePackage>
+
+    /**
+     * The files in this package.
+     */
+    val files: List<ShakeFile>
 
     /**
      * The classes in this package.
@@ -180,47 +188,67 @@ interface ShakePackage {
     fun toJson(): Map<String, Any?>
 
     class Impl : ShakePackage {
-        override val project: ShakeProject
+        override val project: ShakeProject.Impl
         override val name: String
-        override val parent: ShakePackage?
+        override val parent: Impl?
 
-        override val subpackagePointers: List<Pointer<ShakePackage>>
-        override val classPointers: List<Pointer<ShakeClass>>
-        override val functionPointers: List<Pointer<ShakeFunction>>
-        override val fieldPointers: List<Pointer<ShakeField>>
+        override val subpackagePointers: MutablePointerList<Impl>
+        override val filePointers: MutablePointerList<ShakeFile.Impl>
+        override val classPointers: MutablePointerList<ShakeClass.Impl>
+        override val functionPointers: MutablePointerList<ShakeFunction.Impl>
+        override val fieldPointers: MutablePointerList<ShakeField.Impl>
 
-        override val subpackages: List<ShakePackage>
-        override val classes: List<ShakeClass>
-        override val functions: List<ShakeFunction>
-        override val fields: List<ShakeField>
+        override val subpackages: List<Impl>
+        override val files: List<ShakeFile.Impl>
+        override val classes: List<ShakeClass.Impl>
+        override val functions: List<ShakeFunction.Impl>
+        override val fields: List<ShakeField.Impl>
 
         override val qualifiedName: String get() = if (parent == null) name else "${parent.qualifiedName}.$name"
-        override val scope: ShakeScope.ShakePackageScope = ShakeScope.ShakePackageScope.from(this)
+        override val scope = ShakeScope.ShakePackageScope.from(this)
         override val signature: String get() = qualifiedName
 
         constructor(
-            baseProject: ShakeProject,
+            baseProject: ShakeProject.Impl,
             name: String,
-            parent: ShakePackage?,
-            subpackages: List<ShakePackage>,
-            classes: List<ShakeClass>,
-            functions: List<ShakeFunction>,
-            fields: List<ShakeField>
+            parent: Impl?,
+            subpackages: List<Impl>,
+            files: List<ShakeFile.Impl>,
+            classes: List<ShakeClass.Impl>,
+            functions: List<ShakeFunction.Impl>,
+            fields: List<ShakeField.Impl>
         ) {
             this.project = baseProject
             this.name = name
             this.parent = parent
 
-            this.subpackagePointers = subpackages.map { it.point() }
-            this.classPointers = classes.map { it.point() }
-            this.functionPointers = functions.map { it.point() }
-            this.fieldPointers = fields.map { it.point() }
+            this.subpackagePointers = subpackages.mutablePoints()
+            this.filePointers = files.mutablePoints()
+            this.classPointers = classes.mutablePoints()
+            this.functionPointers = functions.mutablePoints()
+            this.fieldPointers = fields.mutablePoints()
 
             this.subpackages = PointingList.from(subpackagePointers)
+            this.files = PointingList.from(filePointers)
             this.classes = PointingList.from(classPointers)
             this.functions = PointingList.from(functionPointers)
             this.fields = PointingList.from(fieldPointers)
         }
+
+        constructor(
+            baseProject: ShakeProject.Impl,
+            name: String,
+            parent: ShakePackage.Impl?,
+        ): this(
+            baseProject,
+            name,
+            parent,
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList()
+        )
 
         internal constructor(
             baseProject: ShakeProject.Impl,
@@ -231,17 +259,20 @@ interface ShakePackage {
             this.name = it.name
             this.parent = parent
 
-            val subpackagePointers = it.subpackages.map { latePoint<ShakePackage>() }.toMutableList()
-            val classPointers = it.classes.map { latePoint<ShakeClass>() }
-            val functionPointers = it.functions.map { latePoint<ShakeFunction>() }
-            val fieldPointers = it.fields.map { latePoint<ShakeField>() }
+            val subpackagePointers = it.subpackages.map { latePoint<ShakePackage.Impl>() }
+            val filePointers = it.files.map { latePoint<ShakeFile.Impl>() }
+            val classPointers = it.classes.map { latePoint<ShakeClass.Impl>() }
+            val functionPointers = it.functions.map { latePoint<ShakeFunction.Impl>() }
+            val fieldPointers = it.fields.map { latePoint<ShakeField.Impl>() }
 
-            this.subpackagePointers = subpackagePointers
-            this.classPointers = classPointers
-            this.functionPointers = functionPointers
-            this.fieldPointers = fieldPointers
+            this.subpackagePointers = subpackagePointers.toMutableList()
+            this.filePointers = filePointers.toMutableList()
+            this.classPointers = classPointers.toMutableList()
+            this.functionPointers = functionPointers.toMutableList()
+            this.fieldPointers = fieldPointers.toMutableList()
 
             this.subpackages = PointingList.from(subpackagePointers)
+            this.files = PointingList.from(filePointers)
             this.classes = PointingList.from(classPointers)
             this.functions = PointingList.from(functionPointers)
             this.fields = PointingList.from(fieldPointers)
@@ -250,18 +281,21 @@ interface ShakePackage {
                 pointer.init(from(baseProject, this, pkg))
             }
 
-            it.classes.zip(classPointers) { clz, pointer ->
-                pointer.init(ShakeClass.from(baseProject, this, clz))
+            it.files.zip(filePointers) { file, pointer ->
+                pointer.init(ShakeFile.from(this.scope, file))
             }
 
-            it.functions.zip(functionPointers) { fn, pointer ->
-                pointer.init(ShakeFunction.from(baseProject, this, fn))
+            this.files.flatMap { it.classes }.zip(classPointers) { clz, pointer ->
+                pointer.init(clz)
             }
 
-            it.fields.zip(fieldPointers) { f, pointer ->
-                pointer.init(ShakeField.from(baseProject, this, f))
+            this.files.flatMap { it.functions }.zip(functionPointers) { func, pointer ->
+                pointer.init(func)
             }
 
+            this.files.flatMap { it.fields }.zip(fieldPointers) { field, pointer ->
+                pointer.init(field)
+            }
         }
 
         override fun getPackage(name: String): Pointer<ShakePackage?> {
@@ -283,12 +317,27 @@ interface ShakePackage {
                 "fields" to fields.map { it.name }
             )
         }
+
+        fun getPackageF(name: String): Impl {
+            if(name.contains(".")) return getPackageF(name.split(".").toTypedArray())
+            var pkg = subpackages.firstOrNull { it.name == name }
+            if(pkg != null) return pkg
+            pkg = create(project, this, name)
+            this.subpackagePointers.add(pkg.point())
+            return pkg
+        }
+
+        fun getPackageF(parts: Array<String>): Impl {
+            if(parts.isEmpty()) throw IllegalArgumentException("Cannot get package from empty name")
+            return getPackageF(parts.first()).getPackageF(parts.drop(1).toTypedArray())
+        }
     }
 
     companion object {
         /**
          * Clone a [ShakePackage]. This is used to create deep copies of [ShakeProject]s.
          */
-        fun from(project: ShakeProject.Impl, parent: Impl?, it: ShakePackage): ShakePackage = Impl(project, parent, it)
+        fun from(project: ShakeProject.Impl, parent: Impl?, it: ShakePackage): Impl = Impl(project, parent, it)
+        fun create(impl: ShakeProject.Impl, pkg: Impl?, name: String): Impl = Impl(impl, name, pkg)
     }
 }

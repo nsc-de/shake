@@ -1,6 +1,5 @@
 package io.github.shakelang.shake.processor.program.types.code.values
 
-import io.github.shakelang.shake.processor.program.types.ShakeProject
 import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.util.Pointer
@@ -28,6 +27,9 @@ interface ShakeDoubleLiteral : ShakeValue {
         fun from(scope: ShakeScope, it: ShakeDoubleLiteral): ShakeDoubleLiteral {
             return Impl(scope, it.value)
         }
+        fun create(scope: ShakeScope, value: Double): ShakeDoubleLiteral {
+            return Impl(scope, value)
+        }
     }
 }
 
@@ -51,6 +53,9 @@ interface ShakeIntLiteral : ShakeValue {
     companion object {
         fun from(scope: ShakeScope, it: ShakeIntLiteral): ShakeIntLiteral {
             return Impl(scope, it.value)
+        }
+        fun create(scope: ShakeScope, value: Int): ShakeIntLiteral {
+            return Impl(scope, value)
         }
     }
 }
@@ -76,6 +81,16 @@ interface ShakeBooleanLiteral : ShakeValue {
         fun from(scope: ShakeScope, it: ShakeBooleanLiteral): ShakeBooleanLiteral {
             return Impl(scope, it.value)
         }
+        fun create(scope: ShakeScope, value: Boolean): ShakeBooleanLiteral {
+            return Impl(scope, value)
+        }
+        fun True(scope: ShakeScope): ShakeBooleanLiteral {
+            return Impl(scope, true)
+        }
+
+        fun False(scope: ShakeScope): ShakeBooleanLiteral {
+            return Impl(scope, false)
+        }
     }
 }
 
@@ -99,6 +114,9 @@ interface ShakeCharacterLiteral : ShakeValue {
     companion object {
         fun from(scope: ShakeScope, it: ShakeCharacterLiteral): ShakeCharacterLiteral {
             return Impl(scope, it.value)
+        }
+        fun create(scope: ShakeScope, value: Char): ShakeCharacterLiteral {
+            return Impl(scope, value)
         }
     }
 }

@@ -2,7 +2,7 @@ package io.github.shakelang.shake.parser.node
 
 import io.github.shakelang.parseutils.characters.position.PositionMap
 
-class ShakeFile(map: PositionMap, val children: Array<ShakeFileChildNode>) : ShakeNodeImpl(map) {
+class ShakeFileNode(map: PositionMap, val children: Array<ShakeFileChildNode>) : ShakeNodeImpl(map) {
 
     constructor(map: PositionMap, children: List<ShakeFileChildNode>) : this(map, children.toTypedArray())
 

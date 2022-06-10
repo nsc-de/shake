@@ -73,5 +73,17 @@ interface ShakeInvocation: ShakeValue, ShakeStatement {
         fun from(scope: ShakeScope, it: ShakeInvocation): ShakeInvocation {
             return Impl(scope, it)
         }
+
+        fun create(scope: ShakeScope, function: ShakeInvokable, args: List<ShakeValue>, parent: ShakeValue?, returnType: ShakeType): ShakeInvocation {
+            return create(scope, function, args, parent, returnType.point())
+        }
+
+        fun create(scope: ShakeScope, function: ShakeInvokable, args: List<ShakeValue>, parent: ShakeValue?, returnType: Pointer<ShakeType>): ShakeInvocation {
+            return Impl(scope, function, args, parent, "", false, returnType)
+        }
+
+
+
+
     }
 }

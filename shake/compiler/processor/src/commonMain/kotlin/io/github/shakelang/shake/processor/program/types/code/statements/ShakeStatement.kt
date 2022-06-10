@@ -8,10 +8,11 @@ import io.github.shakelang.shake.processor.program.types.code.ShakeMutateType
 import io.github.shakelang.shake.processor.program.types.code.ShakeNew
 
 interface ShakeStatement {
+    val scope: ShakeScope
     fun toJson(): Map<String, Any?>
 
     companion object {
-        fun from(scope: ShakeScope, statement: ShakeStatement): ShakeStatement {
+        fun from(scope: ShakeScope.ShakeScopeImpl, statement: ShakeStatement): ShakeStatement {
             return when (statement) {
                 is ShakeAssignmentType -> ShakeAssignmentType.from(scope, statement)
                 is ShakeMutateType -> ShakeMutateType.from(scope, statement)

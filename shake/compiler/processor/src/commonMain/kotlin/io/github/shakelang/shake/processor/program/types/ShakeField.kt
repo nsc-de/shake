@@ -1,5 +1,6 @@
 package io.github.shakelang.shake.processor.program.types
 
+import io.github.shakelang.shake.processor.program.types.code.values.ShakeUsage
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 import io.github.shakelang.shake.processor.util.Pointer
 import io.github.shakelang.shake.processor.util.point
@@ -32,7 +33,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable, ShakeFieldType {
             project: ShakeProject,
             pkg: ShakePackage?,
             name: String,
-            type: ShakeType,
+            type: Pointer<ShakeType>,
             parentScope: ShakeScope,
             isStatic: Boolean,
             isFinal: Boolean,
@@ -45,7 +46,7 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable, ShakeFieldType {
             this.project = project
             this.pkg = pkg
             this.name = name
-            this.typePointer = type.point()
+            this.typePointer = type
             this.scope = parentScope
             this.isStatic = isStatic
             this.isFinal = isFinal
@@ -123,6 +124,12 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable, ShakeFieldType {
         override fun decrementAfterType(): ShakeType {
             return type.decrementAfterType() ?: this.type // TODO not available cases
         }
+
+        override fun access(scope: ShakeScope, receiver: ShakeValue?): ShakeValue {
+            if(receiver != null) throw IllegalArgumentException("Field accesses cannot have a receiver")
+            return ShakeUsage.create(scope, this)
+        }
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "pkg" to pkg?.name,
@@ -143,6 +150,34 @@ interface ShakeField : ShakeDeclaration, ShakeAssignable, ShakeFieldType {
         /**
          * Deep copies a [ShakeField].
          */
-        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeField): ShakeField = Impl(project, pkg, it, it.scope)
+        fun from(project: ShakeProject, pkg: ShakePackage?, it: ShakeField) = Impl(project, pkg, it, it.scope)
+
+        fun create(
+            project: ShakeProject,
+            pkg: ShakePackage?,
+            name: String,
+            type: Pointer<ShakeType>,
+            scope: ShakeScope,
+            isStatic: Boolean,
+            isFinal: Boolean,
+            isAbstract: Boolean,
+            isPrivate: Boolean,
+            isProtected: Boolean,
+            isPublic: Boolean,
+            initialValue: ShakeValue?
+        ) = Impl(
+            project,
+            pkg,
+            name,
+            type,
+            scope,
+            isStatic,
+            isFinal,
+            isAbstract,
+            isPrivate,
+            isProtected,
+            isPublic,
+            initialValue
+        )
     }
 }

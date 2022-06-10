@@ -3,6 +3,7 @@ package io.github.shakelang.shake.processor.program.types.code.values
 import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.point
 
 interface ShakeCast : ShakeValue {
     val castTargetPointer: Pointer<ShakeType>
@@ -34,6 +35,14 @@ interface ShakeCast : ShakeValue {
     companion object {
         fun from(scope: ShakeScope, it: ShakeCast): ShakeCast {
             return Impl(scope, ShakeValue.from(scope, it.value), ShakeType.from(scope, it.castTarget))
+        }
+
+        fun create(scope: ShakeScope, value: ShakeValue, target: Pointer<ShakeType>): ShakeCast {
+            return Impl(scope, value, target)
+        }
+
+        fun create(scope: ShakeScope, value: ShakeValue, target: ShakeType): ShakeCast {
+            return create(scope, value, target.point())
         }
     }
 }

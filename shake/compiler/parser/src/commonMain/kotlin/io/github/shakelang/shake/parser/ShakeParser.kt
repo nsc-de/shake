@@ -31,7 +31,7 @@ abstract class ShakeParser {
     abstract val input: ShakeTokenInputStream
     abstract val map: PositionMap
 
-    abstract fun parse(): ShakeFile
+    abstract fun parse(): ShakeFileNode
     abstract fun parseAsStatements(): ShakeTree
     abstract fun expectValue(): ShakeNode
 
@@ -51,8 +51,8 @@ class ShakeParserImpl (
 
     override val map: PositionMap = input.map
 
-    override fun parse(): ShakeFile {
-        if (!input.hasNext()) return ShakeFile(map, arrayOf())
+    override fun parse(): ShakeFileNode {
+        if (!input.hasNext()) return ShakeFileNode(map, arrayOf())
         val result = doParseProgram()
         if (input.hasNext()) throw ParserError("Input did not end")
         return result
@@ -85,7 +85,7 @@ class ShakeParserImpl (
     // ****************************************************************************
     // Basic Program
 
-    fun doParseProgram(): ShakeFile {
+    fun doParseProgram(): ShakeFileNode {
         val nodes: MutableList<ShakeFileChildNode> = ArrayList()
         var position = -2
         skipSeparators()
@@ -105,7 +105,7 @@ class ShakeParserImpl (
             // if(this.skipSeparators() > 0) separator = true;
             skipSeparators()
         }
-        return ShakeFile(map, nodes)
+        return ShakeFileNode(map, nodes)
     }
 
     fun expectShakeFileChild(): ShakeFileChildNode {

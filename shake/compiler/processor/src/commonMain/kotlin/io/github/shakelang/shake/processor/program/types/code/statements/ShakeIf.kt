@@ -11,6 +11,7 @@ interface ShakeIf : ShakeStatement {
     val elseBody: ShakeCode?
 
     class Impl(
+        override val scope: ShakeScope,
         override val condition: ShakeValue,
         override val body: ShakeCode,
         override val elseBody: ShakeCode?
@@ -23,12 +24,17 @@ interface ShakeIf : ShakeStatement {
     }
 
     companion object {
-        fun from(scope: ShakeScope, it: ShakeIf): ShakeIf {
+        fun from(scope: ShakeScope.ShakeScopeImpl, it: ShakeIf): ShakeIf {
             return Impl(
+                scope,
                 ShakeValue.from(scope, it.condition),
                 ShakeCode.from(scope, it.body),
                 it.elseBody?.let { ShakeCode.from(scope, it) }
             )
+        }
+
+        fun create(scope: ShakeScope, condition: ShakeValue, body: ShakeCode, elseBody: ShakeCode? = null): ShakeIf {
+            return Impl(scope, condition, body, elseBody)
         }
     }
 }

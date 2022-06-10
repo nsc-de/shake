@@ -264,6 +264,15 @@ interface ShakeType {
     fun orType(other: ShakeType): ShakeType?
 
     /**
+     * This returns the type of the value returned by the logical-xor operator.
+     *
+     * @param other the right-hand side of the logical-xor operator
+     * @return the type returned by the logical-xor operator
+     */
+    fun xorType(other: ShakeType): ShakeType?
+
+
+    /**
      * This returns the type of the value returned not operator.
      *
      * @return the type returned by the not operator
@@ -515,67 +524,67 @@ interface ShakeType {
             /**
              * A pointer pointing towards the primitive boolean type.
              */
-            val booleanPointer = point(bool())
+            val booleanPointer = bool().point()
 
             /**
              * A pointer pointing towards the primitive byte type.
              */
-            val bytePointer = point(byte())
+            val bytePointer = byte().point()
 
             /**
              * A pointer pointing towards the primitive char type.
              */
-            val shortPointer = point(short())
+            val shortPointer = short().point()
 
             /**
              * A pointer pointing towards the primitive int type.
              */
-            val intPointer = point(int())
+            val intPointer = int().point()
 
             /**
              * A pointer pointing towards the primitive long type.
              */
-            val longPointer = point(long())
+            val longPointer = long().point()
 
             /**
              * A pointer pointing towards the primitive float type.
              */
-            val floatPointer = point(float())
+            val floatPointer = float().point()
 
             /**
              * A pointer pointing towards the primitive double type.
              */
-            val doublePointer = point(double())
+            val doublePointer = double().point()
 
             /**
              * A pointer pointing towards the primitive unsigned byte type.
              */
-            val unsignedBytePointer = point(unsignedByte())
+            val unsignedBytePointer = unsignedByte().point()
 
             /**
              * A pointer pointing towards the primitive unsigned short type.
              */
-            val unsignedShortPointer = point(unsignedShort())
+            val unsignedShortPointer = unsignedShort().point()
 
             /**
              * A pointer pointing towards the primitive unsigned int type.
              */
-            val unsignedIntPointer = point(unsignedInt())
+            val unsignedIntPointer = unsignedInt().point()
 
             /**
              * A pointer pointing towards the primitive unsigned long type.
              */
-            val unsignedLongPointer = point(unsignedLong())
+            val unsignedLongPointer = unsignedLong().point()
 
             /**
              * A pointer pointing towards the primitive char type.
              */
-            val charPointer = point(char())
+            val charPointer = char().point()
 
             /**
              * A pointer pointing towards the primitive void type.
              */
-            val voidPointer = point(void())
+            val voidPointer = void().point()
 
 
             /**
@@ -598,6 +607,7 @@ interface ShakeType {
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun andType(other: ShakeType): ShakeType = bool()
                 override fun orType(other: ShakeType): ShakeType = bool()
+                override fun xorType(other: ShakeType): ShakeType? = bool()
                 override fun notType(): ShakeType = bool()
 
                 override fun castableTo(other: ShakeType): Boolean =
@@ -650,9 +660,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -710,9 +721,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -769,9 +781,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -827,9 +840,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -884,9 +898,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -933,9 +948,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -988,9 +1004,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -1051,9 +1068,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -1114,9 +1132,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -1176,9 +1195,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -1237,9 +1257,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -1281,9 +1302,10 @@ interface ShakeType {
                 override fun greaterThanOrEqualType(other: ShakeType): ShakeType = bool()
                 override fun lessThanType(other: ShakeType): ShakeType = bool()
                 override fun lessThanOrEqualType(other: ShakeType): ShakeType = bool()
-                override fun andType(other: ShakeType): ShakeType = bool()
-                override fun orType(other: ShakeType): ShakeType = bool()
-                override fun notType(): ShakeType = bool()
+                override fun andType(other: ShakeType): ShakeType? = null
+                override fun orType(other: ShakeType): ShakeType? = null
+                override fun xorType(other: ShakeType): ShakeType? = null
+                override fun notType(): ShakeType? = null
 
                 override fun compatibilityDistance(other: ShakeType): Int =
                     if(other !is Primitive) -1 else when(other.type) {
@@ -1364,12 +1386,13 @@ interface ShakeType {
             override fun lessThanOrEqualType(other: ShakeType): ShakeType? = null
             override fun andType(other: ShakeType): ShakeType? = null
             override fun orType(other: ShakeType): ShakeType? = null
+            override fun xorType(other: ShakeType): ShakeType? = null
             override fun notType(): ShakeType? = null
             override fun childType(name: String): ShakeType? = clazz.fields.find { it.name == name }?.type
             override fun childFunctions(name: String): List<ShakeFunctionType>
                 = clazz.methods.filter { it.name == name }
 
-            override fun childInvokable(name: String): List<ShakeFunctionType>? = childFunctions(name)
+            override fun childInvokable(name: String): List<ShakeFunctionType> = childFunctions(name)
 
             override fun castableTo(other: ShakeType): Boolean
                 = other is Object && other.clazz.compatibleTo(clazz)
@@ -1430,16 +1453,17 @@ interface ShakeType {
             override fun lessThanOrEqualType(other: ShakeType): ShakeType? = null
             override fun andType(other: ShakeType): ShakeType? = null
             override fun orType(other: ShakeType): ShakeType? = null
+            override fun xorType(other: ShakeType): ShakeType? = null
             override fun notType(): ShakeType? = null
             override fun childType(name: String): ShakeType? {
                 TODO("Not yet implemented")
             }
 
-            override fun childFunctions(name: String): List<ShakeFunction>? {
+            override fun childFunctions(name: String): List<ShakeFunction> {
                 TODO("Not yet implemented")
             }
 
-            override fun childInvokable(name: String): List<ShakeFunction>? {
+            override fun childInvokable(name: String): List<ShakeInvokable> {
                 TODO("Not yet implemented")
             }
 

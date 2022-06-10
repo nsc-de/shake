@@ -1,12 +1,12 @@
 package io.github.shakelang.shake
 
 import io.github.shakelang.shake.js.ShakeJsGenerator
-import io.github.shakelang.shake.processor.ShakePackageBasedProcessor
+import io.github.shakelang.shake.processor.ShakeCodeProcessor
 import io.github.shakelang.shason.json
 
 fun main(args: Array<String>) {
 
-    val processor = ShakePackageBasedProcessor()
+    val processor = ShakeCodeProcessor()
     processor.loadFile("shake/compiler/processor/src/commonTest/resources", "test.shake")
     processor.loadFile("shake/compiler/processor/src/commonTest/resources", "io/github/shakelang/test.shake")
     val project = processor.finish()

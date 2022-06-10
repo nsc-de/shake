@@ -4,16 +4,19 @@ import io.github.shakelang.shake.processor.program.types.ShakeAssignable
 import io.github.shakelang.shake.processor.program.types.ShakeDeclaration
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.program.types.ShakeScope
+import io.github.shakelang.shake.processor.program.types.code.values.ShakeUsage
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 import io.github.shakelang.shake.processor.util.Pointer
 import io.github.shakelang.shake.processor.util.point
 
 interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeStatement {
-    val scope: ShakeScope
+    override val scope: ShakeScope
     val initialValue: ShakeValue?
     val latestValue: ShakeValue?
     val latestType: ShakeType
     val isFinal: Boolean
+
+    override val declaration: ShakeDeclaration get() = this
 
     fun valueCompatible(value: ShakeValue): Boolean
 
@@ -123,6 +126,11 @@ interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeSta
             return type.decrementAfterType() ?: this.type
         }
 
+        override fun access(scope: ShakeScope, receiver: ShakeValue?): ShakeValue {
+            if(receiver != null) throw IllegalArgumentException("Cannot access variable with receiver")
+            return ShakeUsage.create(scope, this)
+        }
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "name" to name,
@@ -138,6 +146,10 @@ interface ShakeVariableDeclaration : ShakeDeclaration, ShakeAssignable, ShakeSta
     companion object {
         fun from(scope: ShakeScope, it: ShakeVariableDeclaration): ShakeVariableDeclaration {
             return Impl(scope, it)
+        }
+
+        fun create(scope: ShakeScope, name: String, type: ShakeType, value: ShakeValue?, final: Boolean): ShakeVariableDeclaration {
+            return Impl(scope, name, value, final, type)
         }
     }
 }

@@ -7,7 +7,10 @@ import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 interface ShakeReturn : ShakeStatement {
     val value: ShakeValue?
 
-    class Impl(override val value: ShakeValue?) : ShakeReturn {
+    class Impl(
+        override val scope: ShakeScope,
+        override val value: ShakeValue?
+    ) : ShakeReturn {
         override fun toJson(): Map<String, Any?> = mapOf(
             "type" to "return",
             "value" to value
@@ -16,7 +19,11 @@ interface ShakeReturn : ShakeStatement {
 
     companion object {
         fun from(scope: ShakeScope, it: ShakeReturn): ShakeReturn {
-            return Impl(it.value?.let { ShakeValue.from(scope, it) })
+            return Impl(scope, it.value?.let { ShakeValue.from(scope, it) })
+        }
+
+        fun create(scope: ShakeScope, value: ShakeValue): ShakeReturn {
+            return Impl(scope, value)
         }
     }
 }

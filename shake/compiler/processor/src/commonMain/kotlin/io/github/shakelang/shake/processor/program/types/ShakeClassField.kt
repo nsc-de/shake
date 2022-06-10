@@ -1,15 +1,15 @@
 package io.github.shakelang.shake.processor.program.types
 
+import io.github.shakelang.shake.processor.program.types.code.values.ShakeUsage
 import io.github.shakelang.shake.processor.program.types.code.values.ShakeValue
 import io.github.shakelang.shake.processor.util.Pointer
-import io.github.shakelang.shake.processor.util.point
 
 interface ShakeClassField : ShakeFieldType {
     val clazz: ShakeClass
     override val qualifiedName: String
 
     class Impl : ShakeClassField {
-        override val clazz: ShakeClass
+        override val clazz: ShakeClass.Impl
         override val name: String
         override val typePointer: Pointer<ShakeType>
         override val type: ShakeType get() = typePointer.value
@@ -28,13 +28,9 @@ interface ShakeClassField : ShakeFieldType {
         override val qualifiedName: String
 
         constructor(
-            clazz: ShakeClass,
+            clazz: ShakeClass.Impl,
             name: String,
-            actualValue: ShakeValue?,
-            actualType: ShakeType,
-            type: ShakeType,
-            project: ShakeProject,
-            pkg: ShakePackage?,
+            type: Pointer<ShakeType>,
             parentScope: ShakeScope,
             isStatic: Boolean,
             isFinal: Boolean,
@@ -46,9 +42,9 @@ interface ShakeClassField : ShakeFieldType {
         ) {
             this.clazz = clazz
             this.name = name
-            this.typePointer = type.point()
-            this.project = project
-            this.pkg = pkg
+            this.typePointer = type
+            this.project = clazz.project
+            this.pkg = clazz.pkg
             this.scope = parentScope
             this.isStatic = isStatic
             this.isFinal = isFinal
@@ -62,7 +58,7 @@ interface ShakeClassField : ShakeFieldType {
         }
 
         constructor(
-            clazz: ShakeClass,
+            clazz: ShakeClass.Impl,
             parentScope: ShakeScope,
             it: ShakeClassField
         ) {
@@ -78,7 +74,7 @@ interface ShakeClassField : ShakeFieldType {
             this.isPrivate = it.isPrivate
             this.isProtected = it.isProtected
             this.isPublic = it.isPublic
-            this.initialValue = it.initialValue // TODO: copy initial value
+            this.initialValue = it.initialValue?.let { it1 -> ShakeValue.from(parentScope, it1) }
             this.signature = "${clazz.signature}#$name"
             this.qualifiedName = "${clazz.qualifiedName}.$name"
         }
@@ -127,6 +123,15 @@ interface ShakeClassField : ShakeFieldType {
             return type.decrementAfterType() ?: this.type // TODO not available cases
         }
 
+        override fun access(scope: ShakeScope, receiver: ShakeValue?): ShakeValue {
+            if(isStatic) {
+                if(receiver != null) throw IllegalArgumentException("Static field $qualifiedName cannot be accessed with a target")
+                return ShakeUsage.create(scope, this)
+            }
+            if(receiver == null) throw IllegalArgumentException("Field $qualifiedName must be accessed with a target")
+            return ShakeUsage.create(scope, this, receiver)
+        }
+
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "clazz" to clazz.qualifiedName,
@@ -144,6 +149,32 @@ interface ShakeClassField : ShakeFieldType {
     }
 
     companion object {
-        fun from(clazz: ShakeClass, scope: ShakeScope, it: ShakeClassField): ShakeClassField = Impl(clazz, scope, it)
+        fun from(clazz: ShakeClass.Impl, scope: ShakeScope, it: ShakeClassField) = Impl(clazz, scope, it)
+
+        fun create(
+            clazz: ShakeClass.Impl,
+            name: String,
+            type: Pointer<ShakeType>,
+            parentScope: ShakeScope,
+            isStatic: Boolean,
+            isFinal: Boolean,
+            isAbstract: Boolean,
+            isPrivate: Boolean,
+            isProtected: Boolean,
+            isPublic: Boolean,
+            initialValue: ShakeValue?
+        ) = Impl(
+            clazz,
+            name,
+            type,
+            parentScope,
+            isStatic,
+            isFinal,
+            isAbstract,
+            isPrivate,
+            isProtected,
+            isPublic,
+            initialValue
+        )
     }
 }

@@ -3,6 +3,7 @@ package io.github.shakelang.shake.processor.program.types.code.values
 import io.github.shakelang.shake.processor.program.types.ShakeScope
 import io.github.shakelang.shake.processor.program.types.ShakeType
 import io.github.shakelang.shake.processor.util.Pointer
+import io.github.shakelang.shake.processor.util.point
 
 interface ShakeConcatenation : ShakeValue {
     val left: ShakeValue
@@ -62,6 +63,15 @@ interface ShakeAddition : ShakeCalculation {
                 typePointer = ShakeType.from(scope, it.type)
             )
         }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeAddition {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
+            )
+        }
     }
 }
 interface ShakeSubtraction : ShakeCalculation {
@@ -92,6 +102,15 @@ interface ShakeSubtraction : ShakeCalculation {
                 left = ShakeValue.from(scope, it.left),
                 right = ShakeValue.from(scope, it.right),
                 typePointer = ShakeType.from(scope, it.type)
+            )
+        }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeSubtraction {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
             )
         }
     }
@@ -125,6 +144,15 @@ interface ShakeMultiplication : ShakeCalculation {
                 typePointer = ShakeType.from(scope, it.type)
             )
         }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeMultiplication {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
+            )
+        }
     }
 }
 interface ShakeDivision : ShakeCalculation {
@@ -154,6 +182,15 @@ interface ShakeDivision : ShakeCalculation {
                 left = ShakeValue.from(scope, it.left),
                 right = ShakeValue.from(scope, it.right),
                 typePointer = ShakeType.from(scope, it.type)
+            )
+        }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeDivision {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
             )
         }
     }
@@ -187,6 +224,15 @@ interface ShakeModulus : ShakeCalculation {
                 typePointer = ShakeType.from(scope, it.type)
             )
         }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeModulus {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
+            )
+        }
     }
 }
 interface ShakePower : ShakeCalculation {
@@ -216,6 +262,15 @@ interface ShakePower : ShakeCalculation {
                 left = ShakeValue.from(scope, it.left),
                 right = ShakeValue.from(scope, it.right),
                 typePointer = ShakeType.from(scope, it.type)
+            )
+        }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakePower {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
             )
         }
     }
@@ -252,6 +307,14 @@ interface ShakeEquals : ShakeComparison {
                 typePointer = ShakeType.from(scope, it.type)
             )
         }
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeEquals {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
+            )
+        }
     }
 }
 interface ShakeNotEquals : ShakeComparison {
@@ -281,6 +344,15 @@ interface ShakeNotEquals : ShakeComparison {
                 left = ShakeValue.from(scope, it.left),
                 right = ShakeValue.from(scope, it.right),
                 typePointer = ShakeType.from(scope, it.type)
+            )
+        }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeNotEquals {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
             )
         }
     }
@@ -314,6 +386,15 @@ interface ShakeLessThan : ShakeComparison {
                 typePointer = ShakeType.from(scope, it.type)
             )
         }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeLessThan {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
+            )
+        }
     }
 }
 interface ShakeLessThanOrEqual : ShakeComparison {
@@ -343,6 +424,15 @@ interface ShakeLessThanOrEqual : ShakeComparison {
                 left = ShakeValue.from(scope, it.left),
                 right = ShakeValue.from(scope, it.right),
                 typePointer = ShakeType.from(scope, it.type)
+            )
+        }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeLessThanOrEqual {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
             )
         }
     }
@@ -376,6 +466,15 @@ interface ShakeGreaterThan : ShakeComparison {
                 typePointer = ShakeType.from(scope, it.type)
             )
         }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeGreaterThan {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
+            )
+        }
     }
 }
 interface ShakeGreaterThanOrEqual : ShakeComparison {
@@ -405,6 +504,15 @@ interface ShakeGreaterThanOrEqual : ShakeComparison {
                 left = ShakeValue.from(scope, it.left),
                 right = ShakeValue.from(scope, it.right),
                 typePointer = ShakeType.from(scope, it.type)
+            )
+        }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeGreaterThanOrEqual {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
             )
         }
     }
@@ -464,6 +572,15 @@ interface ShakeAnd : ShakeLogicalConcatenation {
                 typePointer = ShakeType.from(scope, it.type)
             )
         }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeAnd {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
+            )
+        }
     }
 }
 interface ShakeOr : ShakeLogicalConcatenation {
@@ -493,6 +610,15 @@ interface ShakeOr : ShakeLogicalConcatenation {
                 left = ShakeValue.from(scope, it.left),
                 right = ShakeValue.from(scope, it.right),
                 typePointer = ShakeType.from(scope, it.type)
+            )
+        }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeOr {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
             )
         }
     }
@@ -526,6 +652,15 @@ interface ShakeXor : ShakeLogicalConcatenation {
                 typePointer = ShakeType.from(scope, it.type)
             )
         }
+
+        fun create(scope: ShakeScope, left: ShakeValue, right: ShakeValue, type: ShakeType): ShakeXor {
+            return Impl(
+                scope,
+                left = left,
+                right = right,
+                typePointer = type.point()
+            )
+        }
     }
 }
 interface ShakeNot : ShakeLogical {
@@ -554,6 +689,14 @@ interface ShakeNot : ShakeLogical {
                 scope,
                 value = ShakeValue.from(scope, it.value),
                 typePointer = ShakeType.from(scope, it.type)
+            )
+        }
+
+        fun create(scope: ShakeScope, value: ShakeValue, type: ShakeType): ShakeNot {
+            return Impl(
+                scope,
+                value = value,
+                typePointer = type.point()
             )
         }
     }

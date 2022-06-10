@@ -8,7 +8,11 @@ interface ShakeWhile : ShakeStatement {
     val condition: ShakeValue
     val body: ShakeCode
 
-    class Impl(override val condition: ShakeValue, override val body: ShakeCode) : ShakeWhile {
+    class Impl(
+        override val scope: ShakeScope,
+        override val condition: ShakeValue,
+        override val body: ShakeCode
+    ) : ShakeWhile {
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "while",
@@ -19,11 +23,12 @@ interface ShakeWhile : ShakeStatement {
     }
 
     companion object {
-        fun from(scope: ShakeScope, it: ShakeWhile): ShakeWhile {
-            return Impl(
-                ShakeValue.from(scope, it.condition),
-                ShakeCode.from(scope, it.body),
-            )
+        fun from(scope: ShakeScope.ShakeScopeImpl, it: ShakeWhile): ShakeWhile {
+            return Impl(scope, ShakeValue.from(scope, it.condition), ShakeCode.from(scope, it.body))
+        }
+
+        fun create(scope: ShakeScope, condition: ShakeValue, body: ShakeCode): ShakeWhile {
+            return Impl(scope, condition, body)
         }
     }
 }
@@ -32,7 +37,11 @@ interface ShakeDoWhile : ShakeStatement {
     val body: ShakeCode
     val condition: ShakeValue
 
-    class Impl(override val condition: ShakeValue, override val body: ShakeCode) : ShakeDoWhile {
+    class Impl(
+        override val scope: ShakeScope,
+        override val condition: ShakeValue,
+        override val body: ShakeCode
+    ) : ShakeDoWhile {
         override fun toJson(): Map<String, Any?> {
             return mapOf(
                 "type" to "do_while",
@@ -43,11 +52,16 @@ interface ShakeDoWhile : ShakeStatement {
     }
 
     companion object {
-        fun from(scope: ShakeScope, it: ShakeDoWhile): ShakeDoWhile {
+        fun from(scope: ShakeScope.ShakeScopeImpl, it: ShakeDoWhile): ShakeDoWhile {
             return Impl(
+                scope,
                 ShakeValue.from(scope, it.condition),
-                ShakeCode.from(scope, it.body),
+                ShakeCode.from(scope, it.body)
             )
+        }
+
+        fun create(scope: ShakeScope, condition: ShakeValue, body: ShakeCode): ShakeDoWhile {
+            return Impl(scope, condition, body)
         }
     }
 }
@@ -59,6 +73,7 @@ interface ShakeFor : ShakeStatement {
     val body: ShakeCode
 
     class Impl(
+        override val scope: ShakeScope,
         override val init: ShakeStatement,
         override val condition: ShakeValue,
         override val update: ShakeStatement,
@@ -76,13 +91,18 @@ interface ShakeFor : ShakeStatement {
     }
 
     companion object {
-        fun from(scope: ShakeScope, it: ShakeFor): ShakeFor {
+        fun from(scope: ShakeScope.ShakeScopeImpl, it: ShakeFor): ShakeFor {
             return Impl(
+                scope,
                 ShakeStatement.from(scope, it.init),
                 ShakeValue.from(scope, it.condition),
                 ShakeStatement.from(scope, it.update),
-                ShakeCode.from(scope, it.body),
+                ShakeCode.from(scope, it.body)
             )
+        }
+
+        fun create(scope: ShakeScope, init: ShakeStatement, condition: ShakeValue, update: ShakeStatement, body: ShakeCode): ShakeFor {
+            return Impl(scope, init, condition, update, body)
         }
     }
 }

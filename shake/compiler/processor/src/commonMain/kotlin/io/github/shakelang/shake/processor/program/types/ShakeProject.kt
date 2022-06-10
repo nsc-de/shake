@@ -3,9 +3,7 @@ package io.github.shakelang.shake.processor.program.types
 import io.github.shakelang.shake.parser.node.ShakeIdentifierNode
 import io.github.shakelang.shake.parser.node.ShakeValuedNode
 import io.github.shakelang.shake.parser.node.ShakeVariableType
-import io.github.shakelang.shake.processor.util.Pointer
-import io.github.shakelang.shake.processor.util.PointingList
-import io.github.shakelang.shake.processor.util.latePoint
+import io.github.shakelang.shake.processor.util.*
 import io.github.shakelang.shason.json
 
 /**
@@ -27,28 +25,38 @@ interface ShakeProject {
     /**
      * List containing pointers to all root packages in the project.
      */
-    val packagePointers: List<Pointer<ShakePackage>>
+    val packagePointers: PointerList<ShakePackage>
+
+    /**
+     * List containing pointers to all root files in the project.
+     */
+    val filePointers: PointerList<ShakeFile>
 
     /**
      * List containing pointers to all root classes in the project.
      */
-    val classPointers: List<Pointer<ShakeClass>>
+    val classPointers: PointerList<ShakeClass>
 
     /**
      * List containing pointers to all root functions in the project.
      */
-    val functionPointers: List<Pointer<ShakeFunction>>
+    val functionPointers: PointerList<ShakeFunction>
 
     /**
      * List containing pointers to all root fields in the project.
      */
-    val fieldPointers: List<Pointer<ShakeField>>
+    val fieldPointers: PointerList<ShakeField>
 
 
     /**
      * List containing all the root packages in the project.
      */
     val packages: List<ShakePackage>
+
+    /**
+     * List containing all the root files in the project.
+     */
+    val files: List<ShakeFile>
 
     /**
      * List containing all the root classes in the project.
@@ -225,6 +233,22 @@ interface ShakeProject {
     }
 
     /**
+     * Get a [ShakeConstructor] by its shake-signature.
+     * This will give back a [Pointer] to the [ShakeConstructor], so if the constructor is
+     * not found, but created at a later point, it will be returned, but only if it is
+     * already created at the point of access of the [Pointer.value] property. Until
+     * creation the pointer will point to null.
+     *
+     * @param signature The signature of the constructor.
+     * @return A pointer to the [ShakeConstructor].
+     */
+    fun getConstructorBySignature(signature: String): Pointer<ShakeConstructor?> {
+        val parts = signature.split("#")
+        val clz = getClassBySignature("${parts[0]}#${parts[1]}")
+        return clz.transform { it?.getConstructorBySignature(signature) }
+    }
+
+    /**
      * Get a [ShakeScope] by its shake-signature.
      * This will give back a [Pointer] to the [ShakeScope], so if the scope is not found,
      * but created at a later point, it will be returned, but only if it is already
@@ -238,32 +262,37 @@ interface ShakeProject {
 
     class Impl: ShakeProject {
 
-        override val packagePointers: List<Pointer<ShakePackage>>
-        override val classPointers: List<Pointer<ShakeClass>>
-        override val functionPointers: List<Pointer<ShakeFunction>>
-        override val fieldPointers: List<Pointer<ShakeField>>
+        override val packagePointers: MutablePointerList<ShakePackage.Impl>
+        override val filePointers: MutablePointerList<ShakeFile.Impl>
+        override val classPointers: MutablePointerList<ShakeClass.Impl>
+        override val functionPointers: MutablePointerList<ShakeFunction.Impl>
+        override val fieldPointers: MutablePointerList<ShakeField.Impl>
 
-        override val packages: List<ShakePackage>
-        override val classes: List<ShakeClass>
-        override val functions: List<ShakeFunction>
-        override val fields: List<ShakeField>
-        override val scope: ShakeScope.ShakeProjectScope = ShakeScope.ShakeProjectScope.from(this)
+        override val packages: List<ShakePackage.Impl>
+        override val files: List<ShakeFile.Impl>
+        override val classes: List<ShakeClass.Impl>
+        override val functions: List<ShakeFunction.Impl>
+        override val fields: List<ShakeField.Impl>
+        override val scope: ShakeScope.ShakeProjectScope.Impl = ShakeScope.ShakeProjectScope.from(this)
 
         private val scopeList: MutableList<ShakeScope> = mutableListOf()
         val scopes: List<ShakeScope> get() = scopeList
 
         constructor(
-            subpackages: List<ShakePackage>,
-            classes: List<ShakeClass>,
-            functions: List<ShakeFunction>,
-            fields: List<ShakeField>
+            subpackages: List<ShakePackage.Impl>,
+            files: List<ShakeFile.Impl>,
+            classes: List<ShakeClass.Impl>,
+            functions: List<ShakeFunction.Impl>,
+            fields: List<ShakeField.Impl>
         ) {
-            packagePointers = subpackages.map { Pointer.of(it) }
-            classPointers = classes.map { Pointer.of(it) }
-            functionPointers = functions.map { Pointer.of(it) }
-            fieldPointers = fields.map { Pointer.of(it) }
+            packagePointers = subpackages.mutablePoints()
+            filePointers = files.mutablePoints()
+            classPointers = classes.mutablePoints()
+            functionPointers = functions.mutablePoints()
+            fieldPointers = fields.mutablePoints()
 
             this.packages = PointingList.from(packagePointers)
+            this.files = PointingList.from(filePointers)
             this.classes = PointingList.from(classPointers)
             this.functions = PointingList.from(functionPointers)
             this.fields = PointingList.from(fieldPointers)
@@ -272,17 +301,20 @@ interface ShakeProject {
         internal constructor(
             it: ShakeProject
         ) {
-            val subpackagePointers = it.packages.map { latePoint<ShakePackage>() }.toMutableList()
-            val classPointers = it.classes.map { latePoint<ShakeClass>() }
-            val functionPointers = it.functions.map { latePoint<ShakeFunction>() }
-            val fieldPointers = it.fields.map { latePoint<ShakeField>() }
+            val subpackagePointers = it.packages.map { latePoint<ShakePackage.Impl>() }
+            val filePointers = it.files.map { latePoint<ShakeFile.Impl>() }
+            val classPointers = it.classes.map { latePoint<ShakeClass.Impl>() }
+            val functionPointers = it.functions.map { latePoint<ShakeFunction.Impl>() }
+            val fieldPointers = it.fields.map { latePoint<ShakeField.Impl>() }
 
-            this.packagePointers = subpackagePointers
-            this.classPointers = classPointers
-            this.functionPointers = functionPointers
-            this.fieldPointers = fieldPointers
+            this.packagePointers = subpackagePointers.toMutableList()
+            this.filePointers = filePointers.toMutableList()
+            this.classPointers = classPointers.toMutableList()
+            this.functionPointers = functionPointers.toMutableList()
+            this.fieldPointers = fieldPointers.toMutableList()
 
             this.packages = PointingList.from(subpackagePointers)
+            this.files = PointingList.from(filePointers)
             this.classes = PointingList.from(classPointers)
             this.functions = PointingList.from(functionPointers)
             this.fields = PointingList.from(fieldPointers)
@@ -291,18 +323,30 @@ interface ShakeProject {
                 pointer.init(ShakePackage.from(this, null, pkg))
             }
 
-            it.classes.zip(classPointers) { clz, pointer ->
-                pointer.init(ShakeClass.from(this, null, clz))
+            it.files.zip(filePointers) { file, pointer ->
+                pointer.init(ShakeFile.from(scope, file))
             }
 
-            it.functions.zip(functionPointers) { fn, pointer ->
-                pointer.init(ShakeFunction.from(this, null, fn))
+            this.files.flatMap { it.classes }.zip(classPointers) { clz, pointer ->
+                pointer.init(clz)
             }
 
-            it.fields.zip(fieldPointers) { f, pointer ->
-                pointer.init(ShakeField.from(this, null, f))
+            this.files.flatMap { it.functions }.zip(functionPointers) { func, pointer ->
+                pointer.init(func)
+            }
+
+            this.files.flatMap { it.fields }.zip(fieldPointers) { field, pointer ->
+                pointer.init(field)
             }
         }
+
+        constructor() : this(
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList()
+        )
 
         override fun getPackage(name: String): Pointer<ShakePackage?> {
             if(name.contains(".")) return getPackage(name.split(".").toTypedArray())
@@ -325,9 +369,9 @@ interface ShakeProject {
 
         override fun getClass(name: String): Pointer<ShakeClass?> {
             val parts = name.split(".")
-            val name = parts.last()
+            val clazzName = parts.last()
             val pkg = parts.dropLast(1).toTypedArray()
-            return getClass(pkg, name)
+            return getClass(pkg, clazzName)
         }
 
         override fun toJson(): Map<String, Any?> {
@@ -374,6 +418,17 @@ interface ShakeProject {
             return Pointer.task { scopes.find { it.signature == signature } }
         }
 
+        fun getPackageF(name: String): ShakePackage.Impl {
+            if(name.contains(".")) return getPackageF(name.split(".").toTypedArray())
+            return packages.find { it.name == name } ?: ShakePackage.create(this, null, name)
+        }
+
+        fun getPackageF(parts: Array<String>): ShakePackage.Impl {
+            if(parts.isEmpty()) throw IllegalArgumentException("Cannot get package from empty name")
+            if(parts.size == 1) return getPackageF(parts.first())
+            return getPackageF(parts.first()).getPackageF(parts.drop(1).toTypedArray())
+        }
+
         internal fun registerScope(scope: ShakeScope) = scopeList.add(scope)
     }
 
@@ -385,5 +440,6 @@ interface ShakeProject {
          * @return A new [ShakeProject]
          */
         fun from(it: ShakeProject): ShakeProject = Impl(it)
+        fun empty() = Impl()
     }
 }

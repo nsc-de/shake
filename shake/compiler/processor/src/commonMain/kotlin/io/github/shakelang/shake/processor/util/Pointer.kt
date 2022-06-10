@@ -75,8 +75,6 @@ interface Pointer<out T> {
     }
 }
 
-fun <T> point(value: T): Pointer<T> = Pointer.of(value)
-fun <T> mutablePoint(value: T): MutablePointer<T> = Pointer.mutableOf(value)
 fun <T> latePoint(): LateInitPointer<T> = Pointer.late()
 fun <T> lateMutablePoint(): LateInitMutablePointer<T> = Pointer.lateMutable()
 
@@ -305,4 +303,8 @@ interface MutablePointingList<T> : PointingList<T>, MutableList<T> {
             return Impl(it)
         }
     }
+}
+
+fun <T> Pointer<T?>.notNull(msg: String? = null): Pointer<T> {
+    return this.transform { it ?: throw IllegalStateException(msg ?: "null value not allowed") }
 }
